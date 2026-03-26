@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Role {
+  USER
+  MANAGER
+  ADMIN
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+  role     Role   @default(USER)
+
+  session Session[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  sessionToken String   @unique
+  expires      DateTime
+  userAgent    String
+  ipAddress    String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model TourPackage {
+  id   String @id @default(uuid())
+  slug String @unique
+
+  title       Json
+  description Json?
+  location    Json
+  duration    Json
+  capacity    Json
+
+  tag String?
+
+  price         Decimal @db.Decimal(12, 2)
+  originalPrice Decimal? @db.Decimal(12, 2)
+
+  images Json
+
+  rating  Float @default(0)
+  reviews Int   @default(0)
+
+  isPublished Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tour_packages")
+}
+
+model GaleryImage {
+  id       String @id @default(uuid())
+  imageUrl String @db.Text
+  title    Json
+  category Json
+
+  createdAt DateTime @default(now())
+
+  @@map("gallery_images")
+}
+
+model Setting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
