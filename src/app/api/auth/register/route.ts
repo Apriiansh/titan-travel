@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { prisma } from "@/../lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json();
+    const { name, email, password, phone } = await request.json();
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !phone) {
       return NextResponse.json(
-        { message: "Semua field (Nama, Email, Password) wajib diisi" },
+        { message: "Semua field (Nama, Email, Password, Telepon) wajib diisi" },
         { status: 400 },
       );
     }
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
         name,
         email,
         password: hashedPassword,
+        phone,
         role: "USER",
       },
     });

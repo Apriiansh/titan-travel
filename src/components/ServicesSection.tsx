@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
     Plane,
@@ -12,9 +13,10 @@ import { useLocale } from "@/lib/LocaleContext";
 
 const icons = [Globe, Plane, Globe, Building2, Users, GraduationCap];
 
-export default function ServicesSection() {
-    const { t } = useLocale();
-    const s = t.services;
+export default function ServicesSection({ data }: { data?: any }) {
+    const { dObj } = useLocale();
+    // Localize the whole settings object first
+    const s = dObj(data);
 
     return (
         <section id="layanan" className="section-padding bg-background-secondary relative overflow-hidden">
@@ -36,11 +38,11 @@ export default function ServicesSection() {
                 {/* Section Header */}
                 <div className="text-center mb-10 sm:mb-16">
                     <span className="inline-block px-4 py-1.5 rounded-full bg-primary-500/10 text-primary-500 text-xs sm:text-sm font-semibold mb-3 sm:mb-4">
-                        {s.badge}
+                        {s.badge || "Our Services"}
                     </span>
                     <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold font-(family-name:--font-playfair) text-foreground mb-3 sm:mb-4">
-                        {s.title1}
-                        <span className="gradient-text">{s.title2}</span>
+                        {s.title1 || "Complete Travel"}{" "}
+                        <span className="gradient-text">{s.title2 || "Solutions"}</span>
                     </h2>
                     <p className="text-foreground-secondary text-sm sm:text-base lg:text-lg max-w-2xl mx-auto">
                         {s.subtitle}
@@ -48,11 +50,11 @@ export default function ServicesSection() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-                    {s.items.map((service, i) => {
-                        const Icon = icons[i];
+                    {s.items && Array.isArray(s.items) && s.items.map((service: any, i: number) => {
+                        const Icon = icons[i % icons.length];
                         return (
                             <div
-                                key={service.title}
+                                key={i}
                                 className="group relative rounded-md overflow-hidden border border-card-border bg-card-bg p-5 sm:p-6 hover:border-primary-500/30 transition-all duration-500 hover:shadow-xl"
                             >
                                 {/* Hover gradient */}
@@ -78,7 +80,7 @@ export default function ServicesSection() {
 
                                     {/* Link */}
                                     <span className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-primary-500 group-hover:text-white transition-colors duration-500">
-                                        {s.readMore}
+                                        {s.readMore || "Read More"}
                                         <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
                                     </span>
                                 </div>

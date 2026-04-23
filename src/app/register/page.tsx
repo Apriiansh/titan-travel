@@ -13,6 +13,7 @@ export default function RegisterPage() {
     name: "",
     email: "",
     password: "",
+    phone: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,7 +36,7 @@ export default function RegisterPage() {
       } else {
         setError(data.message || "Something went wrong");
       }
-    } catch (err) {
+    } catch {
       setError("Failed to connect to server");
     } finally {
       setLoading(false);
@@ -93,6 +94,20 @@ export default function RegisterPage() {
                   className="w-full bg-background border border-card-border rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all text-foreground"
                   placeholder="name@example.com"
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground ml-1">Nomor Telepon / WhatsApp</label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-foreground-secondary">+62</span>
+                <input
+                  type="tel"
+                  required
+                  className="w-full bg-background border border-card-border rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all text-foreground"
+                  placeholder="8123456789"
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 />
               </div>
             </div>

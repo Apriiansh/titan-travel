@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
     MapPin,
@@ -12,9 +13,10 @@ import { useLocale } from "@/lib/LocaleContext";
 
 const contactIcons = [Phone, MessageCircle, MapPin, Clock];
 
-export default function ContactSection() {
-    const { t } = useLocale();
-    const c = t.contact;
+export default function ContactSection({ data, packages = [] }: { data?: any, packages?: any[] }) {
+    const { dt, dObj } = useLocale();
+    // Localize the whole settings object first
+    const c = dObj(data);
 
     return (
         <section id="kontak" className="section-padding bg-background-secondary relative overflow-hidden">
@@ -36,10 +38,11 @@ export default function ContactSection() {
                 {/* Section Header */}
                 <div className="text-center mb-10 sm:mb-16">
                     <span className="inline-block px-4 py-1.5 rounded-full bg-primary-500/10 text-primary-500 text-xs sm:text-sm font-semibold mb-3 sm:mb-4">
-                        {c.badge}
+                        {c.badge || "Contact"}
                     </span>
                     <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold font-(family-name:--font-playfair) text-foreground mb-3 sm:mb-4">
-                        {c.title1} <span className="gradient-text">{c.title2}</span>
+                        {c.title1 || "Ready to"}{" "}
+                        <span className="gradient-text">{c.title2 || "Adventure?"}</span>
                     </h2>
                     <p className="text-foreground-secondary text-sm sm:text-base lg:text-lg max-w-2xl mx-auto">
                         {c.subtitle}
@@ -50,13 +53,13 @@ export default function ContactSection() {
                     {/* Contact Form */}
                     <div className="lg:col-span-3 p-5 sm:p-8 rounded-md border border-card-border bg-card-bg shadow-sm">
                         <h3 className="text-lg sm:text-xl font-bold font-(family-name:--font-playfair) text-foreground mb-4 sm:mb-6">
-                            {c.formTitle}
+                            {c.formTitle || "Send us a message"}
                         </h3>
                         <form className="space-y-4 sm:space-y-5">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                                 <div>
                                     <label className="block text-xs sm:text-sm font-medium text-foreground mb-1.5 sm:mb-2">
-                                        {c.labelName}
+                                        {c.labelName || "Full Name"}
                                     </label>
                                     <input
                                         type="text"
@@ -66,7 +69,7 @@ export default function ContactSection() {
                                 </div>
                                 <div>
                                     <label className="block text-xs sm:text-sm font-medium text-foreground mb-1.5 sm:mb-2">
-                                        {c.labelPhone}
+                                        {c.labelPhone || "WhatsApp Number"}
                                     </label>
                                     <input
                                         type="tel"
@@ -77,7 +80,7 @@ export default function ContactSection() {
                             </div>
                             <div>
                                 <label className="block text-xs sm:text-sm font-medium text-foreground mb-1.5 sm:mb-2">
-                                    {c.labelEmail}
+                                    {c.labelEmail || "Email Address"}
                                 </label>
                                 <input
                                     type="email"
@@ -87,39 +90,46 @@ export default function ContactSection() {
                             </div>
                             <div>
                                 <label className="block text-xs sm:text-sm font-medium text-foreground mb-1.5 sm:mb-2">
-                                    {c.labelDestination}
+                                    {c.labelDestination || "Destination of Interest"}
                                 </label>
                                 <select className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-sm border border-card-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500 transition-all">
-                                    <option value="">{c.placeholderDestination}</option>
-                                    {c.destinationOptions.map((opt) => (
-                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                    ))}
+                                    <option value="">{c.placeholderDestination || "Select destination..."}</option>
+                                    {/* Map from packages table for truly dynamic experience */}
+                                    {packages && packages.length > 0 ? (
+                                        packages.map((pkg: any) => (
+                                            <option key={pkg.id} value={pkg.slug}>{dt(pkg.title)}</option>
+                                        ))
+                                    ) : (
+                                        c.destinationOptions && Array.isArray(c.destinationOptions) && c.destinationOptions.map((opt: any) => (
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        ))
+                                    )}
                                 </select>
                             </div>
                             <div>
                                 <label className="block text-xs sm:text-sm font-medium text-foreground mb-1.5 sm:mb-2">
-                                    {c.labelMessage}
+                                    {c.labelMessage || "Message"}
                                 </label>
                                 <textarea
                                     rows={4}
-                                    placeholder={c.placeholderMessage}
+                                    placeholder={c.placeholderMessage || "Tell us about your travel plans..."}
                                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-sm border border-card-border bg-background text-foreground placeholder-foreground-secondary/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500 transition-all resize-none"
                                 />
                             </div>
                             <button type="submit" className="btn-primary w-full justify-center py-3 sm:py-4 text-sm sm:text-base">
                                 <Send className="w-4 h-4 sm:w-5 sm:h-5" />
-                                {c.submit}
+                                {c.submit || "Send Message"}
                             </button>
                         </form>
                     </div>
 
                     {/* Contact Info Cards */}
                     <div className="lg:col-span-2 space-y-3 sm:space-y-4">
-                        {c.contactInfo.map((info, i) => {
-                            const Icon = contactIcons[i];
+                        {c.contactInfo && Array.isArray(c.contactInfo) && c.contactInfo.map((info: any, i: number) => {
+                            const Icon = contactIcons[i % contactIcons.length];
                             return (
                                 <div
-                                    key={info.title}
+                                    key={i}
                                     className="group p-4 sm:p-5 rounded-md border border-card-border bg-card-bg hover:border-primary-500/20 hover:shadow-lg transition-all duration-300"
                                 >
                                     <div className="flex items-start gap-3 sm:gap-4">
@@ -128,10 +138,10 @@ export default function ContactSection() {
                                         </div>
                                         <div>
                                             <h4 className="font-semibold text-foreground text-sm sm:text-base mb-0.5">{info.title}</h4>
-                                            {info.details.map((detail) =>
+                                            {info.details && Array.isArray(info.details) && info.details.map((detail: any, j: number) =>
                                                 "link" in info && info.link ? (
                                                     <a
-                                                        key={detail}
+                                                        key={j}
                                                         href={info.link as string}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
@@ -140,7 +150,7 @@ export default function ContactSection() {
                                                         {detail}
                                                     </a>
                                                 ) : (
-                                                    <p key={detail} className="text-xs sm:text-sm text-foreground-secondary">
+                                                    <p key={j} className="text-xs sm:text-sm text-foreground-secondary">
                                                         {detail}
                                                     </p>
                                                 )
@@ -159,7 +169,7 @@ export default function ContactSection() {
                             className="flex items-center justify-center gap-2 sm:gap-3 w-full py-3 sm:py-4 rounded-md bg-linear-to-r from-emerald-500 to-emerald-600 text-white font-semibold text-sm sm:text-base hover:shadow-lg hover:scale-[1.02] transition-all duration-300"
                         >
                             <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                            {c.whatsappCta}
+                            {c.whatsappCta || "Chat WhatsApp"}
                         </a>
 
                         {/* Instagram */}

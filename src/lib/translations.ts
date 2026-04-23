@@ -1,4 +1,4 @@
-export type Locale = "id" | "en";
+export type Locale = "en" | "id" | "ms";
 
 export const translations = {
     id: {

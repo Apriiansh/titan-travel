@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { prisma } from "../../../../../lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/auth";
 
 export async function POST(request: Request) {
@@ -15,17 +15,17 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json(
         { message: "Email atau password salah" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     // 2. Bandingkan password (Bcrypt)
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    
+
     if (!isPasswordValid) {
       return NextResponse.json(
         { message: "Email atau password salah" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -42,11 +42,11 @@ export async function POST(request: Request) {
 
     // 5. Set HttpOnly Cookie & Kembalikan Response
     const response = NextResponse.json(
-      { 
-        message: "Login berhasil", 
-        user: { name: user.name, role: user.role } 
+      {
+        message: "Login berhasil",
+        user: { name: user.name, role: user.role },
       },
-      { status: 200 }
+      { status: 200 },
     );
 
     response.cookies.set({
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     console.error("LOGIN_ERROR:", error);
     return NextResponse.json(
       { message: "Terjadi kesalahan internal server" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

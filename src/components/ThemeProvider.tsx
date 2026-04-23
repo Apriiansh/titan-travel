@@ -36,6 +36,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         document.documentElement.setAttribute("data-theme", initial);
+        if (initial === "dark") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
         startTransition(() => {
             setState({ theme: initial, mounted: true });
         });
@@ -48,6 +53,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         });
         localStorage.setItem("titan-theme", next);
         document.documentElement.setAttribute("data-theme", next);
+        if (next === "dark") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
     };
 
     if (!state.mounted) {

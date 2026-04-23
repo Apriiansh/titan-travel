@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, Mail, Lock, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Mail, Lock, Loader2, CheckCircle2, Eye, EyeOff } from "lucide-react";
 
 function LoginContent() {
   const router = useRouter();
@@ -15,6 +15,7 @@ function LoginContent() {
     email: "",
     password: "",
   });
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   useEffect(() => {
     const msg = searchParams.get("success");
@@ -110,12 +111,19 @@ function LoginContent() {
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground-secondary" />
               <input
-                type="password"
+                type={isPasswordVisible ? "text" : "password"}
                 required
-                className="w-full bg-background border border-card-border rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all text-foreground"
+                className="w-full bg-background border border-card-border rounded-xl py-3 pl-12 pr-12 focus:outline-none focus:ring-2 focus:ring-primary-500/50 transition-all text-foreground"
                 placeholder="••••••••"
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
+              <button
+                type="button"
+                onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground-secondary hover:text-foreground transition-colors focus:outline-none"
+              >
+                {isPasswordVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
           </div>
 
