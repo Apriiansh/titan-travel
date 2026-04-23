@@ -25,7 +25,9 @@ export default function Navbar({ data }: { data?: any }) {
   const { theme, toggleTheme } = useTheme();
   const { locale, setLocale, dObj } = useLocale();
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
-  const [hoveredAuth, setHoveredAuth] = useState<"login" | "register" | null>(null);
+  const [hoveredAuth, setHoveredAuth] = useState<"login" | "register" | null>(
+    null,
+  );
 
   // Localize the whole settings object first
   const d = dObj(data) || {};
@@ -179,8 +181,8 @@ export default function Navbar({ data }: { data?: any }) {
                   onClick={() => setLocale(l)}
                   className={`transition-all duration-200 ${
                     locale === l
-                      ? isScrolled 
-                        ? "opacity-100 text-primary-500 scale-110" 
+                      ? isScrolled
+                        ? "opacity-100 text-primary-500 scale-110"
                         : "opacity-100 text-white scale-110 drop-shadow-md"
                       : "opacity-40 hover:opacity-80"
                   }`}

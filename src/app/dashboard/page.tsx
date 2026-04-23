@@ -3,8 +3,8 @@ import { getBookingsByUser } from "@/lib/actions/bookings";
 import { redirect } from "next/navigation";
 import { DashboardClient } from "./DashboardClient";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
-import { Badge } from "@/components/ui/badge";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -15,36 +15,28 @@ export default async function DashboardPage() {
 
   const bookings = await getBookingsByUser(session.id as string);
   const settings = await prisma.setting.findMany();
-  const settingsObj = settings.reduce((acc: any, s) => {
-    acc[s.key] = s.value;
-    return acc;
-  }, {});
+  
+  const getSetting = (key: string) => {
+    const s = settings.find(s => s.key === key);
+    return s?.value || {};
+  }
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <Navbar data={settingsObj} />
-
-      {/* Dark Hero Section */}
-      <div className="relative h-[260px] w-full overflow-hidden flex items-center bg-slate-900 dark:bg-slate-950">
-        <div className="absolute inset-0 bg-linear-to-br from-primary-900/20 to-transparent" />
-
-        <div className="container mx-auto px-4 relative z-10 pt-10 pb-4">
-          <Badge className="mb-4 bg-primary-500 hover:bg-primary-500 text-white border-none px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider">
-            User Dashboard
-          </Badge>
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-2">
-            Pesanan Saya
-          </h1>
-          <p className="text-slate-300 max-w-lg">
-            Halo {session.name as string}, pantau semua rencana perjalanan dan
-            status pembayaran Anda secara real-time.
-          </p>
+    <>
+      <Navbar data={getSetting("navbar")} />
+      <main className="min-h-screen bg-background">
+        {/* Dark Header Background for Transparent Navbar */}
+        <div className="absolute top-0 left-0 w-full h-[300px] bg-slate-900 -z-10" />
+        
+        <div className="pt-16 sm:pt-20">
+          <DashboardClient
+            initialBookings={bookings}
+            userName={session.name as string}
+          />
         </div>
-      </div>
-
-      <div className="container mx-auto px-4 -mt-10 pb-20 relative z-20">
-        <DashboardClient initialBookings={bookings} />
-      </div>
-    </main>
+      </main>
+      <Footer data={getSetting("footer")} />
+    </>
   );
 }
+

@@ -11,7 +11,8 @@ export async function getTopsisAnalysis() {
 
   // 2. Ambil paket wisata yang dipublish
   const packages = await prisma.tourPackage.findMany({
-    where: { isPublished: true }
+    where: { isPublished: true },
+    include: { priceTiers: true }
   });
 
   if (packages.length === 0 || criteria.length < 4) {
@@ -42,14 +43,21 @@ export async function getTopsisAnalysis() {
   };
 
   // 4. Map paket ke TopsisAlternative
-  const alternatives: TopsisAlternative[] = packages.map(pkg => ({
-    id: pkg.id,
-    name: (pkg.title as any).id || (pkg.title as any).en || "Untitled",
-    c1_price: Number(pkg.price),
-    c2_facilities: pkg.facilityScore,
-    c3_departure: pkg.departureScore,
-    c4_duration: pkg.durationDays,
-  }));
+  const alternatives: TopsisAlternative[] = packages.map(pkg => {
+    // Ambil harga terendah dari tier untuk C1
+    const minPrice = pkg.priceTiers.length > 0 
+      ? Math.min(...pkg.priceTiers.map(t => Number(t.price))) 
+      : 0;
+
+    return {
+      id: pkg.id,
+      name: (pkg.title as any).id || (pkg.title as any).en || "Untitled",
+      c1_price: minPrice,
+      c2_facilities: pkg.facilityScore,
+      c3_departure: pkg.departureScore,
+      c4_duration: pkg.durationDays,
+    };
+  });
 
   // 5. Hitung TOPSIS
   const results = calculateTopsis(alternatives, config);

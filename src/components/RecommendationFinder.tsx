@@ -110,6 +110,7 @@ export default function RecommendationFinder({ onResult }: { onResult: (packages
     setLoading(true);
     setTimeout(async () => {
       const results = await getPersonalizedRecommendations(pref);
+      
       onResult(results);
       setLoading(false);
       setStep(4);

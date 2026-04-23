@@ -1,54 +1,72 @@
 "use client";
 
+import { useState } from "react";
+import {
+  Clock,
+  Users,
+  Star,
+  ArrowLeft,
+  CheckCircle2,
+  Calendar,
+  MessageSquare,
+  ChevronRight,
+  Share2,
+  ArrowRight,
+  Timer,
+  XCircle,
+  AlertCircle,
+  Compass,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { format } from "date-fns";
+import { id, enUS } from "date-fns/locale";
+import { useRouter } from "next/navigation";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Calendar,
-  Users,
-  CreditCard,
-  Clock,
-  ExternalLink,
-  AlertCircle,
-  XCircle,
-  Timer,
-  CheckCircle2,
-} from "lucide-react";
-import { format } from "date-fns";
-import { id } from "date-fns/locale";
-import { useRouter } from "next/navigation";
 
-interface DashboardClientProps {
+export function   DashboardClient({
+  initialBookings,
+  userName,
+}: {
   initialBookings: any[];
-}
-
-export function DashboardClient({ initialBookings }: DashboardClientProps) {
+  userName: string;
+}) {
+  const { dt, locale } = useLocale();
   const router = useRouter();
+  
+  // Ambil translasi berdasarkan locale yang aktif
+  const t =
+    translations[locale as keyof typeof translations]?.dashboard ||
+    translations.id.dashboard;
 
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "PENDING":
         return {
-          label: "Menunggu Pembayaran",
+          label: t.status?.pending || "Menunggu Pembayaran",
           color: "bg-amber-100 text-amber-700 border-amber-200",
           icon: <Timer className="w-3.5 h-3.5" />,
         };
       case "PEMBAYARAN_DITERIMA":
       case "CONFIRMED":
         return {
-          label: "Berhasil / Terkonfirmasi",
+          label: t.status?.confirmed || "Berhasil / Terkonfirmasi",
           color: "bg-emerald-100 text-emerald-700 border-emerald-200",
           icon: <CheckCircle2 className="w-3.5 h-3.5" />,
         };
       case "CANCELLED":
         return {
-          label: "Dibatalkan",
+          label: t.status?.cancelled || "Dibatalkan",
           color: "bg-red-100 text-red-700 border-red-200",
           icon: <XCircle className="w-3.5 h-3.5" />,
         };
       default:
         return {
-          label: status,
+          label: t.status?.unknown || status,
           color: "bg-slate-100 text-slate-700 border-slate-200",
           icon: <AlertCircle className="w-3.5 h-3.5" />,
         };
@@ -60,161 +78,365 @@ export function DashboardClient({ initialBookings }: DashboardClientProps) {
       window.snap.pay(snapToken, {
         onSuccess: () => router.refresh(),
         onPending: () => router.refresh(),
-        onError: () => alert("Pembayaran gagal!"),
-        onClose: () => alert("Selesaikan pembayaran Anda segera."),
+        onError: () => alert(t.actions?.failed || "Pembayaran gagal!"),
+        onClose: () =>
+          alert(
+            t.actions?.pendingAlert || "Selesaikan pembayaran Anda segera.",
+          ),
       });
     }
   };
 
-  if (initialBookings.length === 0) {
-    return (
-      <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
-        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-          <AlertCircle className="w-8 h-8 text-slate-400" />
-        </div>
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-          Belum ada pesanan
-        </h3>
-        <p className="text-slate-500 mt-1 mb-6">
-          Anda belum pernah melakukan pemesanan paket wisata.
-        </p>
-        <Button
-          onClick={() => router.push("/")}
-          variant="outline"
-          className="rounded-xl"
-        >
-          Cari Paket Wisata
-        </Button>
-      </div>
-    );
-  }
+  const dateLocale = locale === "id" ? id : enUS;
 
   return (
-    <div className="grid grid-cols-1 gap-6">
-      {initialBookings.map((booking) => {
-        const status = getStatusConfig(booking.status);
-        const pkg = booking.package;
-        const title = pkg?.title?.id || pkg?.title?.en || "Paket Wisata";
+    <div className="pb-20 relative">
+      {/* Dark Hero Background Segment (Consistent with Package Detail) */}
+      <div className="absolute top-[-80px] left-0 w-full h-[400px] bg-slate-900 z-0" />
 
-        return (
-          <Card
-            key={booking.id}
-            className="overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow rounded-2xl group bg-white dark:bg-slate-900"
+      {/* Top Navigation Bar */}
+      <div className="bg-transparent sticky top-16 sm:top-20 z-40">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm font-medium"
           >
-            <CardContent className="p-0">
-              <div className="flex flex-col md:flex-row">
-                {/* Image Section */}
-                <div className="w-full md:w-64 h-48 md:h-auto relative overflow-hidden bg-slate-200">
-                  <img
-                    src={pkg?.images?.[0] || "/placeholder.jpg"}
-                    alt={title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge
-                      className={`${status.color} border flex items-center gap-1 px-3 py-1 text-[10px] uppercase font-bold shadow-sm`}
-                    >
-                      {status.icon}
-                      {status.label}
-                    </Badge>
+            <ArrowLeft className="w-4 h-4" />
+            {locale === "id" ? "Kembali ke Beranda" : "Back to Home"}
+          </Link>
+          <div className="flex items-center gap-4">
+            <button className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-primary-500 transition-all border border-white/10">
+              <Share2 className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 mt-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          {/* Left Side: Booking List */}
+          <div className="lg:col-span-8 space-y-10">
+            
+            {/* Header / Title Section (On Fixed Dark BG) */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-500/20 border border-primary-500/40 text-primary-400 text-[10px] font-bold uppercase tracking-widest">
+                  <Compass className="w-3 h-3" />
+                  {locale === "id" ? "Dashboard Pengguna" : "User Dashboard"}
+                </span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-(family-name:--font-playfair) text-white leading-tight">
+                {locale === "id" ? (
+                  <>
+                    <span className="text-primary-400 italic">Pesanan </span>Saya
+                  </>
+                ) : (
+                  <>
+                    <span className="text-primary-400 italic">My </span>Bookings
+                  </>
+                )}
+              </h1>
+
+              <p className="text-slate-300 max-w-xl text-base leading-relaxed opacity-90">
+                {(
+                  t.heroSubtitle ||
+                  "Halo {name}, pantau semua rencana perjalanan dan status pembayaran Anda secara real-time."
+                ).replace("{name}", userName)}
+              </p>
+
+              {/* Quick Stats - Using Theme Cards */}
+              <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
+                <div className="flex flex-col items-center text-center p-5 rounded-2xl bg-card-bg border border-card-border shadow-lg">
+                  <div className="w-12 h-12 rounded-full bg-primary-500/10 flex items-center justify-center text-primary-500 mb-3">
+                    <Calendar className="w-6 h-6" />
                   </div>
+                  <p className="text-[10px] uppercase font-bold text-foreground-secondary mb-1">
+                    {t.stats?.totalBookings || "Total Pesanan"}
+                  </p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {initialBookings.length}
+                  </p>
                 </div>
-
-                {/* Info Section */}
-                <div className="flex-1 p-6 flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start mb-2">
-                      <h2 className="text-xl font-bold text-slate-900 dark:text-white line-clamp-1">
-                        {title}
-                      </h2>
-                      <p className="text-lg font-black text-primary-600">
-                        Rp {Number(booking.totalPrice).toLocaleString("id-ID")}
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                      <div className="flex items-center gap-2 text-slate-500">
-                        <Calendar className="w-4 h-4 text-primary-500" />
-                        <div className="text-xs">
-                          <p className="font-semibold text-slate-800 dark:text-slate-200">
-                            Tanggal
-                          </p>
-                          <p>
-                            {format(new Date(booking.tourDate), "dd MMM yyyy", {
-                              locale: id,
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-500">
-                        <Users className="w-4 h-4 text-primary-500" />
-                        <div className="text-xs">
-                          <p className="font-semibold text-slate-800 dark:text-slate-200">
-                            Peserta
-                          </p>
-                          <p>{booking.pax} Pax</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-500">
-                        <CreditCard className="w-4 h-4 text-primary-500" />
-                        <div className="text-xs">
-                          <p className="font-semibold text-slate-800 dark:text-slate-200">
-                            Metode
-                          </p>
-                          <p>{booking.paymentType}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-500">
-                        <Clock className="w-4 h-4 text-primary-500" />
-                        <div className="text-xs">
-                          <p className="font-semibold text-slate-800 dark:text-slate-200">
-                            Kode Booking
-                          </p>
-                          <p className="font-mono uppercase">
-                            {booking.id.substring(0, 8)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                <div className="flex flex-col items-center text-center p-5 rounded-2xl bg-card-bg border border-card-border shadow-lg">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 mb-3">
+                    <CheckCircle2 className="w-6 h-6" />
                   </div>
-
-                  <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4">
-                    <p className="text-[10px] text-slate-400 font-medium italic">
-                      Dipesan pada{" "}
-                      {format(
-                        new Date(booking.createdAt),
-                        "dd MMM yyyy, HH:mm",
-                        { locale: id },
-                      )}
-                    </p>
-
-                    <div className="flex items-center gap-3">
-                      {booking.status === "PENDING" && booking.snapToken && (
-                        <Button
-                          onClick={() => handlePayNow(booking.snapToken!)}
-                          className="bg-primary-500 hover:bg-primary-600 text-white gap-2 rounded-xl h-10 px-6 font-bold text-sm shadow-lg shadow-primary-500/20"
-                        >
-                          <CreditCard className="w-4 h-4" />
-                          Bayar Sekarang
-                        </Button>
-                      )}
-
-                      <Button
-                        variant="outline"
-                        className="rounded-xl h-10 px-4 gap-2 border-slate-200"
-                        disabled
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        Detail
-                      </Button>
-                    </div>
+                  <p className="text-[10px] uppercase font-bold text-foreground-secondary mb-1">
+                    {t.stats?.active || "Aktif"}
+                  </p>
+                  <p className="text-2xl font-bold text-emerald-500">
+                    {initialBookings.filter(b => b.status === "CONFIRMED").length}
+                  </p>
+                </div>
+                <div className="flex flex-col items-center text-center p-5 rounded-2xl bg-card-bg border border-card-border shadow-lg">
+                  <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-3">
+                    <Users className="w-6 h-6" />
                   </div>
+                  <p className="text-[10px] uppercase font-bold text-foreground-secondary mb-1">
+                    {t.stats?.totalPax || "Total Pax"}
+                  </p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {initialBookings.reduce((sum, b) => sum + (b.pax || 0), 0)}
+                  </p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        );
-      })}
+            </div>
+
+            {/* Content Divider / Trip History Header */}
+            <div className="space-y-6 pt-6">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-1 bg-primary-500 rounded-full" />
+                <h2 className="text-2xl font-bold font-(family-name:--font-playfair) text-foreground">
+                  {locale === "id" ? "Daftar Perjalanan" : "Trip History"}
+                </h2>
+              </div>
+
+              {initialBookings.length === 0 ? (
+                <div className="text-center py-20 bg-card-bg rounded-2xl border border-dashed border-card-border shadow-sm">
+                  <AlertCircle className="w-12 h-12 text-foreground-secondary mx-auto mb-4" />
+                  <h3 className="text-lg font-bold text-foreground">
+                    {t.emptyTitle || "Belum ada pesanan"}
+                  </h3>
+                  <p className="text-foreground-secondary mt-1 mb-6">
+                    {t.emptySubtitle || "Anda belum pernah melakukan pemesanan paket wisata."}
+                  </p>
+                  <Button onClick={() => router.push("/")} variant="outline" className="rounded-xl border-card-border">
+                    {t.searchButton || "Cari Paket Wisata"}
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-6">
+                  {initialBookings.map((booking) => {
+                    const status = getStatusConfig(booking.status);
+                    const pkg = booking.package;
+                    const title = pkg?.title?.id || pkg?.title?.en || "Paket Wisata";
+
+                    return (
+                      <Card key={booking.id} className="overflow-hidden border border-card-border shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl group bg-card-bg">
+                        <CardContent className="p-0">
+                          <div className="flex flex-col sm:flex-row">
+                            {/* Image Section */}
+                            <div className="w-full sm:w-56 h-56 sm:h-auto relative overflow-hidden bg-background-secondary">
+                              <img
+                                src={pkg?.images?.[0] || "/placeholder.jpg"}
+                                alt={title}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                              />
+                              <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-40" />
+                              
+                              {/* Status Badge */}
+                              <div className="absolute top-4 left-4">
+                                <Badge className={`${status.color} border-none flex items-center gap-1.5 px-3 py-1 text-[10px] uppercase font-bold shadow-lg`}>
+                                  {status.icon}
+                                  {status.label}
+                                </Badge>
+                              </div>
+                            </div>
+
+                            {/* Info Section */}
+                            <div className="flex-1 p-6 sm:p-8 flex flex-col justify-between">
+                              <div>
+                                <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+                                  <div className="space-y-1">
+                                    <p className="text-[10px] font-bold text-primary-500 uppercase tracking-widest">
+                                      {dt(pkg?.location || "Destinasi")}
+                                    </p>
+                                    <h3 className="text-xl sm:text-2xl font-bold text-foreground font-(family-name:--font-playfair) leading-tight line-clamp-2">
+                                      {dt(pkg?.title || "Package Title")}
+                                    </h3>
+                                  </div>
+                                  <div className="sm:text-right shrink-0">
+                                    <p className="text-2xl font-black text-primary-500">
+                                      {locale === "id"
+                                        ? `Rp ${Number(booking.totalPrice).toLocaleString("id-ID")}`
+                                        : `$ ${(Number(booking.totalPrice) / 15000).toLocaleString("en-US", { maximumFractionDigits: 0 })}`}
+                                    </p>
+                                    <p className="text-[10px] font-bold text-foreground-secondary uppercase tracking-wider">Total Harga</p>
+                                  </div>
+                                </div>
+
+                                {/* Info Grid */}
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                                  <div className="flex items-center gap-3 p-3 rounded-xl bg-background-secondary border border-card-border">
+                                    <Calendar className="w-4 h-4 text-primary-500" />
+                                    <div>
+                                      <p className="text-[9px] uppercase font-bold text-foreground-secondary">Berangkat</p>
+                                      <p className="text-sm text-foreground font-bold">
+                                        {format(new Date(booking.tourDate), "dd MMM yyyy", { locale: dateLocale })}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3 p-3 rounded-xl bg-background-secondary border border-card-border">
+                                    <Users className="w-4 h-4 text-primary-500" />
+                                    <div>
+                                      <p className="text-[9px] uppercase font-bold text-foreground-secondary">
+                                        {t.fields?.pax || "Peserta"}
+                                      </p>
+                                      <p className="text-sm text-foreground font-bold">
+                                        {booking.pax} {locale === "id" ? "Orang" : "Pax"}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3 p-3 rounded-xl bg-background-secondary border border-card-border">
+                                    <Clock className="w-4 h-4 text-primary-500" />
+                                    <div>
+                                      <p className="text-[9px] uppercase font-bold text-foreground-secondary">Kode</p>
+                                      <p className="text-sm text-foreground font-bold font-mono uppercase">
+                                        {booking.id.substring(0, 8)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-card-border">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                  <p className="text-[10px] text-foreground-secondary font-medium italic">
+                                    {t.fields?.bookedAt || "Dipesan pada"}{" "}
+                                    {format(new Date(booking.createdAt), "dd MMM yyyy, HH:mm", { locale: dateLocale })}
+                                  </p>
+                                </div>
+                                <div className="flex gap-3 w-full sm:w-auto">
+                                  {booking.status === "PENDING" && booking.snapToken && (
+                                    <Button
+                                      onClick={() => handlePayNow(booking.snapToken!)}
+                                      className="flex-1 sm:flex-none bg-primary-500 hover:bg-primary-600 text-white rounded-xl h-11 px-6 font-bold text-sm shadow-lg shadow-primary-500/20 transition-all hover:scale-105"
+                                    >
+                                      {t.actions?.payNow || "Bayar Sekarang"}
+                                    </Button>
+                                  )}
+                                  <Button variant="outline" className="flex-1 sm:flex-none rounded-xl h-11 px-6 text-sm border-card-border hover:bg-background-secondary" disabled>
+                                    {t.actions?.detail || "Detail"}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Key Features */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-6 rounded-2xl bg-card-bg border border-card-border flex gap-5 hover:border-primary-500/30 transition-all duration-300">
+                <div className="w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500 shrink-0">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-foreground mb-1.5 text-base">
+                    {t.help?.bookingStatusTitle || "Status Pemesanan"}
+                  </h4>
+                  <p className="text-sm text-foreground-secondary leading-relaxed">
+                    {t.help?.bookingStatusSubtitle || "Semua status pesanan Anda diperbarui secara otomatis dan real-time dari sistem kami."}
+                  </p>
+                </div>
+              </div>
+              <div className="p-6 rounded-2xl bg-card-bg border border-card-border flex gap-5 hover:border-primary-500/30 transition-all duration-300">
+                <div className="w-12 h-12 rounded-xl bg-primary-500/10 flex items-center justify-center text-primary-500 shrink-0">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-foreground mb-1.5 text-base">
+                    {t.help?.customerSupportTitle || "Dukungan Pelanggan"}
+                  </h4>
+                  <p className="text-sm text-foreground-secondary leading-relaxed">
+                    {t.help?.customerSupportSubtitle || "Butuh bantuan dengan pesanan Anda? Tim kami siap membantu Anda 24/7."}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side: Sticky Summary Card */}
+          <div className="lg:col-span-4">
+            <div className="sticky top-24 space-y-6">
+              <div className="p-6 sm:p-8 rounded-2xl bg-card-bg border border-card-border shadow-xl space-y-8 overflow-hidden relative">
+                {/* Decorative background element */}
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary-500/5 rounded-full blur-2xl" />
+
+                <div>
+                  <p className="text-xs font-bold text-foreground-secondary uppercase tracking-widest mb-3">
+                    {t.profile?.title || "Profil Pengguna"}
+                  </p>
+                  <h2 className="text-3xl font-bold text-foreground font-(family-name:--font-playfair) mb-1">
+                    {userName}
+                  </h2>
+                  <p className="text-sm font-bold text-primary-500">
+                    {t.profile?.memberLabel || "Member Titan Travel"}
+                  </p>
+                </div>
+
+                <div className="space-y-4 pt-6 border-t border-card-border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-foreground-secondary">
+                      <Calendar className="w-4 h-4" />
+                      <span className="text-sm font-medium">{t.profile?.totalBookings || "Total Pesanan"}</span>
+                    </div>
+                    <span className="font-bold text-foreground">{initialBookings.length}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-foreground-secondary">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span className="text-sm font-medium">{t.profile?.activeBookings || "Pesanan Aktif"}</span>
+                    </div>
+                    <span className="text-emerald-600 font-bold">{initialBookings.filter(b => b.status === "CONFIRMED").length}</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center gap-3 text-foreground-secondary">
+                      <Star className="w-4 h-4" />
+                      <span className="text-sm font-medium">{t.profile?.totalSpending || "Total Pengeluaran"}</span>
+                    </div>
+                    <span className="font-bold text-foreground">
+                      {locale === "id"
+                        ? `Rp ${initialBookings.reduce((sum, b) => sum + Number(b.totalPrice || 0), 0).toLocaleString("id-ID")}`
+                        : `$ ${(initialBookings.reduce((sum, b) => sum + Number(b.totalPrice || 0), 0) / 15000).toLocaleString("en-US", { maximumFractionDigits: 0 })}`}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-3 pt-6">
+                  <Link 
+                    href="/"
+                    className="w-full py-4 rounded-xl bg-primary-500 text-white font-bold hover:bg-primary-600 shadow-lg shadow-primary-500/20 transition-all flex items-center justify-center gap-2 group"
+                  >
+                    {t.profile?.explorePackages || "Jelajahi Paket Wisata"}
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <button className="w-full py-4 rounded-xl border border-card-border bg-background-secondary text-foreground font-bold hover:bg-background transition-all flex items-center justify-center gap-2 text-sm">
+                    <MessageSquare className="w-4 h-4" />
+                    Bantuan CS
+                  </button>
+                </div>
+              </div>
+
+              {/* Help Card */}
+              <div className="p-6 rounded-2xl bg-primary-500/5 border border-primary-500/10 flex items-center gap-4 group cursor-pointer hover:bg-primary-500/10 transition-all duration-300">
+                <div className="w-12 h-12 rounded-full bg-card-bg flex items-center justify-center text-primary-500 shadow-sm border border-card-border">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-foreground text-sm">
+                    {t.help?.title || "Butuh Bantuan?"}
+                  </h4>
+                  <p className="text-xs text-foreground-secondary">
+                    {t.help?.subtitle || "Hubungi konsultan travel kami"}
+                  </p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-foreground-secondary ml-auto group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
+
