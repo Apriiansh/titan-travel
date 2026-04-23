@@ -24,7 +24,7 @@ interface PackageItem {
     title: string;
     location: string;
     duration: string;
-    capacity: string;
+    capacity: number;
     facilityScore: number;
     departureScore: number;
     durationDays: number;
@@ -143,7 +143,7 @@ async function main() {
             title: "Bali Spiritual & Cultural Journey 4H3M",
             location: "Ubud & Kuta, Bali",
             duration: "4 Days 3 Nights",
-            capacity: "Max 20 Pax",
+            capacity: 20,
             facilityScore: 5,
             departureScore: 1,
             durationDays: 4,
@@ -159,7 +159,7 @@ async function main() {
             title: "Lombok Exotic Beach Tour 3H2M",
             location: "Mandalika, Lombok",
             duration: "3 Days 2 Nights",
-            capacity: "Max 15 Pax",
+            capacity: 15,
             facilityScore: 4,
             departureScore: 2,
             durationDays: 3,
@@ -175,7 +175,7 @@ async function main() {
             title: "Kuala Lumpur City Escape 4H3M",
             location: "Kuala Lumpur, Malaysia",
             duration: "4 Days 3 Nights",
-            capacity: "Max 12 Pax",
+            capacity: 12,
             facilityScore: 4,
             departureScore: 1,
             durationDays: 4,
@@ -191,7 +191,7 @@ async function main() {
             title: "Singapore Modern Vibes 3H2M",
             location: "Marina Bay, Singapore",
             duration: "3 Days 2 Nights",
-            capacity: "Max 10 Pax",
+            capacity: 10,
             facilityScore: 5,
             departureScore: 3,
             durationDays: 3,
@@ -207,7 +207,7 @@ async function main() {
             title: "Yogyakarta Heritage & Culture 2H1M",
             location: "Malioboro, Yogyakarta",
             duration: "2 Days 1 Night",
-            capacity: "Max 30 Pax",
+            capacity: 30,
             facilityScore: 3,
             departureScore: 2,
             durationDays: 2,
@@ -231,7 +231,7 @@ async function main() {
                 description: await toAutoMultiLang(pkg.desc) as unknown as JsonValue,
                 location: await toAutoMultiLang(pkg.location) as unknown as JsonValue,
                 duration: await toAutoMultiLang(pkg.duration) as unknown as JsonValue,
-                capacity: await toAutoMultiLang(pkg.capacity) as unknown as JsonValue,
+                capacity: pkg.capacity,
                 facilityScore: pkg.facilityScore,
                 departureScore: pkg.departureScore,
                 durationDays: pkg.durationDays,

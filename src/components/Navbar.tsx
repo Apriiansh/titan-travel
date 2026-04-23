@@ -228,18 +228,11 @@ export default function Navbar({ data }: { data?: any }) {
                         </Link>
                       )}
                       <Link
-                        href="/my-trips"
+                        href="/dashboard"
                         className="px-4 py-2 text-sm text-foreground-secondary hover:text-primary-500 hover:bg-primary-500/5 transition-colors flex items-center gap-2"
                       >
-              
-                        Perjalanan Saya
-                      </Link>
-                      <Link
-                        href="/history"
-                        className="px-4 py-2 text-sm text-foreground-secondary hover:text-primary-500 hover:bg-primary-500/5 transition-colors flex items-center gap-2"
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                        Riwayat
+                        <TrendingUp className="w-4 h-4" />
+                        Pesanan Saya
                       </Link>
                       <div className="h-px bg-card-border my-1 mx-2" />
                       <button
@@ -252,16 +245,16 @@ export default function Navbar({ data }: { data?: any }) {
                     </div>
                   </div>
                 </div>
-                <a
-                  href="#kontak"
+                <Link
+                  href="/dashboard"
                   className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-sm text-xs font-bold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.03] ${
                     isScrolled
                       ? "bg-primary-500 text-white hover:bg-primary-600"
                       : "bg-accent-500 text-white hover:bg-accent-600"
                   }`}
                 >
-                  {d.cta || "Pesan Sekarang"}
-                </a>
+                  Dashboard
+                </Link>
               </div>
             ) : (
               <div className="hidden sm:flex items-center">

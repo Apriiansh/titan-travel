@@ -67,9 +67,7 @@ interface PackagePayload {
   durationId: string;
   durationEn: string;
   durationMs: string;
-  capacityId: string;
-  capacityEn: string;
-  capacityMs: string;
+  capacity: number;
   facilityScore: number;
   departureScore: number;
   durationDays: number;
@@ -102,7 +100,7 @@ export async function createPackage(data: PackagePayload) {
         : undefined,
       location: { id: data.locationId, en: data.locationEn, ms: data.locationMs },
       duration: { id: data.durationId, en: data.durationEn, ms: data.durationMs },
-      capacity: { id: data.capacityId, en: data.capacityEn, ms: data.capacityMs },
+      capacity: data.capacity,
       facilityScore: data.facilityScore,
       departureScore: data.departureScore,
       durationDays: data.durationDays,
@@ -127,7 +125,7 @@ export async function updatePackage(id: string, data: PackagePayload) {
         : undefined,
       location: { id: data.locationId, en: data.locationEn, ms: data.locationMs },
       duration: { id: data.durationId, en: data.durationEn, ms: data.durationMs },
-      capacity: { id: data.capacityId, en: data.capacityEn, ms: data.capacityMs },
+      capacity: data.capacity,
       facilityScore: data.facilityScore,
       departureScore: data.departureScore,
       durationDays: data.durationDays,

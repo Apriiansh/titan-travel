@@ -63,7 +63,7 @@ model TourPackage {
   description Json?
   location    Json
   duration    Json
-  capacity    Json
+  capacity    Int @default(0)
 
   images Json
 
@@ -135,6 +135,7 @@ model Booking {
   amountPaid  Decimal       @db.Decimal(12, 2) @default(0)
   status      BookingStatus @default(PENDING)
   notes     String?       @db.Text
+  snapToken String?
 
   user    User?        @relation(fields: [userId], references: [id])
   package TourPackage? @relation(fields: [packageId], references: [id])

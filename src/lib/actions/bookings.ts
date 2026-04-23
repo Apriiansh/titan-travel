@@ -2,13 +2,34 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { snap } from "@/lib/midtrans";
+
+function serializeBooking(b: any) {
+  if (!b) return null;
+  return {
+    ...b,
+    totalPrice: Number(b.totalPrice),
+    amountPaid: Number(b.amountPaid),
+  };
+}
 
 export async function getBookings() {
-  return prisma.booking.findMany({ orderBy: { createdAt: "desc" } });
+  const bookings = await prisma.booking.findMany({ orderBy: { createdAt: "desc" } });
+  return bookings.map(serializeBooking);
 }
 
 export async function getBookingById(id: string) {
-  return prisma.booking.findUnique({ where: { id } });
+  const booking = await prisma.booking.findUnique({ where: { id } });
+  return serializeBooking(booking);
+}
+
+export async function getBookingsByUser(userId: string) {
+  const bookings = await prisma.booking.findMany({
+    where: { userId },
+    include: { package: true },
+    orderBy: { createdAt: "desc" },
+  });
+  return bookings.map(serializeBooking);
 }
 
 export async function createBooking(data: {
@@ -29,10 +50,26 @@ export async function createBooking(data: {
 
   if (!pkg) throw new Error("Package not found");
 
-  // Logic Harga Bertingkat (Tiered Pricing)
+  // 1. Cek Sisa Kuota di Tanggal Tersebut (Anti-Overbooking)
+  const existingBookings = await prisma.booking.findMany({
+    where: {
+      packageId: data.packageId,
+      tourDate: data.tourDate,
+      status: { not: "CANCELLED" } // Jangan hitung yang sudah dibatalkan
+    },
+    select: { pax: true }
+  });
+
+  const totalBookedPax = existingBookings.reduce((sum, b) => sum + b.pax, 0);
+  const remainingQuota = pkg.capacity - totalBookedPax;
+
+  if (data.pax > remainingQuota) {
+    throw new Error(`Sisa kuota untuk tanggal ini hanya ${remainingQuota} pax. Mohon kurangi jumlah peserta.`);
+  }
+
+  // 2. Logic Harga Bertingkat (Tiered Pricing)
   let unitPrice = 0;
   
-  // Cari tier yang cocok dengan jumlah pax (pax masuk dalam rentang minPax dan maxPax)
   const applicableTier = pkg.priceTiers.find(tier => 
     data.pax >= tier.minPax && data.pax <= tier.maxPax
   );
@@ -40,7 +77,6 @@ export async function createBooking(data: {
   if (applicableTier) {
     unitPrice = Number(applicableTier.price);
   } else {
-    // Jika tidak ada tier yang cocok, kita ambil harga terendah sebagai fallback
     const sortedTiers = [...pkg.priceTiers].sort((a, b) => Number(a.price) - Number(b.price));
     unitPrice = sortedTiers.length > 0 ? Number(sortedTiers[0].price) : 0;
   }
@@ -53,10 +89,10 @@ export async function createBooking(data: {
   } else if (data.paymentType === "HALF") {
     amountPaid = totalPrice * 0.5;
   } else if (data.paymentType === "DP") {
-    // DP 30% sesuai standar UI
     amountPaid = totalPrice * 0.3;
   }
 
+  // 1. Simpan ke database
   const booking = await prisma.booking.create({
     data: {
       userId: data.userId,
@@ -74,8 +110,42 @@ export async function createBooking(data: {
     },
   });
 
+  // 2. Request Token ke Midtrans
+  let snapToken = "";
+  try {
+    const parameter = {
+      transaction_details: {
+        order_id: booking.id,
+        gross_amount: Math.round(amountPaid),
+      },
+      customer_details: {
+        first_name: data.name,
+        email: data.email,
+        phone: data.phone,
+      },
+      item_details: [{
+        id: pkg.id,
+        price: Math.round(amountPaid),
+        quantity: 1,
+        name: `${(pkg.title as any).id || "Paket Wisata"} (${data.paymentType})`,
+      }]
+    };
+
+    const transaction = await snap.createTransaction(parameter);
+    snapToken = transaction.token;
+
+    // Simpan token ke booking
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: { snapToken }
+    });
+  } catch (error) {
+    console.error("Midtrans Error:", error);
+  }
+
   revalidatePath("/admin/bookings");
-  return booking;
+  
+  return serializeBooking({ ...booking, snapToken });
 }
 
 export async function updateBookingStatus(

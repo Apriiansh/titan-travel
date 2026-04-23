@@ -170,7 +170,7 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
                       Kapasitas
                     </p>
                     <p className="text-sm font-semibold text-slate-900">
-                      {dt(pkg.capacity)}
+                      {pkg.capacity} Pax
                     </p>
                   </div>
                 </div>
@@ -272,10 +272,13 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
                 </div>
 
                 <div className="space-y-3 pt-4">
-                  <button className="w-full py-4 rounded-xl bg-primary-500 text-white font-bold hover:bg-primary-600 shadow-lg shadow-primary-500/25 transition-all flex items-center justify-center gap-2 group">
+                  <Link 
+                    href={`/paket/${pkg.slug}/booking`}
+                    className="w-full py-4 rounded-xl bg-primary-500 text-white font-bold hover:bg-primary-600 shadow-lg shadow-primary-500/25 transition-all flex items-center justify-center gap-2 group"
+                  >
                     Pesan Sekarang
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </button>
+                  </Link>
                   <button className="w-full py-4 rounded-xl border border-card-border bg-foreground/2 text-foreground font-bold hover:bg-foreground/5 transition-all flex items-center justify-center gap-2">
                     <MessageSquare className="w-5 h-5" />
                     Tanya Lewat WhatsApp

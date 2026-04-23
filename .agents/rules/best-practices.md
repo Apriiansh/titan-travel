@@ -1,25 +1,22 @@
-# Development Best Practices
+# 🏆 Best Practices - Titan Travel Architecture
 
-Panduan praktis untuk alur kerja harian dan standar pengembangan aplikasi Titan Travel.
+Dokumen ini berisi standar koding wajib untuk menjaga kualitas dan performa aplikasi.
 
-## 1. Pengembangan Komponen UI
-*   **Komposisi**: Pecah komponen besar menjadi komponen kecil yang dapat digunakan kembali (reusable) di folder `src/components/ui` atau `src/components/panel`.
-*   **Lucide Icons**: Gunakan library `lucide-react` untuk semua ikon demi konsistensi visual.
-*   **Accessibility (a11y)**: Selalu tambahkan atribut `aria-label` pada tombol ikon dan pastikan kontras warna memenuhi standar WCAG (terbantu dengan penggunaan tema variabel).
+## 1. Component Architecture
+- **Avoid God Components**: Jangan biarkan file Client Component melebihi 300-400 baris. Pecah menjadi sub-komponen di folder `components/` lokal.
+- **Server-First Pattern**: Lakukan data fetching di Server Components (`page.tsx`) dan teruskan ke Client Components sebagai props.
+- **Leaf Components**: Gunakan `'use client'` hanya pada komponen terkecil yang membutuhkan interaksi (tombol, input, modal).
 
-## 2. Manajemen State
-*   **Server State First**: Utamakan penggunaan Server Components dan URL Search Params untuk filter/pagination sebelum menggunakan `useState`.
-*   **Form Handling**: Gunakan Server Actions untuk pengiriman formulir guna mendapatkan fitur *progressive enhancement* dan keamanan otomatis.
-*   **Validation**: Gunakan library validasi (seperti Zod jika tersedia) untuk memastikan data dari form aman sebelum masuk ke Database.
+## 2. Data Handling & Backend
+- **Server Actions over API**: Gunakan Server Actions (`src/lib/actions/`) untuk mutasi data internal (Create/Update/Delete). Gunakan API Routes hanya untuk integrasi luar atau webhook.
+- **Prisma Efficiency**: Selalu gunakan `include` hanya untuk data yang benar-benar dibutuhkan untuk menghindari *over-fetching*.
+- **BigInt Serialization**: Pastikan mengonversi BigInt atau Decimal dari database ke `Number` atau `String` sebelum dikirim ke Client Component.
 
-## 3. Dokumentasi & Knowledge
-*   **Folder `goodtoknow/`**: Selalu simpan riset, analisis skripsi, atau hasil simulasi algoritma di folder ini.
-*   **Comment Policy**: Berikan komentar pada blok kode yang kompleks (seperti kalkulasi TOPSIS) untuk menjelaskan *mengapa* logika tersebut digunakan, bukan hanya *apa* yang dilakukan.
+## 3. UI & Styling
+- **2-Column Form Layout**: Untuk form yang kompleks (seperti Paket Wisata), gunakan layout 2-kolom (Main vs Sidebar) agar UI seimbang dan tidak kosong di sisi kanan.
+- **Smart Discount Logic**: Terapkan deteksi simbol `%` pada input harga untuk menghitung diskon otomatis demi kemudahan admin.
+- **Responsive Design**: Gunakan prefix `sm:`, `md:`, `lg:` dari Tailwind secara konsisten.
 
-## 4. Keamanan & Rahasia
-*   **Environment Variables**: Jangan pernah melakukan *hardcode* kunci API atau rahasia database. Gunakan file `.env`.
-*   **Authorization**: Selalu lakukan pengecekan role (`ADMIN`/`MANAGER`) di level Page (Server Side) dan level API Route untuk mencegah akses tidak sah.
-
-## 5. Optimasi Media
-*   **Next.js Image**: Gunakan komponen `next/image` untuk semua gambar publik agar mendapatkan optimasi ukuran file secara otomatis.
-*   **Lazy Loading**: Gunakan dynamic imports untuk komponen berat yang tidak diperlukan saat load pertama (seperti Chart yang berada di bawah lipatan layar).
+## 4. Documentation
+- **Task Tracking**: Gunakan `task.md` untuk mencatat setiap progres fitur besar.
+- **Walkthrough**: Buat `walkthrough.md` setelah fitur selesai untuk menjelaskan apa yang berubah.
