@@ -18,6 +18,7 @@ import {
 import { TopsisResult } from "@/lib/topsis";
 import { SaveButton } from "./SaveButton";
 import { updateTopsisCriteria, getTopsisAnalysis } from "@/lib/actions/topsis";
+import { TopsisDetailDialog } from "@/app/(panel)/admin/topsis/components/TopsisDetailDialog";
 
 interface TopsisAnalysisClientProps {
   initialData: {
@@ -34,6 +35,10 @@ export function TopsisAnalysisClient({
   const [editedCriteria, setEditedCriteria] = useState(initialData.criteria);
   const [isPending, setIsPending] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  
+  // State for detail dialog
+  const [selectedResult, setSelectedResult] = useState<any>(null);
+  const [showDetail, setShowDetail] = useState(false);
 
   const totalWeight = editedCriteria.reduce((sum, c) => sum + c.weight, 0);
   const isWeightValid = Math.abs(totalWeight - 1.0) < 0.0001;
@@ -140,7 +145,7 @@ export function TopsisAnalysisClient({
           </div>
           <div>
             <p className="text-sm text-foreground-secondary">Metode</p>
-            <p className="text-2xl font-bold text-foreground">TOPSIS v1.0</p>
+            <p className="text-2xl font-bold text-foreground">TOPSIS</p>
           </div>
         </div>
       </div>
@@ -369,8 +374,15 @@ export function TopsisAnalysisClient({
                           </div>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button className="p-2 rounded-lg hover:bg-primary-500/10 text-foreground-secondary hover:text-primary-600 transition-colors">
-                            <ArrowRight className="w-4 h-4" />
+                          <button 
+                            onClick={() => {
+                              setSelectedResult(res);
+                              setShowDetail(true);
+                            }}
+                            className="p-2 rounded-lg hover:bg-primary-500/10 text-foreground-secondary hover:text-primary-600 transition-colors flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ml-auto"
+                          >
+                            <span>Detail Math</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
                           </button>
                         </td>
                       </tr>
@@ -389,6 +401,14 @@ export function TopsisAnalysisClient({
           </div>
         </div>
       </div>
+
+      <TopsisDetailDialog 
+        open={showDetail}
+        onOpenChange={setShowDetail}
+        booking={selectedResult}
+        criteria={data.criteria}
+        allPackages={data.results}
+      />
     </div>
   );
 }

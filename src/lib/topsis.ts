@@ -80,6 +80,8 @@ export function calculateTopsis(
   };
 
   // --- LANGKAH 5: Menghitung Jarak Euclidean (D+ dan D-) ---
+  // D_i = sqrt(sum((y_ij - A_j)^2))
+  // Menghitung seberapa jauh alternatif dari kondisi ideal positif (D+) dan kondisi ideal negatif (D-)
   const results = weightedMatrix.map((m, index) => {
     const dPlus = Math.sqrt(
       Math.pow(m.y1 - aPlus.y1, 2) +
@@ -96,6 +98,8 @@ export function calculateTopsis(
     );
 
     // --- LANGKAH 6: Menghitung Nilai Preferensi (Vi) ---
+    // Rumus: V_i = D_i- / (D_i- + D_i+)
+    // Nilai mendekati 1 menunjukkan paket tersebut semakin dekat ke solusi ideal
     const score = dMinus / (dPlus + dMinus) || 0;
 
     return {
@@ -105,6 +109,7 @@ export function calculateTopsis(
   });
 
   // --- LANGKAH 7: Perankingan (Sorting Descending) ---
+  // Mengurutkan hasil berdasarkan skor Vi tertinggi ke terendah
   return results
     .sort((a, b) => b.score - a.score)
     .map((res, index) => ({

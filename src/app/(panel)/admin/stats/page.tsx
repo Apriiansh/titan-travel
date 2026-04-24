@@ -1,19 +1,13 @@
-import { getAdminStatsData } from "@/lib/actions/stats";
-import { StatsClient } from "@/components/panel/StatsClient";
-import { Metadata } from "next";
+import { getAdminStats } from "@/lib/actions/stats";
+import { StatsClient } from "./StatsClient";
 
-export const metadata: Metadata = {
-  title: "Statistik Travel | Titan Admin",
-  description: "Dashboard statistik dan analitik Titan Travel",
+export const metadata = {
+  title: "Statistik Bisnis | Titan Travel",
+  description: "Dashboard analisis performa bisnis Titan Travel",
 };
 
-export default async function AdminStatsPage() {
-  // Fetch initial data directly on the server
-  const stats = await getAdminStatsData();
-
-  return (
-    <div className="w-full">
-      <StatsClient initialData={stats} />
-    </div>
-  );
+export default async function StatsPage() {
+  const data = await getAdminStats();
+  
+  return <StatsClient data={data} />;
 }

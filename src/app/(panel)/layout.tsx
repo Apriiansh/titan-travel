@@ -27,7 +27,6 @@ export default async function PanelLayout({ children }: { children: React.ReactN
             <div className="flex-1">
                <h1 className="text-sm font-semibold text-foreground-secondary hidden md:block">Titan Workspace</h1>
             </div>
-            <ThemeToggle />
           </header>
           <div className="p-4 lg:p-6 w-full max-w-7xl mx-auto">
             {children}

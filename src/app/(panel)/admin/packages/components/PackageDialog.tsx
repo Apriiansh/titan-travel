@@ -41,7 +41,7 @@ export function PackageDialog({
 }: PackageDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none rounded-md shadow-2xl flex flex-col max-h-[92vh]">
+      <DialogContent className="max-w-6xl p-0 overflow-hidden border-none rounded-2xl shadow-2xl flex flex-col max-h-[95vh]">
         <DialogHeader className="p-6 bg-muted/30 border-b border-card-border shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Tag className="w-5 h-5 text-primary-500" />

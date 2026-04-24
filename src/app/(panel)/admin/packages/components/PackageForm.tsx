@@ -90,7 +90,6 @@ export function PackageForm({
               const titleKey = `title${L}` as keyof PackageFormState;
               const locationKey = `location${L}` as keyof PackageFormState;
               const durationKey = `duration${L}` as keyof PackageFormState;
-              const capacityKey = `capacity${L}` as keyof PackageFormState;
               const descKey = `desc${L}` as keyof PackageFormState;
 
               return (

@@ -1,89 +1,82 @@
-import { prisma } from '@/lib/prisma'
+"use server";
 
-interface RevenueResult {
-  totalRevenue: number | string | bigint;
-}
+import { prisma } from "@/lib/prisma";
+import { startOfYear, endOfYear, format, eachMonthOfInterval } from "date-fns";
+import { id } from "date-fns/locale";
 
-interface ChartRawResult {
-  monthNum: number | string | bigint;
-  yearNum: number | string | bigint;
-  pemesanan: number | string | bigint;
-  pendapatan: number | string | bigint;
-}
+export async function getAdminStats() {
+  const now = new Date();
+  const startYear = startOfYear(now);
+  const endYear = endOfYear(now);
 
-export type StatsData = {
-  totalUsers: number;
-  monthlyBookings: number;
-  totalRevenue: number;
-  publishedPackages: number;
-  totalBookings: number;
-  chartData: Array<{ name: string; pemesanan: number; pendapatan: number }>;
-}
+  // 1. Ambil Semua Booking untuk Analisis
+  const bookings = await prisma.booking.findMany({
+    where: {
+      createdAt: {
+        gte: startYear,
+        lte: endYear,
+      },
+    },
+    include: {
+      package: true,
+    },
+  });
 
-export async function getAdminStatsData(): Promise<StatsData> {
-  const now = new Date()
-  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  // 2. Hitung Ringkasan (Summary)
+  const totalRevenue = bookings
+    .filter(b => b.status !== "CANCELLED")
+    .reduce((sum, b) => sum + Number(b.amountPaid), 0);
+  
+  const totalPendingRevenue = bookings
+    .filter(b => b.status === "PENDING")
+    .reduce((sum, b) => sum + (Number(b.totalPrice) - Number(b.amountPaid)), 0);
 
-  // 1. Fetch basic counts
-  const [
-    totalUsers,
-    totalBookings,
-    monthlyBookings,
-    publishedPackages
-  ] = await Promise.all([
-    prisma.user.count(),
-    prisma.booking.count(),
-    prisma.booking.count({ where: { createdAt: { gte: firstDayOfMonth } } }),
-    prisma.tourPackage.count({ where: { isPublished: true } })
-  ])
+  const totalBookings = bookings.length;
+  const totalPax = bookings.reduce((sum, b) => sum + b.pax, 0);
 
-  // 2. Total Revenue (Confirmed/Completed)
-  const revenueResult = await prisma.$queryRaw<RevenueResult[]>`
-    SELECT COALESCE(SUM(tp.price * b.pax), 0) as totalRevenue
-    FROM bookings b
-    LEFT JOIN tour_packages tp ON b.packageId = tp.id
-    WHERE b.status IN ('CONFIRMED', 'COMPLETED')
-  `
-  const totalRevenue = Number((revenueResult[0]?.totalRevenue || 0).toString())
-
-  // 3. Chart Data (Last 6 Months)
-  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-  const rawChartData = await prisma.$queryRaw<ChartRawResult[]>`
-    SELECT 
-      MONTH(b.createdAt) as monthNum,
-      YEAR(b.createdAt) as yearNum,
-      COUNT(b.id) as pemesanan,
-      COALESCE(SUM(b.pax * tp.price), 0) as pendapatan
-    FROM bookings b
-    LEFT JOIN tour_packages tp ON b.packageId = tp.id
-    WHERE b.createdAt >= ${sixMonthsAgo}
-      AND b.status IN ('CONFIRMED', 'COMPLETED')
-    GROUP BY YEAR(b.createdAt), MONTH(b.createdAt)
-    ORDER BY YEAR(b.createdAt) ASC, MONTH(b.createdAt) ASC
-  `;
-
-  const chartData = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const monthName = d.toLocaleDateString('id-ID', { month: 'short' }); 
+  // 3. Data Grafik Bulanan (Revenue per Month)
+  const months = eachMonthOfInterval({ start: startYear, end: endYear });
+  const monthlyData = months.map(month => {
+    const monthStr = format(month, "MMM", { locale: id });
+    const revenue = bookings
+      .filter(b => 
+        b.status !== "CANCELLED" && 
+        format(b.createdAt, "MM") === format(month, "MM")
+      )
+      .reduce((sum, b) => sum + Number(b.amountPaid), 0);
     
-    const foundData = rawChartData.find(
-      (row) => Number(row.monthNum) === d.getMonth() + 1 && Number(row.yearNum) === d.getFullYear()
-    );
+    return { name: monthStr, revenue };
+  });
 
-    chartData.push({
-      name: monthName,
-      pemesanan: foundData ? Number(foundData.pemesanan.toString()) : 0,
-      pendapatan: foundData ? Number((foundData.pendapatan || 0).toString()) / 1000000 : 0 
-    });
-  }
+  // 4. Distribusi Paket Terlaris (Top Packages)
+  const packageMap = new Map();
+  bookings.forEach(b => {
+    const pkgId = b.packageId;
+    const pkgTitle = (b.package?.title as any)?.id || "Unknown";
+    const current = packageMap.get(pkgId) || { name: pkgTitle, value: 0 };
+    packageMap.set(pkgId, { ...current, value: current.value + b.pax });
+  });
+  const topPackages = Array.from(packageMap.values())
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+
+  // 5. Statistik Status
+  const statusStats = {
+    PENDING: bookings.filter(b => b.status === "PENDING").length,
+    CONFIRMED: bookings.filter(b => b.status === "CONFIRMED").length,
+    COMPLETED: bookings.filter(b => b.status === "COMPLETED").length,
+    CANCELLED: bookings.filter(b => b.status === "CANCELLED").length,
+  };
 
   return {
-    totalUsers,
-    monthlyBookings,
-    totalRevenue,
-    publishedPackages,
-    totalBookings,
-    chartData
+    summary: {
+      totalRevenue,
+      totalPendingRevenue,
+      totalBookings,
+      totalPax,
+    },
+    monthlyData,
+    topPackages,
+    statusStats,
   };
 }
