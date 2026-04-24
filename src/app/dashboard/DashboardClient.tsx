@@ -252,7 +252,25 @@ export function   DashboardClient({
                                         ? `Rp ${Number(booking.totalPrice).toLocaleString("id-ID")}`
                                         : `$ ${(Number(booking.totalPrice) / 15000).toLocaleString("en-US", { maximumFractionDigits: 0 })}`}
                                     </p>
-                                    <p className="text-[10px] font-bold text-foreground-secondary uppercase tracking-wider">Total Harga</p>
+                                    <p className="text-[10px] font-bold text-foreground-secondary uppercase tracking-wider">
+                                      {t.fields?.total || "Total Harga"}
+                                    </p>
+                                    
+                                    {/* Sisa Tagihan Logic */}
+                                    {Number(booking.amountPaid) < Number(booking.totalPrice) && (
+                                      <div className="mt-2 pt-2 border-t border-dashed border-card-border">
+                                        <p className="text-xs font-bold text-emerald-500">
+                                          {locale === "id" ? "Dibayar:" : "Paid:"} {locale === "id" 
+                                            ? `Rp ${Number(booking.amountPaid).toLocaleString("id-ID")}`
+                                            : `$ ${(Number(booking.amountPaid) / 15000).toFixed(0)}`}
+                                        </p>
+                                        <p className="text-[11px] font-black text-red-500 mt-1">
+                                          {locale === "id" ? "Sisa:" : "Balance:"} {locale === "id"
+                                            ? `Rp ${(Number(booking.totalPrice) - Number(booking.amountPaid)).toLocaleString("id-ID")}`
+                                            : `$ ${((Number(booking.totalPrice) - Number(booking.amountPaid)) / 15000).toFixed(0)}`}
+                                        </p>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
 

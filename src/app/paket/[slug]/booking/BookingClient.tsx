@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,8 +13,10 @@ import {
   CheckCircle,
   Shield,
   ChevronRight,
+  AlertTriangle,
+  Info,
 } from "lucide-react";
-import { createBooking } from "@/lib/actions/bookings";
+import { createBooking, getAvailableQuota } from "@/lib/actions/bookings";
 import { useRouter } from "next/navigation";
 
 declare global {
@@ -23,23 +25,70 @@ declare global {
   }
 }
 
-export function BookingClient({ packageData }: { packageData: any }) {
+type QuotaInfo = {
+  capacity: number;
+  booked: number;
+  available: number;
+} | null;
+
+export function BookingClient({ 
+  packageData,
+  session 
+}: { 
+  packageData: any;
+  session: any;
+}) {
   const [pax, setPax] = useState(1);
   const [date, setDate] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  
+  // Pre-fill fields from session if available
+  const [name, setName] = useState(session?.name || "");
+  const [email, setEmail] = useState(session?.email || "");
+  const [phone, setPhone] = useState(session?.phone || "");
+  
   const [paymentType, setPaymentType] = useState<"DP" | "HALF" | "FULL">("FULL");
   const [isPending, startTransition] = useTransition();
+  const [errorMsg, setErrorMsg] = useState("");
+  const [quotaInfo, setQuotaInfo] = useState<QuotaInfo>(null);
+  const [isCheckingQuota, setIsCheckingQuota] = useState(false);
   const router = useRouter();
 
+  // --- Real-time quota check when date changes ---
+  const checkQuota = useCallback(async (selectedDate: string) => {
+    if (!selectedDate) {
+      setQuotaInfo(null);
+      return;
+    }
+    setIsCheckingQuota(true);
+    try {
+      const result = await getAvailableQuota(packageData.id, selectedDate);
+      setQuotaInfo(result);
+    } catch {
+      setQuotaInfo(null);
+    } finally {
+      setIsCheckingQuota(false);
+    }
+  }, [packageData.id]);
+
+  useEffect(() => {
+    checkQuota(date);
+  }, [date, checkQuota]);
+
+  // Clamp pax to available quota when quota changes
+  useEffect(() => {
+    if (quotaInfo && pax > quotaInfo.available && quotaInfo.available > 0) {
+      setPax(quotaInfo.available);
+    }
+  }, [quotaInfo, pax]);
+
+  // --- Pricing logic ---
   const getUnitPrice = (p: number) => {
     const tier = packageData.priceTiers.find(
       (t: any) => p >= t.minPax && p <= t.maxPax
     );
     if (tier) return Number(tier.price);
     const sorted = [...packageData.priceTiers].sort(
-      (a, b) => Number(a.price) - Number(b.price)
+      (a: any, b: any) => Number(a.price) - Number(b.price)
     );
     return sorted.length > 0 ? Number(sorted[0].price) : 0;
   };
@@ -54,7 +103,6 @@ export function BookingClient({ packageData }: { packageData: any }) {
   const currentTier = packageData.priceTiers.find(
     (t: any) => pax >= t.minPax && pax <= t.maxPax
   );
-
   const savings =
     currentTier?.originalPrice
       ? Number(currentTier.originalPrice) * pax - totalPrice
@@ -66,15 +114,73 @@ export function BookingClient({ packageData }: { packageData: any }) {
     { key: "DP", label: "DP", pct: "30%", desc: "Min. down payment" },
   ];
 
+  // --- Quota status badge ---
+  const quotaBadge = () => {
+    if (!date) return null;
+    if (isCheckingQuota) {
+      return (
+        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-1.5">
+          <Loader2 className="w-3 h-3 animate-spin" />
+          Mengecek ketersediaan...
+        </div>
+      );
+    }
+    if (!quotaInfo) return null;
+    const { available, capacity, booked } = quotaInfo;
+    if (available === 0) {
+      return (
+        <div className="flex items-center gap-2 mt-2 px-3 py-2.5 rounded-xl bg-red-50 border border-red-200">
+          <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+          <div>
+            <p className="text-xs font-bold text-red-700">Kuota Penuh</p>
+            <p className="text-[10px] text-red-500">{booked}/{capacity} peserta sudah terdaftar</p>
+          </div>
+        </div>
+      );
+    }
+    if (available <= 5) {
+      return (
+        <div className="flex items-center gap-2 mt-2 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200">
+          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+          <div>
+            <p className="text-xs font-bold text-amber-700">Hampir Penuh — Sisa {available} kursi</p>
+            <p className="text-[10px] text-amber-600">{booked}/{capacity} peserta sudah terdaftar</p>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="flex items-center gap-2 mt-2 px-3 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
+        <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
+        <div>
+          <p className="text-xs font-bold text-emerald-700">{available} kursi tersedia</p>
+          <p className="text-[10px] text-emerald-600">{booked}/{capacity} peserta sudah terdaftar</p>
+        </div>
+      </div>
+    );
+  };
+
+  // --- Submit handler ---
   const handleBooking = () => {
+    setErrorMsg("");
+
     if (!date || !name || !email || !phone) {
-      alert("Mohon isi semua data!");
+      setErrorMsg("Mohon isi semua data yang diperlukan.");
+      return;
+    }
+    if (quotaInfo && pax > quotaInfo.available) {
+      setErrorMsg(`Sisa kuota hanya ${quotaInfo.available} pax untuk tanggal ini.`);
+      return;
+    }
+    if (quotaInfo?.available === 0) {
+      setErrorMsg("Tidak ada kuota tersisa untuk tanggal ini. Pilih tanggal lain.");
       return;
     }
 
     startTransition(async () => {
       try {
         const result = await createBooking({
+          userId: session?.id,
           name,
           email,
           phone,
@@ -84,28 +190,33 @@ export function BookingClient({ packageData }: { packageData: any }) {
           paymentType,
         });
 
-        if (result.snapToken) {
+        if (result?.snapToken) {
           window.snap.pay(result.snapToken, {
-            onSuccess: (result: any) => {
-              router.push(`/dashboard?status=success&bookingId=${result.order_id}`);
+            onSuccess: (res: any) => {
+              router.push(`/dashboard?status=success&bookingId=${res.order_id}`);
             },
-            onPending: (result: any) => {
-              router.push(`/dashboard?status=pending&bookingId=${result.order_id}`);
+            onPending: (res: any) => {
+              router.push(`/dashboard?status=pending&bookingId=${res.order_id}`);
             },
             onError: () => {
-              alert("Pembayaran gagal!");
+              setErrorMsg("Pembayaran gagal. Silakan coba lagi.");
             },
             onClose: () => {
-              alert("Anda menutup popup pembayaran sebelum selesai.");
+              // No alert, just silent close — user can retry
             },
           });
         }
-      } catch (err) {
-        console.error(err);
-        alert("Gagal membuat booking");
+      } catch (err: any) {
+        setErrorMsg(err?.message || "Gagal membuat booking. Silakan coba lagi.");
       }
     });
   };
+
+  const isSubmitDisabled =
+    isPending ||
+    isCheckingQuota ||
+    (quotaInfo !== null && quotaInfo.available === 0) ||
+    (quotaInfo !== null && pax > quotaInfo.available);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
@@ -113,7 +224,6 @@ export function BookingClient({ packageData }: { packageData: any }) {
       <div className="md:col-span-3 space-y-6">
         {/* Informasi Pemesan */}
         <Card className="border border-slate-200/80 shadow-sm rounded-2xl overflow-hidden">
-          {/* Section header strip */}
           <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50/60">
             <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-100 text-primary-600">
               <Users className="w-4 h-4" />
@@ -169,30 +279,59 @@ export function BookingClient({ packageData }: { packageData: any }) {
           </div>
 
           <CardContent className="p-6 space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold text-slate-600">
-                  Tanggal Keberangkatan
-                </Label>
-                <Input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="h-11 rounded-xl border-slate-200 focus:border-primary-400 focus:ring-primary-400/20"
-                />
-              </div>
-              <div className="space-y-2">
+            {/* Tanggal & Quota */}
+            <div className="space-y-1">
+              <Label className="text-xs font-semibold text-slate-600">
+                Tanggal Keberangkatan
+              </Label>
+              <Input
+                type="date"
+                value={date}
+                min={new Date().toISOString().split("T")[0]}
+                onChange={(e) => setDate(e.target.value)}
+                className="h-11 rounded-xl border-slate-200 focus:border-primary-400 focus:ring-primary-400/20"
+              />
+              {/* Real-time quota feedback */}
+              {quotaBadge()}
+            </div>
+
+            {/* Jumlah Peserta */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
                 <Label className="text-xs font-semibold text-slate-600">
                   Jumlah Peserta (Pax)
                 </Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={pax}
-                  onChange={(e) => setPax(parseInt(e.target.value) || 1)}
-                  className="h-11 rounded-xl border-slate-200 focus:border-primary-400 focus:ring-primary-400/20"
-                />
+                {quotaInfo && quotaInfo.available > 0 && (
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    Maks. {quotaInfo.available} untuk tanggal ini
+                  </span>
+                )}
               </div>
+              <Input
+                type="number"
+                min={1}
+                max={quotaInfo?.available ?? packageData.capacity}
+                value={pax}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value) || 1;
+                  const max = quotaInfo?.available ?? packageData.capacity;
+                  setPax(Math.min(Math.max(1, val), max));
+                }}
+                className={`h-11 rounded-xl border-slate-200 focus:border-primary-400 focus:ring-primary-400/20 ${
+                  quotaInfo && pax > quotaInfo.available
+                    ? "border-red-400 focus:border-red-400"
+                    : ""
+                }`}
+              />
+              {/* Tier pricing hint */}
+              {packageData.priceTiers.length > 1 && (
+                <div className="flex items-start gap-1.5 mt-1">
+                  <Info className="w-3 h-3 text-primary-400 shrink-0 mt-0.5" />
+                  <p className="text-[10px] text-slate-400">
+                    Harga berubah sesuai jumlah peserta (tiered pricing)
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Payment type selector */}
@@ -239,23 +378,23 @@ export function BookingClient({ packageData }: { packageData: any }) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Error message */}
+        {errorMsg && (
+          <div className="flex items-start gap-3 px-4 py-3 rounded-xl bg-red-50 border border-red-200">
+            <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700 font-medium">{errorMsg}</p>
+          </div>
+        )}
       </div>
 
       {/* ── RIGHT: Summary Card ── */}
       <div className="md:col-span-2 space-y-6">
-        {/*
-          KEY FIX: Ganti <Card> dengan <div> biasa + shadow manual,
-          supaya dark header bisa langsung flush ke atas tanpa padding
-          bawaan dari komponen Card shadcn.
-        */}
         <div className="sticky top-24 rounded-2xl overflow-hidden border border-slate-200/80 shadow-xl shadow-slate-900/10">
-
-          {/* Dark header — now truly flush to top */}
+          {/* Dark header */}
           <div className="relative bg-slate-900 px-6 py-5 overflow-hidden">
-            {/* Decorative blobs */}
             <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-primary-500/20 blur-2xl pointer-events-none" />
             <div className="absolute -bottom-6 -left-4 w-24 h-24 rounded-full bg-indigo-500/15 blur-2xl pointer-events-none" />
-
             <div className="relative z-10 flex items-center gap-3">
               <span className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/10 border border-white/15">
                 <CreditCard className="w-4 h-4 text-primary-400" />
@@ -273,6 +412,13 @@ export function BookingClient({ packageData }: { packageData: any }) {
 
           {/* Body */}
           <div className="bg-white p-6 space-y-5">
+            {/* Package name */}
+            <div className="pb-3 border-b border-dashed border-slate-100">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Paket</p>
+              <p className="text-sm font-bold text-slate-800 leading-tight line-clamp-2">
+                {(packageData.title as any)?.id || "Paket Wisata"}
+              </p>
+            </div>
 
             {/* Tier info row */}
             <div className="flex items-center justify-between pb-4 border-b border-dashed border-slate-100">
@@ -344,21 +490,51 @@ export function BookingClient({ packageData }: { packageData: any }) {
               )}
             </div>
 
+            {/* Quota summary in sidebar */}
+            {quotaInfo && date && (
+              <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Ketersediaan</p>
+                <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      quotaInfo.available === 0 ? "bg-red-500" :
+                      quotaInfo.available <= 5 ? "bg-amber-500" : "bg-emerald-500"
+                    }`}
+                    style={{ width: `${Math.max(5, (quotaInfo.booked / quotaInfo.capacity) * 100)}%` }}
+                  />
+                </div>
+                <div className="flex justify-between mt-1.5">
+                  <span className="text-[10px] text-slate-500">{quotaInfo.booked} terdaftar</span>
+                  <span className="text-[10px] font-bold text-slate-600">{quotaInfo.available} tersisa</span>
+                </div>
+              </div>
+            )}
+
             {/* CTA Button */}
             <Button
-              className="w-full h-13 text-sm font-bold gap-2.5 rounded-xl bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-150"
+              className="w-full h-13 text-sm font-bold gap-2.5 rounded-xl bg-primary-500 hover:bg-primary-600 text-white shadow-lg shadow-primary-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
               onClick={handleBooking}
-              disabled={isPending}
+              disabled={isSubmitDisabled}
             >
               {isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Memproses...
                 </>
+              ) : isCheckingQuota ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Mengecek kuota...
+                </>
+              ) : quotaInfo?.available === 0 ? (
+                <>
+                  <AlertTriangle className="w-4 h-4" />
+                  Kuota Penuh
+                </>
               ) : (
                 <>
                   <CheckCircle className="w-4 h-4" />
-                  Konfirmasi &amp; Bayar
+                  Konfirmasi & Bayar
                   <ChevronRight className="w-3.5 h-3.5 ml-auto opacity-70" />
                 </>
               )}

@@ -14,7 +14,10 @@ function serializeBooking(b: any) {
 }
 
 export async function getBookings() {
-  const bookings = await prisma.booking.findMany({ orderBy: { createdAt: "desc" } });
+  const bookings = await prisma.booking.findMany({
+    include: { package: true },
+    orderBy: { createdAt: "desc" },
+  });
   return bookings.map(serializeBooking);
 }
 
@@ -30,6 +33,33 @@ export async function getBookingsByUser(userId: string) {
     orderBy: { createdAt: "desc" },
   });
   return bookings.map(serializeBooking);
+}
+
+export async function getAvailableQuota(packageId: string, tourDate: string) {
+  const pkg = await prisma.tourPackage.findUnique({
+    where: { id: packageId },
+    select: { capacity: true },
+  });
+
+  if (!pkg) return { available: 0, capacity: 0, booked: 0 };
+
+  const existingBookings = await prisma.booking.findMany({
+    where: {
+      packageId,
+      tourDate: new Date(tourDate),
+      status: { not: "CANCELLED" },
+    },
+    select: { pax: true },
+  });
+
+  const totalBooked = existingBookings.reduce((sum, b) => sum + b.pax, 0);
+  const available = pkg.capacity - totalBooked;
+
+  return {
+    capacity: pkg.capacity,
+    booked: totalBooked,
+    available: Math.max(0, available),
+  };
 }
 
 export async function createBooking(data: {
