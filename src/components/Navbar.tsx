@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Menu,
   X,
@@ -12,6 +13,7 @@ import {
   RefreshCw,
   LogOut,
   User as UserIcon,
+  UserCircle,
 } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { useLocale } from "@/lib/LocaleContext";
@@ -28,6 +30,9 @@ export default function Navbar({ data }: { data?: any }) {
   const [hoveredAuth, setHoveredAuth] = useState<"login" | "register" | null>(
     null,
   );
+  const pathname = usePathname();
+  const isLandingPage = pathname === "/";
+  const isInnerPage = !isLandingPage;
 
   // Localize the whole settings object first
   const d = dObj(data) || {};
@@ -82,6 +87,17 @@ export default function Navbar({ data }: { data?: any }) {
     setIsMobileOpen(false);
   };
 
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileOpen]);
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -100,6 +116,7 @@ export default function Navbar({ data }: { data?: any }) {
           </Link>
 
           {/* Desktop Navigation */}
+          {!isInnerPage && (
           <div className="hidden lg:flex items-center gap-1">
             {d.links &&
               Array.isArray(d.links) &&
@@ -117,6 +134,7 @@ export default function Navbar({ data }: { data?: any }) {
                 </a>
               ))}
           </div>
+          )}
 
           {/* Exchange Rate Badge */}
           {rateLoading ? (
@@ -205,7 +223,7 @@ export default function Navbar({ data }: { data?: any }) {
                     }`}
                   >
                     <UserIcon className="w-3.5 h-3.5 text-primary-500" />
-                    <span className="text-xs font-semibold truncate max-w-[80px]">
+                    <span className="text-xs font-semibold truncate max-w-20">
                       {user.name}
                     </span>
                   </div>
@@ -236,6 +254,20 @@ export default function Navbar({ data }: { data?: any }) {
                         <TrendingUp className="w-4 h-4" />
                         Pesanan Saya
                       </Link>
+                      <Link
+                        href="/dashboard/account"
+                        className="px-4 py-2 text-sm text-foreground-secondary hover:text-primary-500 hover:bg-primary-500/5 transition-colors flex items-center gap-2"
+                      >
+                        <UserCircle className="w-4 h-4" />
+                        Akun Saya
+                      </Link>
+                      <button
+                        onClick={toggleTheme}
+                        className="w-full text-left px-4 py-2 text-sm text-foreground-secondary hover:text-primary-500 hover:bg-primary-500/5 transition-colors flex items-center gap-2"
+                      >
+                        {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                        {theme === "dark" ? "Mode Terang" : "Mode Gelap"}
+                      </button>
                       <div className="h-px bg-card-border my-1 mx-2" />
                       <button
                         onClick={handleLogout}
@@ -248,14 +280,10 @@ export default function Navbar({ data }: { data?: any }) {
                   </div>
                 </div>
                 <Link
-                  href="/dashboard"
-                  className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-sm text-xs font-bold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.03] ${
-                    isScrolled
-                      ? "bg-primary-500 text-white hover:bg-primary-600"
-                      : "bg-accent-500 text-white hover:bg-accent-600"
-                  }`}
+                  href={isInnerPage ? "/" : "/dashboard"}
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-sm text-xs font-bold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-[1.03] bg-primary-500 text-white hover:bg-primary-600"
                 >
-                  Dashboard
+                  {isInnerPage ? "Landing Page" : "Dashboard"}
                 </Link>
               </div>
             ) : (
@@ -266,11 +294,7 @@ export default function Navbar({ data }: { data?: any }) {
                 >
                   {/* Sliding Hover Background */}
                   <div
-                    className={`absolute top-1 bottom-1 w-20 rounded-full transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) shadow-md ${
-                      isScrolled
-                        ? "bg-primary-500 shadow-primary-500/20"
-                        : "bg-accent-500 shadow-accent-500/20"
-                    }`}
+                    className="absolute top-1 bottom-1 w-20 rounded-full transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) shadow-md bg-primary-500 shadow-primary-500/20"
                     style={{
                       left: hoveredAuth === "login" ? "4px" : "84px",
                     }}
@@ -323,14 +347,24 @@ export default function Navbar({ data }: { data?: any }) {
         </div>
       </div>
 
+      {/* Mobile Backdrop */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm lg:hidden z-40"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
       {/* Mobile Menu Dropdown */}
       <div
-        className={`lg:hidden overflow-hidden transition-all duration-300 ${
-          isMobileOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+        className={`lg:hidden relative z-50 transition-all duration-300 ${
+          isMobileOpen
+            ? "max-h-[calc(100dvh-4rem)] opacity-100 visible"
+            : "max-h-0 opacity-0 invisible overflow-hidden"
         }`}
       >
-        <div className="glass-solid mt-2 mx-4 rounded-md p-4 shadow-xl border border-card-border">
-          {d.links &&
+        <div className="glass-solid mt-2 mx-4 rounded-md p-4 shadow-xl border border-card-border max-h-[calc(100dvh-5rem)] overflow-y-auto overscroll-contain">
+          {!isInnerPage && d.links &&
             Array.isArray(d.links) &&
             d.links.map((link: any, i: number) => (
               <a
@@ -364,36 +398,45 @@ export default function Navbar({ data }: { data?: any }) {
                 </Link>
               )}
               <Link
-                href="/my-trips"
+                href="/dashboard"
                 onClick={handleLinkClick}
                 className="flex items-center gap-2 px-3 py-2 text-sm text-foreground-secondary hover:text-primary-500 hover:bg-primary-500/5 rounded-sm transition-colors"
               >
-                Perjalanan Saya
+                <TrendingUp className="w-4 h-4" />
+                Pesanan Saya
               </Link>
               <Link
-                href="/history"
+                href="/dashboard/account"
                 onClick={handleLinkClick}
                 className="flex items-center gap-2 px-3 py-2 text-sm text-foreground-secondary hover:text-primary-500 hover:bg-primary-500/5 rounded-sm transition-colors"
               >
-                <RefreshCw className="w-4 h-4" />
-                Riwayat
+                <UserCircle className="w-4 h-4" />
+                Akun Saya
               </Link>
+              <button
+                onClick={() => { toggleTheme(); }}
+                className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-foreground-secondary hover:text-primary-500 hover:bg-primary-500/5 rounded-sm transition-colors"
+              >
+                {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                {theme === "dark" ? "Mode Terang" : "Mode Gelap"}
+              </button>
 
-              {/* PERBAIKAN: Tombol bahasa duplikat di menu mobile dihapus agar tidak rancu */}
-              <div className="flex gap-2 mt-2 pt-2 border-t border-card-border">
-                <a
-                  href="#kontak"
-                  onClick={handleLinkClick}
-                  className="flex-1 inline-flex items-center justify-center py-2.5 rounded-sm bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold transition-colors"
-                >
-                  {d.cta || "Pesan Sekarang"}
-                </a>
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-2.5 rounded-sm border border-red-500/20 text-red-500 hover:bg-red-500/5 transition-colors"
-                >
-                  <LogOut className="w-5 h-5" />
-                </button>
+              <div className="mt-1 pt-1 border-t border-card-border">
+                <div className="flex gap-2">
+                  <Link
+                    href={isInnerPage ? "/" : "/dashboard"}
+                    onClick={handleLinkClick}
+                    className="flex-1 inline-flex items-center justify-center py-2.5 rounded-sm bg-primary-500 hover:bg-primary-600 text-white text-sm font-semibold transition-colors"
+                  >
+                    {isInnerPage ? "Landing Page" : "Dashboard"}
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="px-3 py-2.5 rounded-sm border border-red-500/20 text-red-500 hover:bg-red-500/5 transition-colors"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
           ) : (

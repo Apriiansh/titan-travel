@@ -61,7 +61,7 @@ export default function GallerySection({ dbData, settingsData }: { dbData?: any[
                   Gunakan flex-col (Vertikal) untuk HP, dan md:flex-row (Horizontal) untuk Desktop.
                   Tinggi juga disesuaikan agar lebih proporsional di HP.
                 */}
-                <div className="flex flex-col md:flex-row w-full h-[500px] sm:h-[600px] md:h-[500px] gap-2 sm:gap-4">
+                <div className="flex flex-col md:flex-row w-full h-125 sm:h-150 md:h-125 gap-2 sm:gap-4">
                     {gallery.map((item: any, index: number) => {
                         const isActive = activeIndex === index;
 
@@ -87,7 +87,7 @@ export default function GallerySection({ dbData, settingsData }: { dbData?: any[
                                 <div 
                                     className={`absolute inset-0 transition-all duration-700 ${
                                         isActive 
-                                            ? "bg-gradient-to-t from-black/90 via-black/30 to-transparent" 
+                                            ? "bg-linear-to-t from-black/90 via-black/30 to-transparent" 
                                             : "bg-black/50 hover:bg-black/40"
                                     }`} 
                                 />
@@ -131,7 +131,7 @@ export default function GallerySection({ dbData, settingsData }: { dbData?: any[
             {/* Lightbox Modal (Full Screen) */}
             {lightbox !== null && gallery[lightbox] && (
                 <div
-                    className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-fade-in"
+                    className="fixed inset-0 z-100 bg-black/95 flex items-center justify-center p-4 animate-fade-in"
                     onClick={() => setLightbox(null)}
                 >
                     <button

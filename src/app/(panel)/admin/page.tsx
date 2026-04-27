@@ -65,15 +65,6 @@ export default async function AdminDashboardPage() {
       trendColor:
         stats.pendingBookings > 0 ? "text-amber-500" : "text-green-500",
     },
-    {
-      title: "Aset Galeri",
-      value: stats.gallery,
-      icon: ImageIcon,
-      iconColor: "text-violet-500",
-      iconBg: "bg-violet-500/10",
-      trend: `${stats.testimonials} testimoni`,
-      trendColor: "text-foreground-secondary",
-    },
   ];
 
   return (
@@ -84,14 +75,13 @@ export default async function AdminDashboardPage() {
           Beranda Admin
         </h1>
         <p className="text-sm text-foreground-secondary">
-          Selamat datang kembali,{" "}
-          <strong>{session?.name as string}</strong>! Tinjau aktivitas sistem
-          hari ini.
+          Selamat datang kembali, <strong>{session?.name as string}</strong>!
+          Tinjau aktivitas sistem hari ini.
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {statCards.map((card) => (
           <StatCard key={card.title} {...card} />
         ))}
@@ -100,14 +90,9 @@ export default async function AdminDashboardPage() {
       {/* Recent Bookings */}
       <div className="rounded-xl border border-card-border bg-card-bg shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-card-border">
-          <div>
-            <h2 className="text-base font-semibold text-foreground">
-              Booking Terbaru
-            </h2>
-            <p className="text-xs text-foreground-secondary mt-0.5">
-              5 permintaan booking terakhir masuk
-            </p>
-          </div>
+          <h2 className="text-base font-semibold text-foreground">
+            Booking Terbaru
+          </h2>
           <a
             href="/admin/bookings"
             className="text-xs font-medium text-primary-500 hover:text-primary-600 transition-colors"

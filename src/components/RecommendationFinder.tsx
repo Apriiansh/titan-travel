@@ -20,7 +20,7 @@ import { useLocale } from "@/lib/LocaleContext";
 const CONTENT = {
   id: {
     title: "Asisten Travel Pintar",
-    subtitle: "Temukan paket paling pas dengan algoritma TOPSIS",
+    subtitle: "Temukan paket wisata paling cocok untuk Anda",
     step1: "1. Apa yang paling penting bagi Anda?",
     step2: "2. Kapan waktu keberangkatan yang Anda inginkan?",
     priorities: [
@@ -35,7 +35,7 @@ const CONTENT = {
     ],
     back: "Kembali",
     analyzing: "Menganalisis Paket...",
-    comparing: "Membandingkan alternatif menggunakan kriteria TOPSIS",
+    comparing: "Mencari paket terbaik sesuai preferensi Anda",
     btnView: "Lihat Rekomendasi",
     found: "Rekomendasi Ditemukan!",
     foundDesc: (p: string, t: string) => `Berikut adalah paket yang paling sesuai dengan preferensi ${p} dan keberangkatan ${t}.`,
@@ -45,7 +45,7 @@ const CONTENT = {
   },
   en: {
     title: "Smart Travel Assistant",
-    subtitle: "Find the perfect package with TOPSIS algorithm",
+    subtitle: "Find the perfect travel package for you",
     step1: "1. What is most important to you?",
     step2: "2. When would you like to depart?",
     priorities: [
@@ -60,7 +60,7 @@ const CONTENT = {
     ],
     back: "Back",
     analyzing: "Analyzing Packages...",
-    comparing: "Comparing alternatives using TOPSIS criteria",
+    comparing: "Finding the best packages based on your preferences",
     btnView: "View Recommendations",
     found: "Recommendation Found!",
     foundDesc: (p: string, t: string) => `Here are the packages that best match your ${p} preference and ${t} departure.`,
@@ -70,7 +70,7 @@ const CONTENT = {
   },
   ms: {
     title: "Asisten Perjalanan Pintar",
-    subtitle: "Cari pakej terbaik dengan algoritma TOPSIS",
+    subtitle: "Cari pakej perjalanan paling sesuai untuk anda",
     step1: "1. Apa yang paling penting bagi anda?",
     step2: "2. Bilakah masa berlepas yang anda inginkan?",
     priorities: [
@@ -85,7 +85,7 @@ const CONTENT = {
     ],
     back: "Kembali",
     analyzing: "Menganalisis Pakej...",
-    comparing: "Membandingkan alternatif menggunakan kriteria TOPSIS",
+    comparing: "Mencari pakej terbaik mengikut pilihan anda",
     btnView: "Lihat Cadangan",
     found: "Cadangan Ditemui!",
     foundDesc: (p: string, t: string) => `Berikut adalah pakej yang paling sesuai dengan pilihan ${p} dan waktu berlepas ${t}.`,
@@ -128,16 +128,16 @@ export default function RecommendationFinder({ onResult }: { onResult: (packages
   return (
     <div className="w-full max-w-4xl mx-auto mb-16">
       <div className="bg-card-bg border border-card-border rounded-2xl overflow-hidden shadow-xl">
-        <div className="p-6 sm:p-8">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white shadow-lg shadow-primary-500/20">
-              <Sparkles className="w-5 h-5 fill-current" />
+        <div className="p-4 sm:p-8">
+          <div className="flex items-center gap-2.5 sm:gap-3 mb-5 sm:mb-8">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-primary-500 flex items-center justify-center text-white shadow-lg shadow-primary-500/20 shrink-0">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-foreground font-(family-name:--font-playfair)">
+              <h3 className="text-sm sm:text-xl font-bold text-foreground font-(family-name:--font-playfair)">
                 {t.title}
               </h3>
-              <p className="text-xs text-foreground-secondary">
+              <p className="text-[10px] sm:text-xs text-foreground-secondary">
                 {t.subtitle}
               </p>
             </div>
@@ -145,8 +145,8 @@ export default function RecommendationFinder({ onResult }: { onResult: (packages
 
           {step === 1 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-              <p className="text-sm font-semibold text-foreground mb-6">{t.step1}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <p className="text-xs sm:text-sm font-semibold text-foreground mb-3 sm:mb-6">{t.step1}</p>
+              <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 {t.priorities.map((item) => {
                   const Icon = PRIO_ICONS[item.id];
                   return (
@@ -156,15 +156,15 @@ export default function RecommendationFinder({ onResult }: { onResult: (packages
                         setPref({ ...pref, priority: item.id as any });
                         setStep(2);
                       }}
-                      className={`p-6 rounded-xl border text-left transition-all group ${
+                      className={`p-3 sm:p-6 rounded-xl border text-left transition-all group ${
                         pref.priority === item.id 
                         ? "border-primary-500 bg-primary-500/5 shadow-md" 
                         : "border-card-border bg-foreground/2 hover:border-primary-500/30"
                       }`}
                     >
-                      <Icon className={`w-8 h-8 mb-4 transition-transform group-hover:scale-110 ${pref.priority === item.id ? "text-primary-500" : "text-foreground-secondary"}`} />
-                      <p className="font-bold text-foreground mb-1">{item.label}</p>
-                      <p className="text-[10px] text-foreground-secondary leading-relaxed">{item.desc}</p>
+                      <Icon className={`w-5 h-5 sm:w-8 sm:h-8 mb-2 sm:mb-4 transition-transform group-hover:scale-110 ${pref.priority === item.id ? "text-primary-500" : "text-foreground-secondary"}`} />
+                      <p className="font-bold text-foreground mb-0.5 sm:mb-1 text-xs sm:text-base">{item.label}</p>
+                      <p className="text-[9px] sm:text-[10px] text-foreground-secondary leading-relaxed hidden sm:block">{item.desc}</p>
                     </button>
                   );
                 })}
@@ -174,8 +174,8 @@ export default function RecommendationFinder({ onResult }: { onResult: (packages
 
           {step === 2 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-              <p className="text-sm font-semibold text-foreground mb-6">{t.step2}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <p className="text-xs sm:text-sm font-semibold text-foreground mb-3 sm:mb-6">{t.step2}</p>
+              <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 {t.times.map((item) => {
                   const Icon = TIME_ICONS[item.id];
                   return (
@@ -185,39 +185,39 @@ export default function RecommendationFinder({ onResult }: { onResult: (packages
                         setPref({ ...pref, prefTime: item.id });
                         setStep(3);
                       }}
-                      className={`p-6 rounded-xl border text-left transition-all group ${
+                      className={`p-3 sm:p-6 rounded-xl border text-left transition-all group ${
                         pref.prefTime === item.id 
                         ? "border-primary-500 bg-primary-500/5 shadow-md" 
                         : "border-card-border bg-foreground/2 hover:border-primary-500/30"
                       }`}
                     >
-                      <Icon className={`w-8 h-8 mb-4 transition-transform group-hover:scale-110 ${pref.prefTime === item.id ? "text-primary-500" : "text-foreground-secondary"}`} />
-                      <p className="font-bold text-foreground mb-1">{item.label}</p>
-                      <p className="text-[10px] text-foreground-secondary leading-relaxed">{item.desc}</p>
+                      <Icon className={`w-5 h-5 sm:w-8 sm:h-8 mb-2 sm:mb-4 transition-transform group-hover:scale-110 ${pref.prefTime === item.id ? "text-primary-500" : "text-foreground-secondary"}`} />
+                      <p className="font-bold text-foreground mb-0.5 sm:mb-1 text-xs sm:text-base">{item.label}</p>
+                      <p className="text-[9px] sm:text-[10px] text-foreground-secondary leading-relaxed">{item.desc}</p>
                     </button>
                   );
                 })}
               </div>
-              <button onClick={() => setStep(1)} className="mt-8 text-xs text-primary-500 flex items-center gap-1 hover:underline">
+              <button onClick={() => setStep(1)} className="mt-4 sm:mt-8 text-[10px] sm:text-xs text-primary-500 flex items-center gap-1 hover:underline">
                 <RotateCcw className="w-3 h-3" /> {t.back}
               </button>
             </div>
           )}
 
           {step === 3 && (
-            <div className="text-center py-12 animate-in zoom-in-95 duration-500">
-              <div className="relative inline-block mb-6">
+            <div className="text-center py-6 sm:py-12 animate-in zoom-in-95 duration-500">
+              <div className="relative inline-block mb-4 sm:mb-6">
                 <div className="absolute inset-0 bg-primary-500/20 blur-xl rounded-full animate-pulse" />
-                <div className="relative w-20 h-20 rounded-full bg-primary-500/10 flex items-center justify-center text-primary-500 border border-primary-500/20">
-                  {loading ? <Loader2 className="w-10 h-10 animate-spin" /> : <Sparkles className="w-10 h-10" />}
+                <div className="relative w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-primary-500/10 flex items-center justify-center text-primary-500 border border-primary-500/20">
+                  {loading ? <Loader2 className="w-7 h-7 sm:w-10 sm:h-10 animate-spin" /> : <Sparkles className="w-7 h-7 sm:w-10 sm:h-10" />}
                 </div>
               </div>
-              <h4 className="text-xl font-bold text-foreground mb-2">{t.analyzing}</h4>
-              <p className="text-sm text-foreground-secondary mb-8">{t.comparing}</p>
+              <h4 className="text-base sm:text-xl font-bold text-foreground mb-1 sm:mb-2">{t.analyzing}</h4>
+              <p className="text-xs sm:text-sm text-foreground-secondary mb-5 sm:mb-8">{t.comparing}</p>
               {!loading && (
                 <button
                   onClick={handleSearch}
-                  className="px-8 py-3 rounded-full bg-primary-500 text-white font-bold hover:bg-primary-600 shadow-lg shadow-primary-500/25 flex items-center gap-2 mx-auto"
+                  className="px-6 py-2.5 sm:px-8 sm:py-3 rounded-full bg-primary-500 text-white text-sm sm:text-base font-bold hover:bg-primary-600 shadow-lg shadow-primary-500/25 flex items-center gap-2 mx-auto"
                 >
                   {t.btnView}
                   <ChevronRight className="w-4 h-4" />
@@ -227,12 +227,12 @@ export default function RecommendationFinder({ onResult }: { onResult: (packages
           )}
 
           {step === 4 && (
-            <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center py-4">
-              <div className="w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mb-4">
-                <CheckCircle2 className="w-8 h-8" />
+            <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center py-3 sm:py-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mb-3 sm:mb-4">
+                <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8" />
               </div>
-              <h4 className="text-xl font-bold text-foreground mb-2">{t.found}</h4>
-              <p className="text-sm text-foreground-secondary mb-8 text-center max-w-sm">
+              <h4 className="text-base sm:text-xl font-bold text-foreground mb-1 sm:mb-2">{t.found}</h4>
+              <p className="text-xs sm:text-sm text-foreground-secondary mb-5 sm:mb-8 text-center max-w-sm">
                 {t.foundDesc(
                   t.priorityLabels[pref.priority as keyof typeof t.priorityLabels], 
                   t.timeLabels[pref.prefTime as keyof typeof t.timeLabels]
@@ -240,7 +240,7 @@ export default function RecommendationFinder({ onResult }: { onResult: (packages
               </p>
               <button
                 onClick={reset}
-                className="text-xs text-foreground-secondary flex items-center gap-1 hover:text-primary-500 transition-colors"
+                className="text-[10px] sm:text-xs text-foreground-secondary flex items-center gap-1 hover:text-primary-500 transition-colors"
               >
                 <RotateCcw className="w-3 h-3" /> {t.searchAgain}
               </button>

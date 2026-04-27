@@ -7,7 +7,6 @@ import {
     Building2,
     Users,
     GraduationCap,
-    ArrowRight,
 } from "lucide-react";
 import { useLocale } from "@/lib/LocaleContext";
 
@@ -49,7 +48,7 @@ export default function ServicesSection({ data }: { data?: any }) {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-5">
                     {s.items && Array.isArray(s.items) && s.items.map((service: any, i: number) => {
                         const Icon = icons[i % icons.length];
                         return (
@@ -74,15 +73,9 @@ export default function ServicesSection({ data }: { data?: any }) {
                                     <h3 className="text-base sm:text-lg lg:text-xl font-bold text-foreground group-hover:text-white font-(family-name:--font-playfair) mb-2 sm:mb-3 transition-colors duration-500">
                                         {service.title}
                                     </h3>
-                                    <p className="text-foreground-secondary group-hover:text-white/85 text-xs sm:text-sm leading-relaxed mb-4 sm:mb-5 transition-colors duration-500">
+                                    <p className="text-foreground-secondary group-hover:text-white/85 text-xs sm:text-sm leading-relaxed transition-colors duration-500">
                                         {service.desc}
                                     </p>
-
-                                    {/* Link */}
-                                    <span className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-primary-500 group-hover:text-white transition-colors duration-500">
-                                        {s.readMore || "Read More"}
-                                        <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform" />
-                                    </span>
                                 </div>
                             </div>
                         );

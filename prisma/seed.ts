@@ -90,7 +90,7 @@ async function main() {
         where: { email: "admin@gmail.com" },
         update: { password: adminPassword },
         create: {
-            name: "Titan Admin",
+            name: "Mint",
             email: "admin@gmail.com",
             password: adminPassword,
             role: "ADMIN",
@@ -387,8 +387,10 @@ async function main() {
     console.log("⏳ Seeding testimonials...");
     await prisma.testimonial.deleteMany({});
     const testimonialSource = [
-        { name: "Jasurjon", role: "Backpacker", text: "Aplikasi ini sangat membantu saya dalam memilih paket wisata paling murah tapi durasinya mantap!" },
-        { name: "Siti Rahayu", role: "Family Traveler", text: "Rekomendasi TOPSIS-nya akurat. Saya pilih paket Bali dan sangat puas dengan fasilitasnya." }
+        { name: "Sujaina", role: "Backpacker", text: "Travel nya bagus, menganggap pelanggan seperti saudara, sdh 3 kali pakai jasa titan travel tidak pernah mengecewakan, guide nya ramah2, harga jauh lebih murah dbanding travel lain." },
+        { name: "Lia Lia", role: "Family Traveler", text: "Sangat keren banget titan travel love banget pokoknya the best semua." },
+        { name: "Erda Yanti Bunda Naura", role: "Traveler", text: "Bagus tempat nya mudah dicari, sesuai maps, karyawannya ramah2 enak diajak ngobrol dan tanya2 , terimaksih titan👍." },
+        { name: "Kicau Mania", role: "Dao Cultivator", text: "Gokils" }
     ];
     for (const t of testimonialSource) {
         await prisma.testimonial.create({

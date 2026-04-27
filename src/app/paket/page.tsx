@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CatalogClient from "./CatalogClient";
+import { getPackages } from "@/lib/actions/packages";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -26,21 +27,21 @@ async function getSettings() {
 }
 
 export default async function AllPackagesPage() {
-  const [packages, settingsObj] = await Promise.all([
-    prisma.tourPackage.findMany({
-      where: { isPublished: true },
-      orderBy: { createdAt: "desc" },
-    }),
+  const [allPackages, settingsObj] = await Promise.all([
+    getPackages(),
     getSettings(),
   ]);
 
+  const packages = allPackages.filter((p: any) => p.isPublished);
+
   const totalPackages = packages.length;
+  const serializedPackages = JSON.parse(JSON.stringify(packages));
 
   return (
     <>
       <Navbar data={settingsObj} />
       <CatalogClient 
-        packages={packages} 
+        packages={serializedPackages} 
         settingsObj={settingsObj} 
         totalPackages={totalPackages} 
       />

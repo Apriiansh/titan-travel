@@ -216,7 +216,7 @@ export function DashboardClient({
               <div className="flex items-center gap-3">
                 <div className="h-8 w-1 bg-primary-500 rounded-full" />
                 <h2 className="text-2xl font-bold font-(family-name:--font-playfair) text-foreground">
-                  {locale === "id" ? "Daftar Perjalanan" : "Trip History"}
+                  {t.fields?.tripHistory || "Daftar Perjalanan"}
                 </h2>
               </div>
 
@@ -243,9 +243,9 @@ export function DashboardClient({
                     return (
                       <Card key={booking.id} className="overflow-hidden border border-card-border shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl group bg-card-bg">
                         <CardContent className="p-0">
-                          <div className="flex flex-col sm:flex-row">
+                          <div className="flex flex-col sm:flex-row p-3 sm:p-4 gap-3 sm:gap-4">
                             {/* Image Section */}
-                            <div className="w-full sm:w-56 h-56 sm:h-auto relative overflow-hidden bg-background-secondary">
+                            <div className="w-full sm:w-56 h-56 sm:h-auto relative overflow-hidden rounded-xl border-2 border-card-border shrink-0">
                               <img
                                 src={pkg?.images?.[0] || "/placeholder.jpg"}
                                 alt={title}
@@ -263,11 +263,15 @@ export function DashboardClient({
                             </div>
 
                             {/* Info Section */}
-                            <div className="flex-1 p-6 sm:p-8 flex flex-col justify-between">
+                            <div className="flex-1 flex flex-col justify-between">
                               <div>
                                 {booking.status === "PENDING" && booking.paymentDeadline && (
                                   <div className="mb-4">
-                                    <CountdownTimer deadline={booking.paymentDeadline} />
+                                    <CountdownTimer
+                                      deadline={booking.paymentDeadline}
+                                      payWithinLabel={t.actions?.payWithin || "Bayar dalam"}
+                                      expiredLabel={t.actions?.paymentExpired || "Batas waktu pembayaran telah habis"}
+                                    />
                                   </div>
                                 )}
                                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
@@ -293,12 +297,12 @@ export function DashboardClient({
                                     {Number(booking.amountPaid) < Number(booking.totalPrice) && (
                                       <div className="mt-2 pt-2 border-t border-dashed border-card-border">
                                         <p className="text-xs font-bold text-emerald-500">
-                                          {locale === "id" ? "Dibayar:" : "Paid:"} {locale === "id" 
+                                          {t.fields?.paid || "Dibayar:"} {locale === "id" 
                                             ? `Rp ${Number(booking.amountPaid).toLocaleString("id-ID")}`
                                             : `$ ${(Number(booking.amountPaid) / 15000).toFixed(0)}`}
                                         </p>
                                         <p className="text-[11px] font-black text-red-500 mt-1">
-                                          {locale === "id" ? "Sisa:" : "Balance:"} {locale === "id"
+                                          {t.fields?.balance || "Sisa:"} {locale === "id"
                                             ? `Rp ${(Number(booking.totalPrice) - Number(booking.amountPaid)).toLocaleString("id-ID")}`
                                             : `$ ${((Number(booking.totalPrice) - Number(booking.amountPaid)) / 15000).toFixed(0)}`}
                                         </p>
@@ -312,7 +316,7 @@ export function DashboardClient({
                                   <div className="flex items-center gap-3 p-3 rounded-xl bg-background-secondary border border-card-border">
                                     <Calendar className="w-4 h-4 text-primary-500" />
                                     <div>
-                                      <p className="text-[9px] uppercase font-bold text-foreground-secondary">Berangkat</p>
+                                      <p className="text-[9px] uppercase font-bold text-foreground-secondary">{t.fields?.departure || "Berangkat"}</p>
                                       <p className="text-sm text-foreground font-bold">
                                         {format(new Date(booking.tourDate), "dd MMM yyyy", { locale: dateLocale })}
                                       </p>
@@ -325,14 +329,14 @@ export function DashboardClient({
                                         {t.fields?.pax || "Peserta"}
                                       </p>
                                       <p className="text-sm text-foreground font-bold">
-                                        {booking.pax} {locale === "id" ? "Orang" : "Pax"}
+                                        {booking.pax} {t.fields?.paxUnit || "Orang"}
                                       </p>
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-3 p-3 rounded-xl bg-background-secondary border border-card-border">
                                     <Clock className="w-4 h-4 text-primary-500" />
                                     <div>
-                                      <p className="text-[9px] uppercase font-bold text-foreground-secondary">Kode</p>
+                                      <p className="text-[9px] uppercase font-bold text-foreground-secondary">{t.fields?.code || "Kode"}</p>
                                       <p className="text-sm text-foreground font-bold font-mono uppercase">
                                         {booking.id.substring(0, 8)}
                                       </p>
@@ -365,24 +369,16 @@ export function DashboardClient({
                                       />
                                       <span className="inline-flex items-center justify-center bg-primary-500 hover:bg-primary-600 text-white rounded-xl h-11 px-6 font-bold text-sm shadow-lg shadow-primary-500/20 transition-all hover:scale-105 cursor-pointer w-full">
                                         {uploadingId === booking.id
-                                          ? "Mengupload..."
-                                          : "Upload Bukti Bayar"}
+                                          ? (t.actions?.uploading || "Mengupload...")
+                                          : (t.actions?.uploadProof || "Upload Bukti Bayar")}
                                       </span>
                                     </label>
                                   )}
                                   {booking.status === "PENDING" && booking.paymentProof && (
                                     <Badge className="bg-amber-100 text-amber-700 border-amber-200 border px-4 py-2 text-xs font-bold">
-                                      Menunggu Verifikasi
+                                      {t.actions?.awaitingVerification || "Menunggu Verifikasi"}
                                     </Badge>
                                   )}
-                                  <Button
-                                    variant="outline"
-                                    className="flex-1 sm:flex-none rounded-xl h-11 px-6 text-sm border-card-border hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 gap-2 font-bold"
-                                    onClick={() => sendWhatsApp(booking)}
-                                  >
-                                    <MessageSquare className="w-4 h-4" />
-                                    Hubungi Admin
-                                  </Button>
                                 </div>
                               </div>
                             </div>
@@ -473,7 +469,7 @@ export function DashboardClient({
                   </div>
                 </div>
 
-                <div className="space-y-3 pt-6">
+                <div className="pt-6">
                   <Link 
                     href="/"
                     className="w-full py-4 rounded-xl bg-primary-500 text-white font-bold hover:bg-primary-600 shadow-lg shadow-primary-500/20 transition-all flex items-center justify-center gap-2 group"
@@ -481,15 +477,16 @@ export function DashboardClient({
                     {t.profile?.explorePackages || "Jelajahi Paket Wisata"}
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
-                  <button className="w-full py-4 rounded-xl border border-card-border bg-background-secondary text-foreground font-bold hover:bg-background transition-all flex items-center justify-center gap-2 text-sm">
-                    <MessageSquare className="w-4 h-4" />
-                    Bantuan CS
-                  </button>
                 </div>
               </div>
 
-              {/* Help Card */}
-              <div className="p-6 rounded-2xl bg-primary-500/5 border border-primary-500/10 flex items-center gap-4 group cursor-pointer hover:bg-primary-500/10 transition-all duration-300">
+              {/* Help Card — Chat WA Admin */}
+              <a
+                href={`https://api.whatsapp.com/send?phone=${adminPhone.startsWith("0") ? "62" + adminPhone.slice(1) : adminPhone}&text=${encodeURIComponent("Halo Admin Titan Travel, saya butuh bantuan.")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-6 rounded-2xl bg-primary-500/5 border border-primary-500/10 flex items-center gap-4 group cursor-pointer hover:bg-primary-500/10 transition-all duration-300"
+              >
                 <div className="w-12 h-12 rounded-full bg-card-bg flex items-center justify-center text-primary-500 shadow-sm border border-card-border">
                   <MessageSquare className="w-6 h-6" />
                 </div>
@@ -502,7 +499,7 @@ export function DashboardClient({
                   </p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-foreground-secondary ml-auto group-hover:translate-x-1 transition-transform" />
-              </div>
+              </a>
             </div>
           </div>
         </div>

@@ -14,13 +14,16 @@ import {
   ChevronRight,
   Share2,
   ArrowRight,
+  Compass,
 } from "lucide-react";
 import SafeImage from "@/components/ui/safe-image";
 import Link from "next/link";
 import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 export default function PackageDetailClient({ pkg }: { pkg: any }) {
   const { dt, locale } = useLocale();
+  const t = translations[locale as keyof typeof translations]?.packageDetail || translations.id.packageDetail;
   const [activeImage, setActiveImage] = useState(0);
   const images =
     pkg.images && pkg.images.length > 0
@@ -39,25 +42,31 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
   };
 
   const getWaktuLabel = (score: number) => {
-    if (score === 1) return "Pagi Hari";
-    if (score === 2) return "Siang Hari";
-    return "Malam Hari";
+    if (score === 1) return t.departureMorning;
+    if (score === 2) return t.departureAfternoon;
+    return t.departureEvening;
   };
 
   return (
-    <div className="pb-20 relative">
-      {/* Dark Hero Background Segment */}
-      <div className="absolute top-[-80px] left-0 w-full h-[400px] bg-slate-900 z-0" />
+    <div id="detail_paket" className="pb-20 relative">
+      {/* Decorative Blurs on Dark Hero Area */}
+      <div className="absolute top-0 left-0 w-full h-128 z-0 pointer-events-none">
+        <div className="absolute top-1/4 right-0 w-72 h-72 bg-primary-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-56 h-56 bg-accent-500/5 rounded-full blur-3xl" />
+      </div>
+
+      {/* Light Background below hero */}
+      <div className="absolute top-128 left-0 w-full bottom-0 bg-background z-0" />
 
       {/* Top Navigation Bar */}
-      <div className="bg-transparent sticky top-16 sm:top-20 z-40">
+      <div className="bg-slate-900 dark:bg-slate-950 top-16 sm:top-20 z-40">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link
             href="/#paket"
-            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm font-medium"
+            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors text-sm font-medium z-10"
           >
             <ArrowLeft className="w-4 h-4" />
-            Kembali ke Daftar
+            {t.backToList}
           </Link>
           <div className="flex items-center gap-4">
             <button className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-primary-500 transition-all border border-white/10">
@@ -67,10 +76,66 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 mt-8 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 pt-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
           {/* Left Side: Images & Description */}
           <div className="lg:col-span-8 space-y-10">
+
+            {/* Hero Title Section (On Dark BG) */}
+            <div className="space-y-5">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-500/20 border border-primary-500/40 text-primary-400 text-[10px] font-bold uppercase tracking-widest">
+                  <Compass className="w-3 h-3" />
+                  {dt(pkg.tag || "Travel")}
+                </span>
+                <div className="flex items-center gap-1 text-accent-400">
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <span className="text-xs font-bold">4.9</span>
+                  <span className="text-[10px] text-white/40">({t.reviewCount})</span>
+                </div>
+                {pkg.facilityScore >= 4 && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
+                    <Sparkles className="w-3 h-3" />
+                    {t.premiumLabel}
+                  </span>
+                )}
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-(family-name:--font-playfair) text-white leading-tight">
+                {dt(pkg.title)}
+              </h1>
+
+              <div className="flex flex-wrap gap-6 text-white/60 border-t border-white/10 pt-5">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-primary-400">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-white/30">{t.locationLabel}</p>
+                    <p className="text-sm font-semibold text-white">{dt(pkg.location)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-primary-400">
+                    <Clock className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-white/30">{t.durationLabel}</p>
+                    <p className="text-sm font-semibold text-white">{dt(pkg.duration)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-primary-400">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-white/30">{t.capacityLabel}</p>
+                    <p className="text-sm font-semibold text-white">{pkg.capacity} {t.capacityUnit}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Image Gallery */}
             <div className="space-y-4">
               <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 group shadow-2xl">
@@ -82,13 +147,6 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent pointer-events-none" />
-
-                {/* Float Badge */}
-                <div className="absolute top-4 left-4">
-                  <span className="px-4 py-2 rounded-full bg-primary-500 text-white text-xs font-bold shadow-xl">
-                    {dt(pkg.tag || "Travel")}
-                  </span>
-                </div>
               </div>
 
               {/* Thumbnails */}
@@ -98,7 +156,7 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
                     <button
                       key={idx}
                       onClick={() => setActiveImage(idx)}
-                      className={`relative w-24 sm:w-32 aspect-video rounded-lg overflow-hidden border-2 transition-all shrink-0 ${activeImage === idx ? "border-primary-500 scale-95 shadow-lg" : "border-white/10 opacity-60 hover:opacity-100"}`}
+                      className={`relative w-24 sm:w-32 aspect-video rounded-lg overflow-hidden border-2 transition-all shrink-0 ${activeImage === idx ? "border-primary-500 scale-95 shadow-lg" : "border-card-border opacity-60 hover:opacity-100"}`}
                     >
                       <SafeImage
                         src={img}
@@ -112,115 +170,52 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
               )}
             </div>
 
-            {/* Title & Info Mobile */}
-            <div className="space-y-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-1 text-accent-400">
-                  <Star className="w-4 h-4 fill-current" />
-                  <span className="text-sm font-bold text-accent-400">4.9</span>
-                  <span className="text-xs text-primary-400/60">
-                    (120+ Review)
-                  </span>
-                </div>
-                {pkg.facilityScore >= 4 && (
-                  <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 text-[10px] font-bold uppercase tracking-wider">
-                    <Sparkles className="w-3 h-3" />
-                    Fasilitas Premium
-                  </div>
-                )}
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-(family-name:--font-playfair) text-slate-900 leading-tight">
-                {dt(pkg.title)}
-              </h1>
-
-              <div className="flex flex-wrap gap-6 text-slate-700 border-y border-white/10 py-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-primary-400">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-600/40">
-                      Lokasi
-                    </p>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {dt(pkg.location)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-primary-400">
-                    <Clock className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-600/40">
-                      Durasi
-                    </p>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {dt(pkg.duration)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-primary-400">
-                    <Users className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase font-bold text-slate-600/40">
-                      Kapasitas
-                    </p>
-                    <p className="text-sm font-semibold text-slate-900">
-                      {pkg.capacity} Pax
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Description Section */}
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-1 bg-primary-500 rounded-full" />
-                <h2 className="text-2xl font-bold font-(family-name:--font-playfair)">
-                  Rincian Perjalanan
+                <h2 className="text-2xl font-bold font-(family-name:--font-playfair) text-foreground">
+                  {t.descriptionTitle}
                 </h2>
               </div>
               <div className="prose prose-slate max-w-none text-foreground-secondary leading-relaxed">
-                {dt(pkg.description) ||
-                  "Tidak ada deskripsi tersedia untuk paket ini."}
+                {dt(pkg.description) || t.noDescription}
               </div>
             </div>
 
             {/* Key Features */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-5 rounded-xl bg-card-bg border border-card-border flex gap-4">
-                <Calendar className="w-6 h-6 text-primary-500 shrink-0" />
+              <div className="p-5 rounded-xl bg-card-bg border border-card-border flex gap-4 shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-primary-500/10 flex items-center justify-center shrink-0">
+                  <Calendar className="w-5 h-5 text-primary-500" />
+                </div>
                 <div>
                   <h4 className="font-bold text-foreground mb-1 text-sm">
-                    Waktu Keberangkatan
+                    {t.departureTitle}
                   </h4>
                   <p className="text-xs text-foreground-secondary leading-relaxed">
-                    Paket ini dijadwalkan berangkat pada{" "}
+                    {t.departureDesc.split("{time}")[0]}
                     <span className="font-bold text-primary-500">
                       {getWaktuLabel(pkg.departureScore)}
-                    </span>{" "}
-                    untuk pengalaman terbaik.
+                    </span>
+                    {t.departureDesc.split("{time}")[1]}
                   </p>
                 </div>
               </div>
-              <div className="p-5 rounded-xl bg-card-bg border border-card-border flex gap-4">
-                <CheckCircle2 className="w-6 h-6 text-primary-500 shrink-0" />
+              <div className="p-5 rounded-xl bg-card-bg border border-card-border flex gap-4 shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                </div>
                 <div>
                   <h4 className="font-bold text-foreground mb-1 text-sm">
-                    Jaminan Layanan
+                    {t.guaranteeTitle}
                   </h4>
                   <p className="text-xs text-foreground-secondary leading-relaxed">
-                    Kami menjamin layanan terbaik sesuai dengan standar
-                    fasilitas skor{" "}
+                    {t.guaranteeDesc.split("{score}")[0]}
                     <span className="font-bold text-primary-500">
                       {pkg.facilityScore}/5
-                    </span>{" "}
-                    yang kami janjikan.
+                    </span>
+                    {t.guaranteeDesc.split("{score}")[1]}
                   </p>
                 </div>
               </div>
@@ -236,14 +231,14 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
 
                 <div>
                   <p className="text-xs font-bold text-foreground-secondary uppercase tracking-widest mb-2">
-                    Harga Mulai Dari
+                    {t.priceLabel}
                   </p>
                   <div className="flex items-end gap-2">
                     <h2 className="text-3xl sm:text-4xl font-bold text-primary-500">
                       {formatPrice(pkg.price)}
                     </h2>
                     <span className="text-sm text-foreground-secondary mb-1">
-                      / Orang
+                      {t.pricePerPerson}
                     </span>
                   </div>
                   {pkg.originalPrice && (
@@ -256,17 +251,17 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
                 <div className="space-y-4 pt-4 border-t border-card-border">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-foreground-secondary">
-                      Deposit Minimum
+                      {t.depositLabel}
                     </span>
                     <span className="font-bold text-foreground">30%</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-foreground-secondary">
-                      Ketersediaan
+                      {t.availabilityLabel}
                     </span>
                     <span className="text-green-600 font-bold flex items-center gap-1">
                       <CheckCircle2 className="w-4 h-4" />
-                      Tersedia
+                      {t.availabilityValue}
                     </span>
                   </div>
                 </div>
@@ -276,18 +271,17 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
                     href={`/paket/${pkg.slug}/booking`}
                     className="w-full py-4 rounded-xl bg-primary-500 text-white font-bold hover:bg-primary-600 shadow-lg shadow-primary-500/25 transition-all flex items-center justify-center gap-2 group"
                   >
-                    Pesan Sekarang
+                    {t.bookNow}
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
                   <button className="w-full py-4 rounded-xl border border-card-border bg-foreground/2 text-foreground font-bold hover:bg-foreground/5 transition-all flex items-center justify-center gap-2">
                     <MessageSquare className="w-5 h-5" />
-                    Tanya Lewat WhatsApp
+                    {t.whatsappCta}
                   </button>
                 </div>
 
                 <p className="text-[10px] text-center text-foreground-secondary leading-relaxed">
-                  *Harga dapat berubah sewaktu-waktu tergantung musim dan
-                  ketersediaan kuota.
+                  {t.priceDisclaimer}
                 </p>
               </div>
 
@@ -298,10 +292,10 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
                 </div>
                 <div>
                   <h4 className="font-bold text-foreground text-sm">
-                    Butuh Bantuan?
+                    {t.helpTitle}
                   </h4>
                   <p className="text-xs text-foreground-secondary">
-                    Hubungi konsultan travel kami
+                    {t.helpSubtitle}
                   </p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-foreground-secondary ml-auto group-hover:translate-x-1 transition-transform" />

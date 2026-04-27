@@ -133,9 +133,9 @@ export default function PackagesSection({
                   )}
 
                   {pkg.topsisScore && (
-                    <span className="px-3 py-1.5 rounded-full bg-accent-500 text-white text-[10px] font-black shadow-lg w-fit flex items-center gap-1">
+                    <span className="px-3 py-1.5 rounded-full bg-primary-500 text-white text-[10px] font-black shadow-lg w-fit flex items-center gap-1">
                       <Sparkles className="w-3 h-3 fill-current" />
-                      {((pkg.topsisScore * 100)).toFixed(0)}% Match
+                      {((pkg.topsisScore * 100)).toFixed(0)}% {locale === "id" ? "Cocok" : "Match"}
                     </span>
                   )}
                 </div>
@@ -160,9 +160,9 @@ export default function PackagesSection({
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-1.5">
                     {pkg.topsisScore ? (
-                      <div className="flex items-center gap-1 bg-accent-500/10 text-accent-600 px-2 py-0.5 rounded text-[10px] font-bold border border-accent-500/20">
+                      <div className="flex items-center gap-1 bg-primary-500/10 text-primary-600 px-2 py-0.5 rounded text-[10px] font-bold border border-primary-500/20">
                         <Sparkles className="w-3 h-3 fill-current" />
-                        Best Recommendation
+                        {locale === "id" ? "Pilihan Terbaik" : "Top Pick"}
                       </div>
                     ) : (
                       <>
@@ -178,7 +178,7 @@ export default function PackagesSection({
                   </div>
                   {pkg.ranking && (
                     <span className="text-[10px] font-bold text-primary-500 uppercase tracking-widest">
-                      Rank #{pkg.ranking}
+                      #{pkg.ranking} {locale === "id" ? "Teratas" : "Top"}
                     </span>
                   )}
                 </div>

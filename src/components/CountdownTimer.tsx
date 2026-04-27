@@ -6,9 +6,11 @@ import { Timer, AlertTriangle } from "lucide-react";
 interface CountdownTimerProps {
   deadline: string | Date;
   onExpired?: () => void;
+  payWithinLabel?: string;
+  expiredLabel?: string;
 }
 
-export function CountdownTimer({ deadline, onExpired }: CountdownTimerProps) {
+export function CountdownTimer({ deadline, onExpired, payWithinLabel = "Bayar dalam", expiredLabel = "Batas waktu pembayaran telah habis" }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState(() => calcTimeLeft(deadline));
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export function CountdownTimer({ deadline, onExpired }: CountdownTimerProps) {
     return (
       <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-red-50 border border-red-200 text-red-600">
         <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-[11px] font-bold">Batas waktu pembayaran telah habis</span>
+        <span className="text-[11px] font-bold">{expiredLabel}</span>
       </div>
     );
   }
@@ -44,7 +46,7 @@ export function CountdownTimer({ deadline, onExpired }: CountdownTimerProps) {
     >
       <Timer className="w-3.5 h-3.5 shrink-0" />
       <span className="text-[11px] font-bold">
-        Bayar dalam{" "}
+        {payWithinLabel}{" "}
         <span className="font-mono tabular-nums">
           {timeLeft.hours.toString().padStart(2, "0")}:
           {timeLeft.minutes.toString().padStart(2, "0")}:

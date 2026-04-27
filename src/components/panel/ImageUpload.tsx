@@ -330,7 +330,7 @@ export function ImageUpload({
           </DialogHeader>
 
           {/* Cropper Area — responsive height */}
-          <div className="relative w-full h-[40vh] sm:h-[55vh] min-h-[260px]">
+          <div className="relative w-full h-[40vh] sm:h-[55vh] min-h-65">
             {previewUrl && (
               <Cropper
                 image={previewUrl}

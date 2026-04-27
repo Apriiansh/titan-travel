@@ -23,7 +23,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
       <SidebarProvider>
         <AppSidebar user={session as { name: string; email: string; role: string }} />
         <main className="flex-1 overflow-auto bg-card-bg">
-          <PanelHeader userName={session.name as string} />
+          <PanelHeader user={session as { name: string; email: string; role: string }} />
           <div className="p-4 lg:p-6 w-full max-w-7xl mx-auto">
             {children}
           </div>

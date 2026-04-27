@@ -67,10 +67,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
   return (
     <>
       <Navbar data={getSetting("navbar")} />
-      <main className="min-h-screen bg-background">
-        {/* Dark Header Background for Transparent Navbar */}
-        <div className="absolute top-0 left-0 w-full h-[300px] bg-slate-900 -z-10" />
-        
+      <main className="min-h-screen bg-slate-900 dark:bg-slate-950">
         <div className="pt-16 sm:pt-20">
           <PackageDetailClient pkg={serializedPkg} />
         </div>

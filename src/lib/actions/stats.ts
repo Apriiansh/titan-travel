@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { startOfYear, endOfYear, format, eachMonthOfInterval } from "date-fns";
 import { id } from "date-fns/locale";
 
+export type StatsData = Awaited<ReturnType<typeof getAdminStats>>;
+
 export async function getAdminStats() {
   const now = new Date();
   const startYear = startOfYear(now);

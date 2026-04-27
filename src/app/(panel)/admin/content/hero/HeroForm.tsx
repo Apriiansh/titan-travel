@@ -211,7 +211,7 @@ export function HeroForm({ initial }: HeroFormProps) {
                 </div>
               </FormCard>
 
-              {/* Stats — sebelumnya di About, dipindah ke Hero */}
+              {/* Stats */}
               <FormCard className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>

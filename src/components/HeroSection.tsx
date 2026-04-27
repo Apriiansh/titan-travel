@@ -34,20 +34,20 @@ export default function HeroSection({ data }: { data?: any }) {
           sizes="100vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-primary-950/70 via-primary-950/50 to-primary-950/80" />
+        <div className="absolute inset-0 bg-linear-to-b from-neutral-950/80 via-neutral-900/60 to-neutral-950/90" />
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-background to-transparent" />
       </div>
 
       {/* Abstract Decorative Elements */}
-      <div className="absolute top-20 left-10 w-64 h-64 sm:w-96 sm:h-96 rounded-md bg-primary-500/10 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-32 right-10 w-48 h-48 sm:w-72 sm:h-72 rounded-md bg-accent-500/10 blur-3xl pointer-events-none" />
-      <div className="absolute top-1/3 right-1/4 w-32 h-32 rounded-md bg-primary-400/5 blur-2xl pointer-events-none animate-float" />
+      <div className="absolute top-20 left-10 w-64 h-64 sm:w-96 sm:h-96 rounded-md bg-primary-500/15 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-32 right-10 w-48 h-48 sm:w-72 sm:h-72 rounded-md bg-primary-300/10 blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 right-1/4 w-32 h-32 rounded-md bg-primary-400/8 blur-2xl pointer-events-none animate-float" />
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 text-center">
         {/* Badge */}
         <div className="animate-fade-in-up inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-md bg-white/10 backdrop-blur-md border border-white/20 text-white/90 text-xs sm:text-sm font-medium mb-6 sm:mb-8">
-          <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent-500 fill-accent-500" />
+          <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent-400 fill-accent-400" />
           {h.badge || "Trusted Since 2013"}
         </div>
 
@@ -55,7 +55,7 @@ export default function HeroSection({ data }: { data?: any }) {
         <h1 className="animate-fade-in-up delay-100 font-(family-name:--font-playfair) text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4 sm:mb-6">
           {h.title1 || "Explore the World"}
           <br />
-          <span className="bg-linear-to-r from-accent-400 to-accent-500 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-primary-300 to-primary-400 bg-clip-text text-transparent">
             {h.title2 || "With Titan Travel"}
           </span>
         </h1>
@@ -69,14 +69,14 @@ export default function HeroSection({ data }: { data?: any }) {
         <div className="animate-fade-in-up delay-300 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
           <a
             href="#paket"
-            className="btn-accent text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center"
+            className="btn-primary text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 w-full sm:w-auto justify-center"
           >
             <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
             {h.cta1 || "View Tour Packages"}
           </a>
           <a
             href="#kontak"
-            className="btn-secondary text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 border-white/30 text-white hover:border-white hover:text-white w-full sm:w-auto justify-center"
+            className="btn-secondary text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 sm:w-auto justify-center"
           >
             {h.cta2 || "Contact Us"}
             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -111,7 +111,7 @@ export default function HeroSection({ data }: { data?: any }) {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce hidden sm:block">
-        <Plane className="w-6 h-6 text-primary-900/60 rotate-135" />
+        <Plane className="w-6 h-6 text-white/40 rotate-135" />
       </div>
     </section>
   );
