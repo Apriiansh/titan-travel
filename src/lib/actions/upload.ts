@@ -1,12 +1,16 @@
 "use server";
 
+import { put } from "@vercel/blob";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { randomUUID } from "node:crypto";
 
+const isVercel = process.env.VERCEL === "1";
+
 /**
- * Uploads a file to the local public/uploads directory.
- * Returns the public URL of the uploaded file.
+ * Uploads a file.
+ * - Production (Vercel): Uses Vercel Blob storage
+ * - Development (local): Uses public/uploads directory
  */
 export async function uploadFile(formData: FormData) {
   try {
@@ -15,7 +19,6 @@ export async function uploadFile(formData: FormData) {
       throw new Error("No file uploaded");
     }
 
-    // Basic validation
     const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (!validTypes.includes(file.type)) {
       throw new Error("Tipe file tidak didukung. Gunakan JPG, PNG, atau WebP.");
@@ -25,25 +28,24 @@ export async function uploadFile(formData: FormData) {
       throw new Error("Ukuran file terlalu besar (Maksimal 5MB).");
     }
 
+    if (isVercel) {
+      const blob = await put(file.name, file, { access: "public" });
+      return { success: true, url: blob.url };
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Ensure directory exists
     const uploadDir = join(process.cwd(), "public", "uploads");
     await mkdir(uploadDir, { recursive: true });
 
-    // Generate unique name
     const ext = file.name.split(".").pop() || "jpg";
     const filename = `${randomUUID()}.${ext}`;
     const path = join(uploadDir, filename);
 
     await writeFile(path, buffer);
 
-    // Return the public URL
-    return {
-      success: true,
-      url: `/uploads/${filename}`,
-    };
+    return { success: true, url: `/uploads/${filename}` };
   } catch (error) {
     console.error("Upload error:", error);
     return {
