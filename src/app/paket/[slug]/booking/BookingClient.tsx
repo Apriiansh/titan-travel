@@ -18,12 +18,7 @@ import {
 } from "lucide-react";
 import { createBooking, getAvailableQuota } from "@/lib/actions/bookings";
 import { useRouter } from "next/navigation";
-
-declare global {
-  interface Window {
-    snap: any;
-  }
-}
+import { PaymentConfirmation } from "./PaymentConfirmation";
 
 type QuotaInfo = {
   capacity: number;
@@ -31,12 +26,24 @@ type QuotaInfo = {
   available: number;
 } | null;
 
+type BankAccount = {
+  id: string;
+  bankName: string;
+  accountName: string;
+  accountNumber: string;
+  imageUrl: string | null;
+};
+
 export function BookingClient({ 
   packageData,
-  session 
+  session,
+  bankAccounts = [],
+  adminPhone = "",
 }: { 
   packageData: any;
   session: any;
+  bankAccounts?: BankAccount[];
+  adminPhone?: string;
 }) {
   const [pax, setPax] = useState(1);
   const [date, setDate] = useState("");
@@ -49,6 +56,7 @@ export function BookingClient({
   const [paymentType, setPaymentType] = useState<"DP" | "HALF" | "FULL">("FULL");
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState("");
+  const [bookingResult, setBookingResult] = useState<any>(null);
   const [quotaInfo, setQuotaInfo] = useState<QuotaInfo>(null);
   const [isCheckingQuota, setIsCheckingQuota] = useState(false);
   const router = useRouter();
@@ -190,20 +198,11 @@ export function BookingClient({
           paymentType,
         });
 
-        if (result?.snapToken) {
-          window.snap.pay(result.snapToken, {
-            onSuccess: (res: any) => {
-              router.push(`/dashboard?status=success&bookingId=${res.order_id}`);
-            },
-            onPending: (res: any) => {
-              router.push(`/dashboard?status=pending&bookingId=${res.order_id}`);
-            },
-            onError: () => {
-              setErrorMsg("Pembayaran gagal. Silakan coba lagi.");
-            },
-            onClose: () => {
-              // No alert, just silent close — user can retry
-            },
+        if (result) {
+          setBookingResult({
+            ...result,
+            packageTitle: (packageData.title as any)?.id || "Paket Wisata",
+            tourDate: date,
           });
         }
       } catch (err: any) {
@@ -217,6 +216,17 @@ export function BookingClient({
     isCheckingQuota ||
     (quotaInfo !== null && quotaInfo.available === 0) ||
     (quotaInfo !== null && pax > quotaInfo.available);
+
+  if (bookingResult) {
+    return (
+      <PaymentConfirmation
+        booking={bookingResult}
+        bankAccounts={bankAccounts}
+        adminPhone={adminPhone}
+        onBack={() => setBookingResult(null)}
+      />
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
@@ -544,7 +554,7 @@ export function BookingClient({
             <div className="flex items-center justify-center gap-1.5 pt-1">
               <Shield className="w-3 h-3 text-green-500" />
               <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">
-                Secure Payment · Midtrans
+                Transfer Bank · Verified by Titan Travel
               </p>
             </div>
           </div>

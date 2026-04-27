@@ -2,7 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { snap } from "@/lib/midtrans";
 
 function serializeBooking(b: any) {
   if (!b) return null;
@@ -122,7 +121,6 @@ export async function createBooking(data: {
     amountPaid = totalPrice * 0.3;
   }
 
-  // 1. Simpan ke database
   const booking = await prisma.booking.create({
     data: {
       userId: data.userId,
@@ -140,42 +138,9 @@ export async function createBooking(data: {
     },
   });
 
-  // 2. Request Token ke Midtrans
-  let snapToken = "";
-  try {
-    const parameter = {
-      transaction_details: {
-        order_id: booking.id,
-        gross_amount: Math.round(amountPaid),
-      },
-      customer_details: {
-        first_name: data.name,
-        email: data.email,
-        phone: data.phone,
-      },
-      item_details: [{
-        id: pkg.id,
-        price: Math.round(amountPaid),
-        quantity: 1,
-        name: `${(pkg.title as any).id || "Paket Wisata"} (${data.paymentType})`,
-      }]
-    };
-
-    const transaction = await snap.createTransaction(parameter);
-    snapToken = transaction.token;
-
-    // Simpan token ke booking
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: { snapToken }
-    });
-  } catch (error) {
-    console.error("Midtrans Error:", error);
-  }
-
   revalidatePath("/admin/bookings");
-  
-  return serializeBooking({ ...booking, snapToken });
+
+  return serializeBooking(booking);
 }
 
 export async function updateBookingStatus(
@@ -189,4 +154,22 @@ export async function updateBookingStatus(
 export async function deleteBooking(id: string) {
   await prisma.booking.delete({ where: { id } });
   revalidatePath("/admin/bookings");
+}
+
+export async function uploadPaymentProof(bookingId: string, imageUrl: string) {
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: { paymentProof: imageUrl },
+  });
+  revalidatePath("/admin/bookings");
+  revalidatePath("/dashboard");
+}
+
+export async function verifyPayment(bookingId: string) {
+  await prisma.booking.update({
+    where: { id: bookingId },
+    data: { status: "CONFIRMED" },
+  });
+  revalidatePath("/admin/bookings");
+  revalidatePath("/dashboard");
 }

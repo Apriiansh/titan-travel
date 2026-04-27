@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { BookingClient } from "./BookingClient";
+import { getActiveBankAccounts } from "@/lib/actions/bank-accounts";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
@@ -15,12 +16,13 @@ export default async function BookingPage({
   const { slug } = await params;
   const session = await getSession();
 
-  const [pkg, settings] = await Promise.all([
+  const [pkg, settings, bankAccounts] = await Promise.all([
     prisma.tourPackage.findUnique({
       where: { slug },
       include: { priceTiers: { orderBy: { minPax: "asc" } } },
     }),
     prisma.setting.findMany(),
+    getActiveBankAccounts(),
   ]);
 
   if (!pkg || !pkg.isPublished) notFound();
@@ -86,6 +88,8 @@ export default async function BookingPage({
             <BookingClient 
               packageData={JSON.parse(JSON.stringify(pkg))} 
               session={session}
+              bankAccounts={JSON.parse(JSON.stringify(bankAccounts))}
+              adminPhone={(settingsObj.contact as any)?.id?.whatsapp || "085268111110"}
             />
           </div>
         </section>

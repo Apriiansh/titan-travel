@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createUser, deleteUser, updateUser } from "@/lib/actions/users";
+import { createUser, deleteUser, updateUser, getUsers } from "@/lib/actions/users";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -72,7 +72,8 @@ export function UsersClient({ initialData }: { initialData: User[] }) {
         await createUser(form);
       }
       setOpen(false);
-      refresh();
+      const fresh = await getUsers();
+      setData(fresh as User[]);
     });
   }
 

@@ -135,7 +135,7 @@ model Booking {
   amountPaid  Decimal       @db.Decimal(12, 2) @default(0)
   status      BookingStatus @default(PENDING)
   notes     String?       @db.Text
-  snapToken String?
+  paymentProof String?    @db.Text
 
   user    User?        @relation(fields: [userId], references: [id])
   package TourPackage? @relation(fields: [packageId], references: [id])
@@ -169,6 +169,21 @@ model PriceTier {
   package   TourPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
 
   @@map("price_tiers")
+}
+
+model BankAccount {
+  id            String   @id @default(uuid())
+  bankName      String
+  accountName   String
+  accountNumber String
+  imageUrl      String?  @db.Text
+  isActive      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("bank_accounts")
 }
 
 enum PaymentType {

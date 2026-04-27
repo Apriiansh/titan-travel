@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Clock,
   Users,
@@ -20,6 +20,8 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
+import { uploadPaymentProof } from "@/lib/actions/bookings";
+import { uploadFile } from "@/lib/actions/upload";
 import { id, enUS } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import { useLocale } from "@/lib/LocaleContext";
@@ -28,15 +30,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export function   DashboardClient({
+export function DashboardClient({
   initialBookings,
   userName,
+  adminPhone = "",
 }: {
   initialBookings: any[];
   userName: string;
+  adminPhone?: string;
 }) {
+  const [bookings, setBookings] = useState(initialBookings);
   const { dt, locale } = useLocale();
   const router = useRouter();
+
+  useEffect(() => {
+    setBookings(initialBookings);
+  }, [initialBookings]);
   
   // Ambil translasi berdasarkan locale yang aktif
   const t =
@@ -73,18 +82,37 @@ export function   DashboardClient({
     }
   };
 
-  const handlePayNow = (snapToken: string) => {
-    if (window.snap) {
-      window.snap.pay(snapToken, {
-        onSuccess: () => router.refresh(),
-        onPending: () => router.refresh(),
-        onError: () => alert(t.actions?.failed || "Pembayaran gagal!"),
-        onClose: () =>
-          alert(
-            t.actions?.pendingAlert || "Selesaikan pembayaran Anda segera.",
-          ),
-      });
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+
+  const handleUploadProof = async (bookingId: string, file: File) => {
+    setUploadingId(bookingId);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const result = await uploadFile(formData);
+      if (result.success && result.url) {
+        await uploadPaymentProof(bookingId, result.url);
+        setBookings((prev) =>
+          prev.map((b) =>
+            b.id === bookingId ? { ...b, paymentProof: result.url } : b
+          )
+        );
+      }
+    } catch {
+      alert(t.actions?.failed || "Gagal upload bukti pembayaran.");
+    } finally {
+      setUploadingId(null);
     }
+  };
+
+  const sendWhatsApp = (booking: any) => {
+    const pkgTitle = booking.package?.title?.id || "Paket Wisata";
+    const dateStr = booking.tourDate
+      ? new Date(booking.tourDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+      : "-";
+    const message = `Halo Admin *Titan Travel*,\n\nSaya telah melakukan pemesanan dan ${booking.paymentProof ? "mengunggah bukti pembayaran" : "akan segera melakukan pembayaran"}:\n\n📌 *Paket:* ${pkgTitle}\n📅 *Tanggal:* ${dateStr}\n👥 *Peserta:* ${booking.pax} Orang\n💰 *Total Bayar:* Rp ${Number(booking.amountPaid).toLocaleString("id-ID")}\n🆔 *Kode Booking:* ${booking.id.substring(0, 8).toUpperCase()}\n\nMohon diproses ya. Terima kasih! 🙏`;
+    const phone = adminPhone.startsWith("0") ? "62" + adminPhone.slice(1) : adminPhone;
+    window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`, "_blank");
   };
 
   const dateLocale = locale === "id" ? id : enUS;
@@ -92,7 +120,7 @@ export function   DashboardClient({
   return (
     <div className="pb-20 relative">
       {/* Dark Hero Background Segment (Consistent with Package Detail) */}
-      <div className="absolute top-[-80px] left-0 w-full h-[400px] bg-slate-900 z-0" />
+      <div className="absolute -top-20 left-0 w-full h-100 bg-slate-900 z-0" />
 
       {/* Top Navigation Bar */}
       <div className="bg-transparent sticky top-16 sm:top-20 z-40">
@@ -155,7 +183,7 @@ export function   DashboardClient({
                     {t.stats?.totalBookings || "Total Pesanan"}
                   </p>
                   <p className="text-2xl font-bold text-foreground">
-                    {initialBookings.length}
+                    {bookings.length}
                   </p>
                 </div>
                 <div className="flex flex-col items-center text-center p-5 rounded-2xl bg-card-bg border border-card-border shadow-lg">
@@ -166,7 +194,7 @@ export function   DashboardClient({
                     {t.stats?.active || "Aktif"}
                   </p>
                   <p className="text-2xl font-bold text-emerald-500">
-                    {initialBookings.filter(b => b.status === "CONFIRMED").length}
+                    {bookings.filter(b => b.status === "CONFIRMED").length}
                   </p>
                 </div>
                 <div className="flex flex-col items-center text-center p-5 rounded-2xl bg-card-bg border border-card-border shadow-lg">
@@ -177,7 +205,7 @@ export function   DashboardClient({
                     {t.stats?.totalPax || "Total Pax"}
                   </p>
                   <p className="text-2xl font-bold text-foreground">
-                    {initialBookings.reduce((sum, b) => sum + (b.pax || 0), 0)}
+                    {bookings.reduce((sum, b) => sum + (b.pax || 0), 0)}
                   </p>
                 </div>
               </div>
@@ -192,7 +220,7 @@ export function   DashboardClient({
                 </h2>
               </div>
 
-              {initialBookings.length === 0 ? (
+              {bookings.length === 0 ? (
                 <div className="text-center py-20 bg-card-bg rounded-2xl border border-dashed border-card-border shadow-sm">
                   <AlertCircle className="w-12 h-12 text-foreground-secondary mx-auto mb-4" />
                   <h3 className="text-lg font-bold text-foreground">
@@ -207,7 +235,7 @@ export function   DashboardClient({
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-6">
-                  {initialBookings.map((booking) => {
+                  {bookings.map((booking) => {
                     const status = getStatusConfig(booking.status);
                     const pkg = booking.package;
                     const title = pkg?.title?.id || pkg?.title?.en || "Paket Wisata";
@@ -318,16 +346,37 @@ export function   DashboardClient({
                                   </p>
                                 </div>
                                 <div className="flex gap-3 w-full sm:w-auto">
-                                  {booking.status === "PENDING" && booking.snapToken && (
-                                    <Button
-                                      onClick={() => handlePayNow(booking.snapToken!)}
-                                      className="flex-1 sm:flex-none bg-primary-500 hover:bg-primary-600 text-white rounded-xl h-11 px-6 font-bold text-sm shadow-lg shadow-primary-500/20 transition-all hover:scale-105"
-                                    >
-                                      {t.actions?.payNow || "Bayar Sekarang"}
-                                    </Button>
+                                  {booking.status === "PENDING" && !booking.paymentProof && (
+                                    <label className="flex-1 sm:flex-none cursor-pointer">
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) handleUploadProof(booking.id, file);
+                                        }}
+                                        disabled={uploadingId === booking.id}
+                                      />
+                                      <span className="inline-flex items-center justify-center bg-primary-500 hover:bg-primary-600 text-white rounded-xl h-11 px-6 font-bold text-sm shadow-lg shadow-primary-500/20 transition-all hover:scale-105 cursor-pointer w-full">
+                                        {uploadingId === booking.id
+                                          ? "Mengupload..."
+                                          : "Upload Bukti Bayar"}
+                                      </span>
+                                    </label>
                                   )}
-                                  <Button variant="outline" className="flex-1 sm:flex-none rounded-xl h-11 px-6 text-sm border-card-border hover:bg-background-secondary" disabled>
-                                    {t.actions?.detail || "Detail"}
+                                  {booking.status === "PENDING" && booking.paymentProof && (
+                                    <Badge className="bg-amber-100 text-amber-700 border-amber-200 border px-4 py-2 text-xs font-bold">
+                                      Menunggu Verifikasi
+                                    </Badge>
+                                  )}
+                                  <Button
+                                    variant="outline"
+                                    className="flex-1 sm:flex-none rounded-xl h-11 px-6 text-sm border-card-border hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 gap-2 font-bold"
+                                    onClick={() => sendWhatsApp(booking)}
+                                  >
+                                    <MessageSquare className="w-4 h-4" />
+                                    Hubungi Admin
                                   </Button>
                                 </div>
                               </div>
@@ -397,14 +446,14 @@ export function   DashboardClient({
                       <Calendar className="w-4 h-4" />
                       <span className="text-sm font-medium">{t.profile?.totalBookings || "Total Pesanan"}</span>
                     </div>
-                    <span className="font-bold text-foreground">{initialBookings.length}</span>
+                    <span className="font-bold text-foreground">{bookings.length}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 text-foreground-secondary">
                       <CheckCircle2 className="w-4 h-4" />
                       <span className="text-sm font-medium">{t.profile?.activeBookings || "Pesanan Aktif"}</span>
                     </div>
-                    <span className="text-emerald-600 font-bold">{initialBookings.filter(b => b.status === "CONFIRMED").length}</span>
+                    <span className="text-emerald-600 font-bold">{bookings.filter(b => b.status === "CONFIRMED").length}</span>
                   </div>
                   <div className="flex items-center justify-between pt-2">
                     <div className="flex items-center gap-3 text-foreground-secondary">
@@ -413,8 +462,8 @@ export function   DashboardClient({
                     </div>
                     <span className="font-bold text-foreground">
                       {locale === "id"
-                        ? `Rp ${initialBookings.reduce((sum, b) => sum + Number(b.totalPrice || 0), 0).toLocaleString("id-ID")}`
-                        : `$ ${(initialBookings.reduce((sum, b) => sum + Number(b.totalPrice || 0), 0) / 15000).toLocaleString("en-US", { maximumFractionDigits: 0 })}`}
+                        ? `Rp ${bookings.reduce((sum, b) => sum + Number(b.totalPrice || 0), 0).toLocaleString("id-ID")}`
+                        : `$ ${(bookings.reduce((sum, b) => sum + Number(b.totalPrice || 0), 0) / 15000).toLocaleString("en-US", { maximumFractionDigits: 0 })}`}
                     </span>
                   </div>
                 </div>

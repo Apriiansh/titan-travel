@@ -18,8 +18,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { deleteBooking, updateBookingStatus } from "@/lib/actions/bookings";
-import { Trash2, Loader2, MessageSquare, MoreVertical, ExternalLink, Calendar, Users, CreditCard } from "lucide-react";
+import { deleteBooking, updateBookingStatus, verifyPayment } from "@/lib/actions/bookings";
+import { Trash2, Loader2, MessageSquare, MoreVertical, ExternalLink, Calendar, Users, CreditCard, Image as ImageIcon, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type Booking = {
@@ -35,6 +35,7 @@ type Booking = {
   amountPaid: number;
   status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
   notes?: string | null;
+  paymentProof?: string | null;
   createdAt: Date;
   package?: any;
 };
@@ -104,7 +105,7 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
         description="Kelola reservasi, pantau pembayaran, dan hubungi pelanggan"
         action={
           <Select value={filter} onValueChange={(val) => setFilter(val ?? "ALL")}>
-            <SelectTrigger className="w-[180px] bg-card-bg border-card-border">
+            <SelectTrigger className="w-45 bg-card-bg border-card-border">
               <SelectValue placeholder="Filter Status" />
             </SelectTrigger>
             <SelectContent className="bg-card-bg border-card-border">
@@ -207,6 +208,36 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                               Lunas
                             </div>
                           )}
+                          {/* Payment Proof */}
+                          {booking.paymentProof && (
+                            <a
+                              href={booking.paymentProof}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-primary-600 hover:text-primary-700 transition-colors"
+                            >
+                              <ImageIcon className="w-3 h-3" />
+                              Lihat Bukti Bayar
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
+                          {booking.status === "PENDING" && booking.paymentProof && (
+                            <Button
+                              size="sm"
+                              className="mt-2 h-7 px-3 text-[10px] font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg gap-1"
+                              onClick={() => {
+                                startTransition(async () => {
+                                  await verifyPayment(booking.id);
+                                  setData((prev) => prev.map((b) => (b.id === booking.id ? { ...b, status: "CONFIRMED" } : b)));
+                                  refresh();
+                                });
+                              }}
+                              disabled={isPending}
+                            >
+                              <CheckCircle className="w-3 h-3" />
+                              Verifikasi Pembayaran
+                            </Button>
+                          )}
                         </div>
                       </td>
 
@@ -217,7 +248,7 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                           onValueChange={(val) => val && handleStatusChange(booking.id, val as Booking["status"])}
                           disabled={isPending}
                         >
-                          <SelectTrigger className={`w-[130px] h-9 text-xs font-bold rounded-xl border shadow-none ${STATUS_CONFIG[booking.status].color}`}>
+                          <SelectTrigger className={`w-32.5 h-9 text-xs font-bold rounded-xl border shadow-none ${STATUS_CONFIG[booking.status].color}`}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl shadow-xl border-card-border">

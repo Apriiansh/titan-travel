@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Users, Settings, FileText, Activity, LogOut, Package, BarChart, TrendingUp, Image as ImageIcon, MessageCircle, CheckSquare } from "lucide-react"
+import { Home, Users, Settings, FileText, Activity, LogOut, Package, BarChart, TrendingUp, Image as ImageIcon, MessageCircle, CheckSquare, Landmark } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -52,6 +52,7 @@ export function AppSidebar({ user }: { user: { name: string; email: string; role
       label: "Pengaturan & Bantuan",
       items: [
         { title: "Info Kontak & Chat", url: "/admin/settings/contact", icon: MessageCircle },
+        { title: "Rekening Bank", url: "/admin/settings/bank-accounts", icon: Landmark },
         { title: "Kelola Pengguna", url: "/admin/users", icon: Users },
         { title: "Pengaturan Global", url: "/admin/settings", icon: Settings },
       ]
@@ -65,8 +66,14 @@ export function AppSidebar({ user }: { user: { name: string; email: string; role
       items: [
         { title: "Dashboard", url: "/manager", icon: Home },
         { title: "Validasi", url: "/manager/validation", icon: CheckSquare },
-        { title: "Laporan Perjalanan", url: "/manager/reports", icon: FileText },
         { title: "Aktivitas Sistem", url: "/manager/activity", icon: Activity },
+      ]
+    },
+    {
+      label: "Laporan & Dokumen",
+      items: [
+        { title: "Laporan Transaksi", url: "/manager/reports/bookings", icon: FileText },
+        { title: "Laporan TOPSIS", url: "/manager/reports/topsis", icon: TrendingUp },
       ]
     }
   ];

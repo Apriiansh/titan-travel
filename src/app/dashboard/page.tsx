@@ -26,12 +26,13 @@ export default async function DashboardPage() {
       <Navbar data={getSetting("navbar")} />
       <main className="min-h-screen bg-background">
         {/* Dark Header Background for Transparent Navbar */}
-        <div className="absolute top-0 left-0 w-full h-[300px] bg-slate-900 -z-10" />
+        <div className="absolute top-0 left-0 w-full h-75 bg-slate-900 -z-10" />
         
         <div className="pt-16 sm:pt-20">
           <DashboardClient
             initialBookings={bookings}
             userName={session.name as string}
+            adminPhone={(getSetting("contact") as any)?.id?.whatsapp || "085268111110"}
           />
         </div>
       </main>
