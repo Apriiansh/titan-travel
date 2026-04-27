@@ -5,6 +5,7 @@ import { DashboardClient } from "./DashboardClient";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { prisma } from "@/lib/prisma";
+import { NotificationToast } from "@/components/NotificationToast";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -23,6 +24,7 @@ export default async function DashboardPage() {
 
   return (
     <>
+      <NotificationToast userId={session.id as string} role="USER" />
       <Navbar data={getSetting("navbar")} />
       <main className="min-h-screen bg-background">
         {/* Dark Header Background for Transparent Navbar */}

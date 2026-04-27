@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import Image from "next/image";
+import SafeImage from "@/components/ui/safe-image";
 import Cropper, { Area } from "react-easy-crop";
 import {
   Dialog,
@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getCroppedImg } from "@/lib/utils/crop";
 import { uploadFile } from "@/lib/actions/upload";
-import { X, Upload, Image as ImageIcon, Loader2, Plus, Info, AlertCircle } from "lucide-react";
+import { X, Upload, Image as ImageIcon, Loader2, Plus, Info, AlertCircle, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ImageUploadProps {
@@ -25,6 +25,9 @@ interface ImageUploadProps {
   aspectRatio?: number;
   label?: string;
   helperText?: string;
+  maxSizeMB?: number;
+  maxDimension?: number;
+  quality?: number;
 }
 
 export function ImageUpload({
@@ -34,6 +37,9 @@ export function ImageUpload({
   aspectRatio = 16 / 9,
   label,
   helperText,
+  maxSizeMB = 5,
+  maxDimension = 2400,
+  quality = 0.82,
 }: ImageUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -43,6 +49,8 @@ export function ImageUpload({
   const [isCropping, setIsCropping] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [pendingUrl, setPendingUrl] = useState<string>("");
+  const [showUrlPreview, setShowUrlPreview] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,15 +66,12 @@ export function ImageUpload({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const MAX_FILE_SIZE_MB = 5;
-
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
 
-    // Client-side guard before even opening cropper
-    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-      setUploadError(`File terlalu besar (${(file.size / 1024 / 1024).toFixed(1)} MB). Maksimal ${MAX_FILE_SIZE_MB} MB.`);
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      setUploadError(`File terlalu besar (${(file.size / 1024 / 1024).toFixed(1)} MB). Maksimal ${maxSizeMB} MB.`);
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -93,7 +98,7 @@ export function ImageUpload({
     setUploadError(null);
 
     try {
-      const blob = await getCroppedImg(previewUrl, croppedAreaPixels);
+      const blob = await getCroppedImg(previewUrl, croppedAreaPixels, 0, quality, maxDimension);
       if (!blob) throw new Error("Gagal memproses gambar. Coba lagi.");
 
       // Use the original file extension but keep JPEG MIME type since canvas always outputs JPEG
@@ -144,7 +149,7 @@ export function ImageUpload({
             key={i}
             className="group relative aspect-video rounded-md border border-card-border overflow-hidden bg-muted"
           >
-            <Image
+            <SafeImage
               src={url}
               alt={`Uploaded image ${i + 1}`}
               fill
@@ -210,24 +215,95 @@ export function ImageUpload({
         </div>
       )}
 
-      {/* URL Fallback Input */}
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <ImageIcon className="h-4 w-4 text-foreground-secondary" />
+      {/* URL Input with Preview */}
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <ImageIcon className="h-4 w-4 text-foreground-secondary" />
+            </div>
+            <Input
+              placeholder="Atau masukkan URL gambar langsung..."
+              className="pl-9 h-9 text-xs"
+              value={pendingUrl}
+              onChange={(e) => {
+                setPendingUrl(e.target.value);
+                setShowUrlPreview(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  if (pendingUrl.trim()) setShowUrlPreview(true);
+                }
+              }}
+            />
+          </div>
+          {pendingUrl.trim() && !showUrlPreview && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 px-3 text-xs shrink-0"
+              onClick={() => setShowUrlPreview(true)}
+            >
+              Preview
+            </Button>
+          )}
         </div>
-        <Input
-          placeholder="Atau masukkan URL gambar langsung..."
-          className="pl-9 h-9 text-xs"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              const url = (e.target as HTMLInputElement).value.trim();
-              if (url) {
-                onChange(multiple ? [...values, url] : url);
-                (e.target as HTMLInputElement).value = "";
-              }
-            }
-          }}
-        />
+        <div className="text-[10px] text-foreground-secondary/70 space-y-0.5 px-1">
+          <p>Gunakan <span className="font-semibold">link langsung ke gambar</span> (bukan link halaman web). URL harus diakhiri ekstensi gambar atau berupa direct image link.</p>
+          <p className="text-foreground-secondary/50">
+            ✅ https://images.unsplash.com/photo-xxx?auto=format&w=800
+            &nbsp;&bull;&nbsp; ✅ https://i.imgur.com/abc123.jpg
+            &nbsp;&bull;&nbsp; ❌ https://unsplash.com/photos/xxx
+          </p>
+        </div>
+
+        {showUrlPreview && pendingUrl.trim() && (
+          <div className="rounded-md border border-card-border bg-muted/30 p-3 space-y-3 animate-in fade-in-50 duration-200">
+            <div className="relative aspect-video rounded-md overflow-hidden bg-muted border border-card-border">
+              <img
+                src={pendingUrl.trim()}
+                alt="Preview URL"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                  setUploadError("Gambar tidak bisa dimuat. Pastikan URL valid dan berupa link langsung ke gambar.");
+                }}
+                onLoad={() => setUploadError(null)}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-[10px] text-foreground-secondary truncate max-w-[60%]">{pendingUrl.trim()}</p>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs text-foreground-secondary"
+                  onClick={() => { setPendingUrl(""); setShowUrlPreview(false); setUploadError(null); }}
+                >
+                  <X className="w-3.5 h-3.5 mr-1" />
+                  Batal
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="h-7 px-3 text-xs bg-primary-500 hover:bg-primary-600 text-white gap-1.5"
+                  onClick={() => {
+                    const url = pendingUrl.trim();
+                    onChange(multiple ? [...values, url] : url);
+                    setPendingUrl("");
+                    setShowUrlPreview(false);
+                  }}
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  Gunakan URL
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Crop Modal — full responsive */}

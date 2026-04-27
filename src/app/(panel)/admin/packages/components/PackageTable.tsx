@@ -1,5 +1,5 @@
 "use client";
-import NextImage from "next/image";
+import SafeImage from "@/components/ui/safe-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/panel/ConfirmDialog";
@@ -76,7 +76,7 @@ export function PackageTable({
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-md overflow-hidden bg-muted shrink-0 relative">
                       {pkg.images?.[0] ? (
-                        <NextImage
+                        <SafeImage
                           src={pkg.images[0]}
                           alt={pkg.title.id || "Package"}
                           fill

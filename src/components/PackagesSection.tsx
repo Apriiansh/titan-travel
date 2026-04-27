@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Star, MapPin, Clock, Users, ArrowRight, Sparkles, ThumbsUp, CheckCircle2, Info } from "lucide-react";
-import Image from "next/image";
+import SafeImage from "@/components/ui/safe-image";
 import Link from "next/link";
 import { useLocale } from "@/lib/LocaleContext";
 
@@ -100,7 +100,7 @@ export default function PackagesSection({
             >
               {/* Image Container */}
               <div className="relative h-56 sm:h-64 overflow-hidden">
-                <Image
+                <SafeImage
                   src={
                     (pkg.images &&
                       Array.isArray(pkg.images) &&

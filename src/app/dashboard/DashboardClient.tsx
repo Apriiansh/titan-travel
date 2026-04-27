@@ -17,7 +17,6 @@ import {
   AlertCircle,
   Compass,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
 import { uploadPaymentProof } from "@/lib/actions/bookings";
@@ -29,6 +28,7 @@ import { translations } from "@/lib/translations";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CountdownTimer } from "@/components/CountdownTimer";
 
 export function DashboardClient({
   initialBookings,
@@ -265,6 +265,11 @@ export function DashboardClient({
                             {/* Info Section */}
                             <div className="flex-1 p-6 sm:p-8 flex flex-col justify-between">
                               <div>
+                                {booking.status === "PENDING" && booking.paymentDeadline && (
+                                  <div className="mb-4">
+                                    <CountdownTimer deadline={booking.paymentDeadline} />
+                                  </div>
+                                )}
                                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
                                   <div className="space-y-1">
                                     <p className="text-[10px] font-bold text-primary-500 uppercase tracking-widest">

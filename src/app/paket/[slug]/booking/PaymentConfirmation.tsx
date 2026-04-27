@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { uploadPaymentProof } from "@/lib/actions/bookings";
 import { uploadFile } from "@/lib/actions/upload";
-import Image from "next/image";
+import SafeImage from "@/components/ui/safe-image";
 
 type BankAccount = {
   id: string;
@@ -157,7 +157,7 @@ export function PaymentConfirmation({
                 >
                   {bank.imageUrl ? (
                     <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-100 shrink-0 relative">
-                      <Image
+                      <SafeImage
                         src={bank.imageUrl}
                         alt={bank.bankName}
                         fill
@@ -237,7 +237,7 @@ export function PaymentConfirmation({
                 </p>
                 {previewUrl && (
                   <div className="relative w-48 h-48 mx-auto rounded-xl overflow-hidden border border-slate-200 mt-4">
-                    <Image
+                    <SafeImage
                       src={previewUrl}
                       alt="Bukti Pembayaran"
                       fill
@@ -264,7 +264,7 @@ export function PaymentConfirmation({
                   </>
                 ) : previewUrl ? (
                   <div className="relative w-48 h-48 rounded-xl overflow-hidden border border-slate-200">
-                    <Image
+                    <SafeImage
                       src={previewUrl}
                       alt="Preview"
                       fill

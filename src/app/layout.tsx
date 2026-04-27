@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LocaleProvider } from "@/lib/LocaleContext";
 import { cn } from "@/lib/utils";
+import { Toaster } from "sonner";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -57,6 +58,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <LocaleProvider>{children}</LocaleProvider>
+          <Toaster position="top-right" richColors closeButton duration={5000} />
         </ThemeProvider>
       </body>
     </html>

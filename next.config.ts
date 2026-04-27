@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
         pathname: "/uploads/**",
         search: "",
       },
+      {
+        pathname: "/*.png",
+        search: "",
+      },
     ],
 
     // External image hosts that are allowed

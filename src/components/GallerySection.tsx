@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
+import SafeImage from "@/components/ui/safe-image";
 import { useLocale } from "@/lib/LocaleContext";
 
 export default function GallerySection({ dbData, settingsData }: { dbData?: any[], settingsData?: any }) {
@@ -73,8 +73,8 @@ export default function GallerySection({ dbData, settingsData }: { dbData?: any[
                                 style={{ flex: isActive ? 5 : 1 }}
                                 className="group relative rounded-xl md:rounded-3xl overflow-hidden cursor-pointer transition-all duration-700 ease-in-out"
                             >
-                                <Image
-                                    src={item.imageUrl || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"}
+                                <SafeImage
+                                    src={item.imageUrl || "/placeholder.jpg"}
                                     alt={dt(item.title || "Gallery Image")}
                                     fill
                                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 40vw"
@@ -93,15 +93,14 @@ export default function GallerySection({ dbData, settingsData }: { dbData?: any[
                                 />
 
                                 {/* Konten Kartu */}
-                                <div className="absolute inset-0 w-full h-full">
-                                    
+                                <div className="absolute inset-0 w-full h-full overflow-hidden">
                                     {/* Teks Vertikal di PC / Teks Tengah di HP (Saat kartu menyempit) */}
                                     <div 
-                                        className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${
-                                            isActive ? "opacity-0 pointer-events-none" : "opacity-100 delay-200"
+                                        className={`absolute inset-0 flex items-end md:items-center justify-center pb-6 md:pb-0 transition-all duration-300 ${
+                                            isActive ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100 delay-150"
                                         }`}
                                     >
-                                        <h3 className="text-white font-bold text-xs sm:text-sm md:text-xl tracking-[0.1em] md:tracking-[0.2em] px-2 text-center transform md:-rotate-90 uppercase drop-shadow-md">
+                                        <h3 className="text-white font-bold text-xs sm:text-sm md:text-xl tracking-widest px-2 text-center whitespace-nowrap transform md:-rotate-90 uppercase drop-shadow-md">
                                             {dt(item.title || "Nama")}
                                         </h3>
                                     </div>
@@ -109,7 +108,7 @@ export default function GallerySection({ dbData, settingsData }: { dbData?: any[
                                     {/* Teks Horizontal (Saat kartu melebar) */}
                                     <div 
                                         className={`absolute bottom-0 left-0 p-4 md:p-8 w-full flex flex-col justify-end transition-all duration-500 transform ${
-                                            isActive ? "opacity-100 translate-y-0 delay-300" : "opacity-0 translate-y-10 pointer-events-none"
+                                            isActive ? "opacity-100 translate-y-0 delay-150" : "opacity-0 translate-y-6 pointer-events-none"
                                         }`}
                                     >
                                         <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
@@ -155,15 +154,14 @@ export default function GallerySection({ dbData, settingsData }: { dbData?: any[
                         <ChevronRight className="w-5 h-5" />
                     </button>
 
-                    <Image
-                        src={gallery[lightbox].imageUrl || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80"}
+                    <SafeImage
+                        src={gallery[lightbox].imageUrl || "/placeholder.jpg"}
                         alt={dt(gallery[lightbox].title || "Gambar Terpilih")}
                         width={1600}
                         height={1067}
                         sizes="90vw"
                         priority
                         className="max-w-[90vw] sm:max-w-full max-h-[80vh] sm:max-h-[85vh] object-contain rounded-md"
-                        onClick={(e) => e.stopPropagation()}
                     />
                     <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 text-center w-full px-4">
                         <h3 className="text-white text-base sm:text-2xl font-bold font-(family-name:--font-playfair)">

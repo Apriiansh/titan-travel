@@ -6,7 +6,8 @@ export async function getCroppedImg(
   imageSrc: string,
   pixelCrop: { x: number; y: number; width: number; height: number },
   rotation: number = 0,
-  quality: number = 0.82
+  quality: number = 0.82,
+  maxDimension: number = 2400
 ): Promise<Blob | null> {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
@@ -29,12 +30,10 @@ export async function getCroppedImg(
   ctx.translate(-image.width / 2, -image.height / 2);
   ctx.drawImage(image, 0, 0);
 
-  // Clamp output resolution to avoid enormous files from huge source images
-  const MAX_DIMENSION = 2400;
-  const outputWidth = Math.min(pixelCrop.width, MAX_DIMENSION);
+  const outputWidth = Math.min(pixelCrop.width, maxDimension);
   const outputHeight = Math.min(
     pixelCrop.height,
-    Math.round((pixelCrop.height / pixelCrop.width) * MAX_DIMENSION)
+    Math.round((pixelCrop.height / pixelCrop.width) * maxDimension)
   );
 
   const croppedCanvas = document.createElement("canvas");

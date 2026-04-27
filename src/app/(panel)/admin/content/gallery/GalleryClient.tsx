@@ -23,7 +23,7 @@ import { Plus, Pencil, Trash2, Loader2, Image as ImageIcon, CheckCircle, Sparkle
 import { useRouter } from "next/navigation";
 import { ImageUpload } from "@/components/panel/ImageUpload";
 import { Badge } from "@/components/ui/badge";
-import NextImage from "next/image";
+import SafeImage from "@/components/ui/safe-image";
 
 type GalleryContent = {
   id: string;
@@ -183,8 +183,8 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
               className="group rounded-md border border-card-border overflow-hidden bg-card-bg transition-all hover:shadow-md"
             >
               <div className="relative aspect-video overflow-hidden bg-muted">
-                <NextImage
-                  src={item.imageUrl}
+                <SafeImage
+                  src={item.imageUrl || "/placeholder.jpg"}
                   alt={item.title.id}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -249,10 +249,13 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
                 <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preview Media</Label>
                 <ImageUpload
                    label="Foto Galeri"
-                   helperText="Rasio 4:3 direkomendasikan."
+                   helperText="Maks 2MB. Rasio 4:3 direkomendasikan."
                    aspectRatio={4 / 3}
                    value={form.imageUrl}
                    onChange={(url) => f("imageUrl", Array.isArray(url) ? url[0] : (url as string))}
+                   maxSizeMB={2}
+                   maxDimension={1600}
+                   quality={0.75}
                 />
               </div>
 

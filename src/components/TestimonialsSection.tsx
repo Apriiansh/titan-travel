@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Star, Quote } from "lucide-react";
-import Image from "next/image";
+import SafeImage from "@/components/ui/safe-image";
 import { useLocale } from "@/lib/LocaleContext";
 
 export default function TestimonialsSection({ dbData, settingsData }: { dbData?: any[], settingsData?: any }) {
@@ -60,7 +60,7 @@ export default function TestimonialsSection({ dbData, settingsData }: { dbData?:
                             {/* Author */}
                             <div className="flex items-center gap-3 pt-3 sm:pt-4 border-t border-card-border">
                                 {item.avatar && (item.avatar.startsWith('http') || item.avatar.startsWith('/')) ? (
-                                    <Image
+                                    <SafeImage
                                         src={item.avatar}
                                         alt={item.name}
                                         width={44}

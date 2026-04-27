@@ -15,7 +15,7 @@ import {
   Share2,
   ArrowRight,
 } from "lucide-react";
-import Image from "next/image";
+import SafeImage from "@/components/ui/safe-image";
 import Link from "next/link";
 import { useLocale } from "@/lib/LocaleContext";
 
@@ -74,7 +74,7 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
             {/* Image Gallery */}
             <div className="space-y-4">
               <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 group shadow-2xl">
-                <Image
+                <SafeImage
                   src={images[activeImage]}
                   alt={dt(pkg.title)}
                   fill
@@ -100,7 +100,7 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
                       onClick={() => setActiveImage(idx)}
                       className={`relative w-24 sm:w-32 aspect-video rounded-lg overflow-hidden border-2 transition-all shrink-0 ${activeImage === idx ? "border-primary-500 scale-95 shadow-lg" : "border-white/10 opacity-60 hover:opacity-100"}`}
                     >
-                      <Image
+                      <SafeImage
                         src={img}
                         alt={`Thumb ${idx}`}
                         fill

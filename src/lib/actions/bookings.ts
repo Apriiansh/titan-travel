@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { createNotification } from "@/lib/actions/notifications";
 
 function serializeBooking(b: any) {
   if (!b) return null;
@@ -121,6 +122,8 @@ export async function createBooking(data: {
     amountPaid = totalPrice * 0.3;
   }
 
+  const paymentDeadline = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
   const booking = await prisma.booking.create({
     data: {
       userId: data.userId,
@@ -135,7 +138,17 @@ export async function createBooking(data: {
       amountPaid,
       status: "PENDING",
       notes: data.notes,
+      paymentDeadline,
     },
+  });
+
+  const pkgTitle = pkg ? ((pkg.title as any)?.id || "Paket Wisata") : "Paket Wisata";
+  await createNotification({
+    role: "ADMIN",
+    type: "BOOKING_NEW",
+    title: "Booking Baru",
+    message: `${data.name} memesan ${pkgTitle} untuk ${data.pax} orang (${data.paymentType}). Total: Rp ${amountPaid.toLocaleString("id-ID")}`,
+    linkUrl: "/admin/bookings",
   });
 
   revalidatePath("/admin/bookings");
@@ -157,19 +170,41 @@ export async function deleteBooking(id: string) {
 }
 
 export async function uploadPaymentProof(bookingId: string, imageUrl: string) {
-  await prisma.booking.update({
+  const booking = await prisma.booking.update({
     where: { id: bookingId },
     data: { paymentProof: imageUrl },
+    select: { id: true, name: true },
   });
+
+  await createNotification({
+    role: "ADMIN",
+    type: "PAYMENT_PROOF",
+    title: "Bukti Pembayaran Diunggah",
+    message: `${booking.name} telah mengunggah bukti pembayaran. Silakan verifikasi.`,
+    linkUrl: "/admin/bookings",
+  });
+
   revalidatePath("/admin/bookings");
   revalidatePath("/dashboard");
 }
 
 export async function verifyPayment(bookingId: string) {
-  await prisma.booking.update({
+  const booking = await prisma.booking.update({
     where: { id: bookingId },
     data: { status: "CONFIRMED" },
+    select: { id: true, userId: true, name: true },
   });
+
+  if (booking.userId) {
+    await createNotification({
+      userId: booking.userId,
+      type: "PAYMENT_VERIFIED",
+      title: "Pembayaran Terverifikasi ✅",
+      message: `Halo ${booking.name}, pembayaran Anda telah diverifikasi. Terima kasih!`,
+      linkUrl: "/dashboard",
+    });
+  }
+
   revalidatePath("/admin/bookings");
   revalidatePath("/dashboard");
 }
