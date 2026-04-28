@@ -21,7 +21,7 @@ import Link from "next/link";
 import { useLocale } from "@/lib/LocaleContext";
 import { translations } from "@/lib/translations";
 
-export default function PackageDetailClient({ pkg }: { pkg: any }) {
+export default function PackageDetailClient({ pkg, adminPhone = "" }: { pkg: any; adminPhone?: string }) {
   const { dt, locale } = useLocale();
   const t = translations[locale as keyof typeof translations]?.packageDetail || translations.id.packageDetail;
   const [activeImage, setActiveImage] = useState(0);
@@ -274,10 +274,6 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
                     {t.bookNow}
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
-                  <button className="w-full py-4 rounded-xl border border-card-border bg-foreground/2 text-foreground font-bold hover:bg-foreground/5 transition-all flex items-center justify-center gap-2">
-                    <MessageSquare className="w-5 h-5" />
-                    {t.whatsappCta}
-                  </button>
                 </div>
 
                 <p className="text-[10px] text-center text-foreground-secondary leading-relaxed">
@@ -285,8 +281,12 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
                 </p>
               </div>
 
-              {/* Help Card */}
-              <div className="p-6 rounded-2xl bg-primary-500/5 border border-primary-500/10 flex items-center gap-4 group cursor-pointer hover:bg-primary-500/10 transition-colors">
+              {/* Help Card — Chat WA Admin */}
+              <a
+                href={`https://api.whatsapp.com/send?phone=${adminPhone.startsWith("0") ? "62" + adminPhone.slice(1) : adminPhone}&text=${encodeURIComponent(`Halo Admin Titan Travel, saya ingin bertanya tentang paket ${typeof pkg.title === "object" ? (pkg.title as any)?.[locale] || (pkg.title as any)?.id : pkg.title}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-6 rounded-2xl bg-primary-500/5 border border-primary-500/10 flex items-center gap-4 group cursor-pointer hover:bg-primary-500/10 transition-all duration-300">
                 <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-primary-500 shadow-sm">
                   <MessageSquare className="w-6 h-6" />
                 </div>
@@ -299,7 +299,7 @@ export default function PackageDetailClient({ pkg }: { pkg: any }) {
                   </p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-foreground-secondary ml-auto group-hover:translate-x-1 transition-transform" />
-              </div>
+              </a>
             </div>
           </div>
         </div>

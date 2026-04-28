@@ -69,7 +69,7 @@ export default async function PackageDetailPage({ params }: { params: Promise<{ 
       <Navbar data={getSetting("navbar")} />
       <main className="min-h-screen bg-slate-900 dark:bg-slate-950">
         <div className="pt-16 sm:pt-20">
-          <PackageDetailClient pkg={serializedPkg} />
+          <PackageDetailClient pkg={serializedPkg} adminPhone={(getSetting("contact") as any)?.id?.whatsapp || "085268111110"} />
         </div>
       </main>
       <Footer data={getSetting("footer")} />
