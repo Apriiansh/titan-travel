@@ -10,6 +10,8 @@ import Footer from "@/components/Footer";
 import { getPersonalizedRecommendations } from "@/lib/actions/recommendation";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   // Fetch from DB
   const [settings, testimonials, gallery, rankedPackages] = await Promise.all([

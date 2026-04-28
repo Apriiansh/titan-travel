@@ -5,6 +5,8 @@ import CatalogClient from "./CatalogClient";
 import { getPackages } from "@/lib/actions/packages";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Semua Paket Wisata | Titan Travel",
   description:
