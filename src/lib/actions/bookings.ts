@@ -208,3 +208,54 @@ export async function verifyPayment(bookingId: string) {
   revalidatePath("/admin/bookings");
   revalidatePath("/dashboard");
 }
+
+export async function uploadSettlementProof(bookingId: string, imageUrl: string) {
+  const booking = await prisma.booking.update({
+    where: { id: bookingId },
+    data: { settlementProof: imageUrl },
+    select: { id: true, name: true },
+  });
+
+  await createNotification({
+    role: "ADMIN",
+    type: "SETTLEMENT_PROOF",
+    title: "Bukti Pelunasan Diunggah",
+    message: `${booking.name} telah mengunggah bukti pelunasan. Silakan verifikasi.`,
+    linkUrl: "/admin/bookings",
+  });
+
+  revalidatePath("/admin/bookings");
+  revalidatePath("/dashboard");
+}
+
+export async function verifySettlement(bookingId: string) {
+  // Get current booking to access totalPrice
+  const currentBooking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    select: { totalPrice: true, userId: true, name: true },
+  });
+
+  if (!currentBooking) throw new Error("Booking not found");
+
+  const booking = await prisma.booking.update({
+    where: { id: bookingId },
+    data: {
+      status: "COMPLETED",
+      amountPaid: currentBooking.totalPrice,
+    },
+    select: { id: true, userId: true, name: true },
+  });
+
+  if (booking.userId) {
+    await createNotification({
+      userId: booking.userId,
+      type: "SETTLEMENT_VERIFIED",
+      title: "Pelunasan Terverifikasi ✅",
+      message: `Halo ${booking.name}, pelunasan Anda telah diverifikasi. Terima kasih! Total pembayaran: Rp ${Number(currentBooking.totalPrice).toLocaleString("id-ID")}`,
+      linkUrl: "/dashboard",
+    });
+  }
+
+  revalidatePath("/admin/bookings");
+  revalidatePath("/dashboard");
+}

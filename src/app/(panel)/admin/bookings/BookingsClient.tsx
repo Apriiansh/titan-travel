@@ -18,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { deleteBooking, updateBookingStatus, verifyPayment } from "@/lib/actions/bookings";
+import { deleteBooking, updateBookingStatus, verifyPayment, verifySettlement } from "@/lib/actions/bookings";
 import { Trash2, Loader2, MessageSquare, MoreVertical, ExternalLink, Calendar, Users, CreditCard, Image as ImageIcon, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -36,6 +36,7 @@ type Booking = {
   status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
   notes?: string | null;
   paymentProof?: string | null;
+  settlementProof?: string | null;
   createdAt: Date;
   package?: any;
 };
@@ -74,6 +75,24 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
       try {
         await deleteBooking(id);
         setData((prev) => prev.filter((b) => b.id !== id));
+        refresh();
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  }
+
+  function handleVerifySettlement(id: string) {
+    startTransition(async () => {
+      try {
+        await verifySettlement(id);
+        setData((prev) =>
+          prev.map((b) =>
+            b.id === id
+              ? { ...b, status: "COMPLETED", amountPaid: b.totalPrice }
+              : b
+          )
+        );
         refresh();
       } catch (err) {
         console.error(err);
@@ -236,6 +255,30 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                             >
                               <CheckCircle className="w-3 h-3" />
                               Verifikasi Pembayaran
+                            </Button>
+                          )}
+                          {/* Settlement Proof */}
+                          {booking.settlementProof && (
+                            <a
+                              href={booking.settlementProof}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+                            >
+                              <ImageIcon className="w-3 h-3" />
+                              Lihat Bukti Pelunasan
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
+                          {booking.status === "CONFIRMED" && booking.settlementProof && (
+                            <Button
+                              size="sm"
+                              className="mt-2 h-7 px-3 text-[10px] font-bold bg-primary-500 hover:bg-primary-600 text-white rounded-lg gap-1"
+                              onClick={() => handleVerifySettlement(booking.id)}
+                              disabled={isPending}
+                            >
+                              <CheckCircle className="w-3 h-3" />
+                              Verifikasi Pelunasan
                             </Button>
                           )}
                         </div>

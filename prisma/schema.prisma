@@ -137,6 +137,7 @@ model Booking {
   status      BookingStatus @default(PENDING)
   notes     String?       @db.Text
   paymentProof String?    @db.Text
+  settlementProof String? @db.Text
   paymentDeadline DateTime?
 
   user    User?        @relation(fields: [userId], references: [id])

@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { uploadPaymentProof } from "@/lib/actions/bookings";
+import { uploadPaymentProof, uploadSettlementProof } from "@/lib/actions/bookings";
 import { uploadFile } from "@/lib/actions/upload";
 import { id, enUS } from "date-fns/locale";
 import { useRouter } from "next/navigation";
@@ -83,6 +83,7 @@ export function DashboardClient({
   };
 
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [uploadingSettlementId, setUploadingSettlementId] = useState<string | null>(null);
 
   const handleUploadProof = async (bookingId: string, file: File) => {
     setUploadingId(bookingId);
@@ -102,6 +103,27 @@ export function DashboardClient({
       alert(t.actions?.failed || "Gagal upload bukti pembayaran.");
     } finally {
       setUploadingId(null);
+    }
+  };
+
+  const handleUploadSettlement = async (bookingId: string, file: File) => {
+    setUploadingSettlementId(bookingId);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const result = await uploadFile(formData);
+      if (result.success && result.url) {
+        await uploadSettlementProof(bookingId, result.url);
+        setBookings((prev) =>
+          prev.map((b) =>
+            b.id === bookingId ? { ...b, settlementProof: result.url } : b
+          )
+        );
+      }
+    } catch {
+      alert(t.actions?.failed || "Gagal upload bukti pelunasan.");
+    } finally {
+      setUploadingSettlementId(null);
     }
   };
 
@@ -265,7 +287,7 @@ export function DashboardClient({
                             {/* Info Section */}
                             <div className="flex-1 flex flex-col justify-between">
                               <div>
-                                {booking.status === "PENDING" && booking.paymentDeadline && (
+                                {booking.status === "PENDING" && booking.paymentDeadline && !booking.paymentProof && (
                                   <div className="mb-4">
                                     <CountdownTimer
                                       deadline={booking.paymentDeadline}
@@ -377,6 +399,40 @@ export function DashboardClient({
                                   {booking.status === "PENDING" && booking.paymentProof && (
                                     <Badge className="bg-amber-100 text-amber-700 border-amber-200 border px-4 py-2 text-xs font-bold">
                                       {t.actions?.awaitingVerification || "Menunggu Verifikasi"}
+                                    </Badge>
+                                  )}
+                                  {/* Settlement upload for CONFIRMED bookings with remaining balance */}
+                                  {booking.status === "CONFIRMED" &&
+                                    booking.paymentType !== "FULL" &&
+                                    Number(booking.amountPaid) < Number(booking.totalPrice) &&
+                                    !booking.settlementProof && (
+                                      <label className="flex-1 sm:flex-none cursor-pointer">
+                                        <input
+                                          type="file"
+                                          accept="image/*"
+                                          className="hidden"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) handleUploadSettlement(booking.id, file);
+                                          }}
+                                          disabled={uploadingSettlementId === booking.id}
+                                        />
+                                        <span className="inline-flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl h-11 px-6 font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all hover:scale-105 cursor-pointer w-full">
+                                          {uploadingSettlementId === booking.id
+                                            ? (t.actions?.uploading || "Mengupload...")
+                                            : (t.actions?.uploadSettlement || "Upload Bukti Pelunasan")}
+                                        </span>
+                                      </label>
+                                  )}
+                                  {booking.status === "CONFIRMED" && booking.settlementProof && (
+                                    <Badge className="bg-amber-100 text-amber-700 border-amber-200 border px-4 py-2 text-xs font-bold">
+                                      {t.actions?.awaitingSettlement || "Menunggu Verifikasi Pelunasan"}
+                                    </Badge>
+                                  )}
+                                  {booking.status === "COMPLETED" && (
+                                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 border px-4 py-2 text-xs font-bold">
+                                      <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                                      {t.actions?.fullPayment || "Lunas"}
                                     </Badge>
                                   )}
                                 </div>
