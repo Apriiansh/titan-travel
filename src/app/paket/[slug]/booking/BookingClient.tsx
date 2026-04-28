@@ -19,6 +19,8 @@ import {
 import { createBooking, getAvailableQuota } from "@/lib/actions/bookings";
 import { useRouter } from "next/navigation";
 import { PaymentConfirmation } from "./PaymentConfirmation";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 type QuotaInfo = {
   capacity: number;
@@ -45,6 +47,8 @@ export function BookingClient({
   bankAccounts?: BankAccount[];
   adminPhone?: string;
 }) {
+  const { locale } = useLocale();
+  const t = (translations[locale as keyof typeof translations] as any)?.bookingPage || translations.id.bookingPage;
   const [pax, setPax] = useState(1);
   const [date, setDate] = useState("");
   
@@ -116,10 +120,16 @@ export function BookingClient({
       ? Number(currentTier.originalPrice) * pax - totalPrice
       : 0;
 
+  const formatPrice = (amount: number) => {
+    if (locale === "en") return `$ ${(amount / 15000).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+    if (locale === "ms") return `RM ${(amount / 3500).toLocaleString("ms-MY", { maximumFractionDigits: 0 })}`;
+    return `Rp ${amount.toLocaleString("id-ID")}`;
+  };
+
   const paymentOptions: { key: "FULL" | "HALF" | "DP"; label: string; pct: string; desc: string }[] = [
-    { key: "FULL", label: "Lunas", pct: "100%", desc: "Bayar sekarang" },
-    { key: "HALF", label: "Setengah", pct: "50%", desc: "Sisa saat tour" },
-    { key: "DP", label: "DP", pct: "30%", desc: "Min. down payment" },
+    { key: "FULL", label: t.payFull, pct: "100%", desc: t.payFullDesc },
+    { key: "HALF", label: t.payHalf, pct: "50%", desc: t.payHalfDesc },
+    { key: "DP", label: t.payDp, pct: "30%", desc: t.payDpDesc },
   ];
 
   // --- Quota status badge ---
@@ -129,7 +139,7 @@ export function BookingClient({
       return (
         <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-1.5">
           <Loader2 className="w-3 h-3 animate-spin" />
-          Mengecek ketersediaan...
+          {t.checkingAvailability}
         </div>
       );
     }
@@ -140,8 +150,8 @@ export function BookingClient({
         <div className="flex items-center gap-2 mt-2 px-3 py-2.5 rounded-xl bg-red-50 border border-red-200">
           <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
           <div>
-            <p className="text-xs font-bold text-red-700">Kuota Penuh</p>
-            <p className="text-[10px] text-red-500">{booked}/{capacity} peserta sudah terdaftar</p>
+            <p className="text-xs font-bold text-red-700">{t.quotaFullTitle}</p>
+            <p className="text-[10px] text-red-500">{t.quotaFullDesc.replace("{booked}", booked).replace("{capacity}", capacity)}</p>
           </div>
         </div>
       );
@@ -151,8 +161,8 @@ export function BookingClient({
         <div className="flex items-center gap-2 mt-2 px-3 py-2.5 rounded-xl bg-amber-50 border border-amber-200">
           <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
           <div>
-            <p className="text-xs font-bold text-amber-700">Hampir Penuh — Sisa {available} kursi</p>
-            <p className="text-[10px] text-amber-600">{booked}/{capacity} peserta sudah terdaftar</p>
+            <p className="text-xs font-bold text-amber-700">{t.almostFullTitle.replace("{count}", available)}</p>
+            <p className="text-[10px] text-amber-600">{t.almostFullDesc.replace("{booked}", booked).replace("{capacity}", capacity)}</p>
           </div>
         </div>
       );
@@ -161,8 +171,8 @@ export function BookingClient({
       <div className="flex items-center gap-2 mt-2 px-3 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200">
         <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />
         <div>
-          <p className="text-xs font-bold text-emerald-700">{available} kursi tersedia</p>
-          <p className="text-[10px] text-emerald-600">{booked}/{capacity} peserta sudah terdaftar</p>
+          <p className="text-xs font-bold text-emerald-700">{t.seatsAvailable.replace("{count}", available)}</p>
+          <p className="text-[10px] text-emerald-600">{t.seatsAvailableDesc.replace("{booked}", booked).replace("{capacity}", capacity)}</p>
         </div>
       </div>
     );
@@ -173,15 +183,15 @@ export function BookingClient({
     setErrorMsg("");
 
     if (!date || !name || !email || !phone) {
-      setErrorMsg("Mohon isi semua data yang diperlukan.");
+      setErrorMsg(t.fillAllFields);
       return;
     }
     if (quotaInfo && pax > quotaInfo.available) {
-      setErrorMsg(`Sisa kuota hanya ${quotaInfo.available} pax untuk tanggal ini.`);
+      setErrorMsg(t.quotaLeft.replace("{count}", quotaInfo.available));
       return;
     }
     if (quotaInfo?.available === 0) {
-      setErrorMsg("Tidak ada kuota tersisa untuk tanggal ini. Pilih tanggal lain.");
+      setErrorMsg(t.noQuota);
       return;
     }
 
@@ -206,7 +216,7 @@ export function BookingClient({
           });
         }
       } catch (err: any) {
-        setErrorMsg(err?.message || "Gagal membuat booking. Silakan coba lagi.");
+        setErrorMsg(err?.message || t.bookingFailed);
       }
     });
   };
@@ -238,18 +248,18 @@ export function BookingClient({
             <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-100 text-primary-600">
               <Users className="w-4 h-4" />
             </span>
-            <p className="text-sm font-bold text-slate-800">Informasi Pemesan</p>
+            <p className="text-sm font-bold text-slate-800">{t.bookerInfo}</p>
           </div>
 
           <CardContent className="p-6 space-y-4">
             <div className="space-y-2">
               <Label className="text-xs font-semibold text-slate-600">
-                Nama Lengkap
+                {t.fullName}
               </Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Masukkan nama sesuai KTP"
+                placeholder={t.namePlaceholder}
                 className="h-11 rounded-xl border-slate-200 focus:border-primary-400 focus:ring-primary-400/20"
               />
             </div>
@@ -266,7 +276,7 @@ export function BookingClient({
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-semibold text-slate-600">
-                  Nomor WhatsApp
+                  {t.whatsappNumber}
                 </Label>
                 <Input
                   value={phone}
@@ -285,14 +295,14 @@ export function BookingClient({
             <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-100 text-primary-600">
               <Calendar className="w-4 h-4" />
             </span>
-            <p className="text-sm font-bold text-slate-800">Detail Perjalanan</p>
+            <p className="text-sm font-bold text-slate-800">{t.tripDetail}</p>
           </div>
 
           <CardContent className="p-6 space-y-6">
             {/* Tanggal & Quota */}
             <div className="space-y-1">
               <Label className="text-xs font-semibold text-slate-600">
-                Tanggal Keberangkatan
+                {t.departureDate}
               </Label>
               <Input
                 type="date"
@@ -309,11 +319,11 @@ export function BookingClient({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-semibold text-slate-600">
-                  Jumlah Peserta (Pax)
+                  {t.paxCount}
                 </Label>
                 {quotaInfo && quotaInfo.available > 0 && (
                   <span className="text-[10px] text-slate-400 font-medium">
-                    Maks. {quotaInfo.available} untuk tanggal ini
+                    {t.maxForDate.replace("{count}", quotaInfo.available)}
                   </span>
                 )}
               </div>
@@ -338,7 +348,7 @@ export function BookingClient({
                 <div className="flex items-start gap-1.5 mt-1">
                   <Info className="w-3 h-3 text-primary-400 shrink-0 mt-0.5" />
                   <p className="text-[10px] text-slate-400">
-                    Harga berubah sesuai jumlah peserta (tiered pricing)
+                    {t.tieredPricingHint}
                   </p>
                 </div>
               )}
@@ -347,7 +357,7 @@ export function BookingClient({
             {/* Payment type selector */}
             <div className="space-y-3">
               <Label className="text-xs font-semibold text-slate-600">
-                Metode Pembayaran
+                {t.paymentMethod}
               </Label>
               <div className="grid grid-cols-3 gap-3">
                 {paymentOptions.map((opt) => (
@@ -411,10 +421,10 @@ export function BookingClient({
               </span>
               <div>
                 <p className="text-sm font-bold text-white leading-tight">
-                  Ringkasan Biaya
+                  {t.costSummary}
                 </p>
                 <p className="text-[10px] text-slate-400 uppercase tracking-widest mt-0.5">
-                  Detail Transaksi
+                  {t.transactionDetail}
                 </p>
               </div>
             </div>
@@ -424,31 +434,31 @@ export function BookingClient({
           <div className="bg-white p-6 space-y-5">
             {/* Package name */}
             <div className="pb-3 border-b border-dashed border-slate-100">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Paket</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{t.packageLabel}</p>
               <p className="text-sm font-bold text-slate-800 leading-tight line-clamp-2">
-                {(packageData.title as any)?.id || "Paket Wisata"}
+                {(packageData.title as any)?.[locale] || (packageData.title as any)?.id || t.packageLabel}
               </p>
             </div>
 
             {/* Tier info row */}
             <div className="flex items-center justify-between pb-4 border-b border-dashed border-slate-100">
               <div>
-                <p className="text-xs font-bold text-slate-700">Harga per Orang</p>
+                <p className="text-xs font-bold text-slate-700">{t.pricePerPerson}</p>
                 <p className="text-[10px] text-slate-400 mt-0.5">
-                  Tier {pax} peserta
+                  {t.tierLabel.replace("{count}", pax)}
                 </p>
               </div>
               <div className="text-right">
                 <p className="text-sm font-black text-slate-900">
-                  Rp {unitPrice.toLocaleString("id-ID")}
+                  {formatPrice(unitPrice)}
                 </p>
-                <p className="text-[10px] text-slate-400">/ orang</p>
+                <p className="text-[10px] text-slate-400">{t.perPerson}</p>
               </div>
             </div>
 
             {/* Pax row */}
             <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-500">Jumlah Peserta</span>
+              <span className="text-xs text-slate-500">{t.paxLabel}</span>
               <span className="text-xs font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full">
                 {pax}x
               </span>
@@ -459,7 +469,7 @@ export function BookingClient({
               <div className="flex items-center gap-2 py-2 px-3 rounded-xl bg-green-50 border border-green-100">
                 <span className="text-green-600 text-xs">🎉</span>
                 <p className="text-[11px] font-bold text-green-700">
-                  Hemat Rp {savings.toLocaleString("id-ID")} untuk tier ini!
+                  {t.savingsLabel.replace("{amount}", formatPrice(savings))}
                 </p>
               </div>
             )}
@@ -467,10 +477,10 @@ export function BookingClient({
             {/* Subtotal */}
             <div className="flex items-baseline justify-between pt-1 border-t border-slate-100">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-tight">
-                Subtotal
+                {t.subtotal}
               </span>
               <p className="text-xl font-black text-primary-600">
-                Rp {totalPrice.toLocaleString("id-ID")}
+                {formatPrice(totalPrice)}
               </p>
             </div>
 
@@ -478,23 +488,23 @@ export function BookingClient({
             <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                  Metode
+                  {t.methodLabel}
                 </span>
                 <span className="text-[10px] font-bold text-primary-600 bg-primary-50 px-2 py-0.5 rounded-full">
                   {paymentType === "FULL" ? "LUNAS 100%" : paymentType === "HALF" ? "50%" : "DP 30%"}
                 </span>
               </div>
               <div className="flex items-baseline justify-between">
-                <span className="text-xs font-semibold text-slate-600">Wajib Bayar Sekarang</span>
+                <span className="text-xs font-semibold text-slate-600">{t.payNowLabel}</span>
                 <span className="text-xl font-black text-slate-900">
-                  Rp {amountToPay.toLocaleString("id-ID")}
+                  {formatPrice(amountToPay)}
                 </span>
               </div>
               {paymentType !== "FULL" && (
                 <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-200">
-                  <span>Sisa tagihan</span>
+                  <span>{t.remainingBill}</span>
                   <span className="font-bold">
-                    Rp {(totalPrice - amountToPay).toLocaleString("id-ID")}
+                    {formatPrice(totalPrice - amountToPay)}
                   </span>
                 </div>
               )}
@@ -503,7 +513,7 @@ export function BookingClient({
             {/* Quota summary in sidebar */}
             {quotaInfo && date && (
               <div className="rounded-xl bg-slate-50 border border-slate-100 p-3">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Ketersediaan</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t.availabilityLabel}</p>
                 <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
@@ -514,8 +524,8 @@ export function BookingClient({
                   />
                 </div>
                 <div className="flex justify-between mt-1.5">
-                  <span className="text-[10px] text-slate-500">{quotaInfo.booked} terdaftar</span>
-                  <span className="text-[10px] font-bold text-slate-600">{quotaInfo.available} tersisa</span>
+                  <span className="text-[10px] text-slate-500">{t.registered.replace("{count}", quotaInfo.booked)}</span>
+                  <span className="text-[10px] font-bold text-slate-600">{t.remaining.replace("{count}", quotaInfo.available)}</span>
                 </div>
               </div>
             )}
@@ -529,22 +539,22 @@ export function BookingClient({
               {isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Memproses...
+                  {t.processing}
                 </>
               ) : isCheckingQuota ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Mengecek kuota...
+                  {t.checkingQuota}
                 </>
               ) : quotaInfo?.available === 0 ? (
                 <>
                   <AlertTriangle className="w-4 h-4" />
-                  Kuota Penuh
+                  {t.quotaFull}
                 </>
               ) : (
                 <>
                   <CheckCircle className="w-4 h-4" />
-                  Konfirmasi & Bayar
+                  {t.confirmAndPay}
                   <ChevronRight className="w-3.5 h-3.5 ml-auto opacity-70" />
                 </>
               )}
@@ -554,7 +564,7 @@ export function BookingClient({
             <div className="flex items-center justify-center gap-1.5 pt-1">
               <Shield className="w-3 h-3 text-green-500" />
               <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">
-                Transfer Bank · Verified by Titan Travel
+                {t.trustBadge}
               </p>
             </div>
           </div>
