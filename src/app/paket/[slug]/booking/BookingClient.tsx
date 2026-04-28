@@ -15,7 +15,11 @@ import {
   ChevronRight,
   AlertTriangle,
   Info,
+  ArrowLeft,
+  Clock,
+  MapPin,
 } from "lucide-react";
+import Link from "next/link";
 import { createBooking, getAvailableQuota } from "@/lib/actions/bookings";
 import { useRouter } from "next/navigation";
 import { PaymentConfirmation } from "./PaymentConfirmation";
@@ -41,11 +45,13 @@ export function BookingClient({
   session,
   bankAccounts = [],
   adminPhone = "",
+  slug = "",
 }: { 
   packageData: any;
   session: any;
   bankAccounts?: BankAccount[];
   adminPhone?: string;
+  slug?: string;
 }) {
   const { locale } = useLocale();
   const t = (translations[locale as keyof typeof translations] as any)?.bookingPage || translations.id.bookingPage;
@@ -238,7 +244,55 @@ export function BookingClient({
     );
   }
 
+  const title = (packageData.title as any)?.[locale] || (packageData.title as any)?.id || t.packageLabel;
+  const location = (packageData.location as any)?.[locale] || (packageData.location as any)?.id || "";
+  const duration = (packageData.duration as any)?.[locale] || (packageData.duration as any)?.id || "";
+
   return (
+    <>
+      {/* Dark Slate Header */}
+      <section className="relative bg-slate-900 pt-24 sm:pt-32 pb-12">
+        <div className="absolute top-0 right-0 w-72 h-72 bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <Link
+            href={`/paket/${slug || packageData.slug}`}
+            className="inline-flex items-center gap-2 text-white/60 hover:text-white text-sm font-medium transition-colors group mb-8"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            {t.backToDetail}
+          </Link>
+          <div className="space-y-4">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-500/20 border border-primary-500/40 text-primary-400 text-[10px] font-bold uppercase tracking-widest">
+              {t.formBadge}
+            </span>
+            <h1 className="text-3xl sm:text-4xl font-bold text-white font-(family-name:--font-playfair) leading-tight">
+              {title}
+            </h1>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-400">
+              {location && (
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-primary-400" />
+                  {location}
+                </div>
+              )}
+              {duration && (
+                <div className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-primary-400" />
+                  {duration}
+                </div>
+              )}
+              <div className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-primary-400" />
+                {t.capacityLabel.replace("{count}", packageData.capacity)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Content */}
+      <section className="bg-background rounded-t-[40px] -mt-8 relative z-10 border-t border-card-border">
+        <div className="max-w-7xl mx-auto px-4 py-10">
     <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
       {/* ── LEFT: Form ── */}
       <div className="md:col-span-3 space-y-6">
@@ -571,5 +625,8 @@ export function BookingClient({
         </div>
       </div>
     </div>
+        </div>
+      </section>
+    </>
   );
 }

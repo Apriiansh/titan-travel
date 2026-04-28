@@ -243,6 +243,9 @@ export const translations = {
             helpSubtitle: "Hubungi konsultan travel kami",
         },
         bookingPage: {
+            backToDetail: "Kembali ke Detail Paket",
+            formBadge: "Form Pemesanan",
+            capacityLabel: "Kapasitas {count} peserta",
             bookerInfo: "Informasi Pemesan",
             fullName: "Nama Lengkap",
             namePlaceholder: "Masukkan nama sesuai KTP",
@@ -549,6 +552,9 @@ export const translations = {
             helpSubtitle: "Contact our travel consultant",
         },
         bookingPage: {
+            backToDetail: "Back to Package Detail",
+            formBadge: "Booking Form",
+            capacityLabel: "Capacity {count} participants",
             bookerInfo: "Booking Information",
             fullName: "Full Name",
             namePlaceholder: "Enter name as on ID",
