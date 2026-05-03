@@ -10,6 +10,8 @@ import { Tag, Loader2, CheckCircle } from "lucide-react";
 import { PackageForm } from "./PackageForm";
 import { PackageFormState } from "../types";
 
+type VehicleType = { id: string; name: string };
+
 interface PackageDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -17,6 +19,7 @@ interface PackageDialogProps {
   isPending: boolean;
   form: PackageFormState;
   isTranslating: boolean;
+  vehicleTypes: VehicleType[];
   onFieldChange: (field: string, value: any) => void;
   onAutoTranslate: () => void;
   onAddTier: () => void;
@@ -32,6 +35,7 @@ export function PackageDialog({
   isPending,
   form,
   isTranslating,
+  vehicleTypes,
   onFieldChange,
   onAutoTranslate,
   onAddTier,
@@ -53,6 +57,7 @@ export function PackageDialog({
           <PackageForm 
             form={form}
             isTranslating={isTranslating}
+            vehicleTypes={vehicleTypes}
             onFieldChange={onFieldChange}
             onAutoTranslate={onAutoTranslate}
             onAddTier={onAddTier}

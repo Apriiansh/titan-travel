@@ -1,4 +1,5 @@
 import { getPackages } from "@/lib/actions/packages";
+import { getActiveVehicleTypes } from "@/lib/actions/vehicle-types";
 import { PackagesClient } from "./PackagesClient";
 
 interface MultiLang {
@@ -8,7 +9,10 @@ interface MultiLang {
 }
 
 export default async function PackagesPage() {
-  const packages = await getPackages();
+  const [packages, vehicleTypes] = await Promise.all([
+    getPackages(),
+    getActiveVehicleTypes(),
+  ]);
   
   // Serialize Decimal → number for client boundary and map locales
   const serialized = packages.map((p) => {
@@ -31,5 +35,5 @@ export default async function PackagesPage() {
     };
   });
 
-  return <PackagesClient initialPackages={serialized} />;
+  return <PackagesClient initialPackages={serialized} vehicleTypes={vehicleTypes} />;
 }

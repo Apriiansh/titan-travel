@@ -47,6 +47,14 @@ export default function PackageDetailClient({ pkg, adminPhone = "" }: { pkg: any
     return t.departureEvening;
   };
 
+  // Group price tiers by vehicle type
+  const tiersByVehicle = (pkg.priceTiers || []).reduce((acc: any, tier: any) => {
+    const vName = tier.vehicleType?.name || t.defaultVehicle || "Standar";
+    if (!acc[vName]) acc[vName] = [];
+    acc[vName].push(tier);
+    return acc;
+  }, {});
+
   return (
     <div id="detail_paket" className="pb-20 relative">
       {/* Decorative Blurs on Dark Hero Area */}
@@ -90,8 +98,8 @@ export default function PackageDetailClient({ pkg, adminPhone = "" }: { pkg: any
                 </span>
                 <div className="flex items-center gap-1 text-accent-400">
                   <Star className="w-3.5 h-3.5 fill-current" />
-                  <span className="text-xs font-bold">4.9</span>
-                  <span className="text-[10px] text-white/40">({t.reviewCount})</span>
+                  <span className="text-xs font-bold">{pkg.rating || "0"}</span>
+                  <span className="text-[10px] text-white/40">({pkg.reviews || "0"})</span>
                 </div>
                 {pkg.facilityScore >= 4 && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold uppercase tracking-wider">
@@ -178,10 +186,73 @@ export default function PackageDetailClient({ pkg, adminPhone = "" }: { pkg: any
                   {t.descriptionTitle}
                 </h2>
               </div>
-              <div className="prose prose-slate max-w-none text-foreground-secondary leading-relaxed">
-                {dt(pkg.description) || t.noDescription}
+              <div className="prose prose-slate max-w-none text-foreground-secondary leading-relaxed whitespace-pre-line">
+                {(dt(pkg.description) || t.noDescription)
+                  .split("\n")
+                  .map((line, i) => (
+                    <p key={i} className={line.trim() === "" ? "min-h-[1.2em]" : ""}>
+                      {line}
+                    </p>
+                  ))}
               </div>
             </div>
+
+            {/* Price Tiers Table */}
+            {pkg.priceTiers && pkg.priceTiers.length > 0 && (
+              <div className="space-y-6 pt-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-1 bg-primary-500 rounded-full" />
+                  <h2 className="text-2xl font-bold font-(family-name:--font-playfair) text-foreground">
+                    {t.pricingTitle || "Daftar Tarif Wisata"}
+                  </h2>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-6">
+                  {Object.entries(tiersByVehicle).map(([vName, tiers]: [string, any]) => (
+                    <div key={vName} className="overflow-hidden rounded-2xl border border-card-border bg-card-bg shadow-sm">
+                      <div className="bg-slate-50 dark:bg-slate-900/50 px-5 py-3 border-b border-card-border flex items-center gap-2">
+                        <Compass className="w-4 h-4 text-primary-500" />
+                        <h3 className="font-bold text-sm text-foreground uppercase tracking-wider">
+                          {vName}
+                        </h3>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="text-left bg-muted/30">
+                              <th className="px-5 py-3 font-semibold text-foreground-secondary text-xs">{t.paxRangeLabel || "Jumlah Peserta"}</th>
+                              <th className="px-5 py-3 font-semibold text-foreground-secondary text-xs text-right">{t.pricePerPaxLabel || "Harga per Orang"}</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-card-border">
+                            {tiers.map((tier: any, idx: number) => (
+                              <tr key={idx} className="hover:bg-primary-500/5 transition-colors">
+                                <td className="px-5 py-4 text-foreground font-medium">
+                                  {tier.minPax} - {tier.maxPax} {t.capacityUnit}
+                                </td>
+                                <td className="px-5 py-4 text-right">
+                                  {tier.originalPrice && Number(tier.originalPrice) > 0 && (
+                                    <span className="text-[10px] text-foreground-secondary line-through block opacity-50">
+                                      {formatPrice(tier.originalPrice)}
+                                    </span>
+                                  )}
+                                  <span className="text-primary-600 font-bold">
+                                    {formatPrice(tier.price)}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] text-foreground-secondary italic">
+                  * {t.pricingNote || "Harga di atas dapat berubah sewaktu-waktu tergantung ketersediaan."}
+                </p>
+              </div>
+            )}
 
             {/* Key Features */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

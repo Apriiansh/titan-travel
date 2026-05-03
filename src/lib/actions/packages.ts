@@ -24,32 +24,31 @@ function serializePackage(pkg: any) {
   };
 }
 
+const priceTiersInclude = {
+  orderBy: { minPax: "asc" as const },
+  include: { vehicleType: { select: { id: true, name: true } } },
+};
+
 export async function getPackages() {
   const pkgs = await prisma.tourPackage.findMany({
-    include: { 
-      priceTiers: { orderBy: { minPax: 'asc' } } 
-    },
+    include: { priceTiers: priceTiersInclude },
     orderBy: { createdAt: "desc" },
   });
   return pkgs.map(serializePackage);
 }
 
 export async function getPackageById(id: string) {
-  const pkg = await prisma.tourPackage.findUnique({ 
+  const pkg = await prisma.tourPackage.findUnique({
     where: { id },
-    include: { 
-      priceTiers: { orderBy: { minPax: 'asc' } } 
-    }
+    include: { priceTiers: priceTiersInclude },
   });
   return serializePackage(pkg);
 }
 
 export async function getPackageBySlug(slug: string) {
-  const pkg = await prisma.tourPackage.findUnique({ 
+  const pkg = await prisma.tourPackage.findUnique({
     where: { slug },
-    include: { 
-      priceTiers: { orderBy: { minPax: 'asc' } } 
-    }
+    include: { priceTiers: priceTiersInclude },
   });
   return serializePackage(pkg);
 }
@@ -71,9 +70,11 @@ interface PackagePayload {
   facilityScore: number;
   departureScore: number;
   durationDays: number;
+  rating: number;
+  reviews: number;
   images: string[];
   isPublished: boolean;
-  priceTiers: { minPax: number; maxPax: number; price: number; originalPrice?: number }[];
+  priceTiers: { minPax: number; maxPax: number; price: number; originalPrice?: number; vehicleTypeId?: string | null }[];
 }
 
 function buildSlug(title: string) {
@@ -104,6 +105,8 @@ export async function createPackage(data: PackagePayload) {
       facilityScore: data.facilityScore,
       departureScore: data.departureScore,
       durationDays: data.durationDays,
+      rating: data.rating,
+      reviews: data.reviews,
       images: data.images,
       isPublished: data.isPublished,
       priceTiers: {
@@ -129,6 +132,8 @@ export async function updatePackage(id: string, data: PackagePayload) {
       facilityScore: data.facilityScore,
       departureScore: data.departureScore,
       durationDays: data.durationDays,
+      rating: data.rating,
+      reviews: data.reviews,
       images: data.images,
       isPublished: data.isPublished,
       priceTiers: {

@@ -17,6 +17,8 @@ export type Package = {
   facilityScore: number;
   departureScore: number;
   durationDays: number;
+  rating: number;
+  reviews: number;
   images: string[];
   isPublished: boolean;
   priceTiers: {
@@ -24,6 +26,8 @@ export type Package = {
     maxPax: number;
     price: number | string;
     originalPrice?: number | string | null;
+    vehicleTypeId?: string | null;
+    vehicleType?: { id: string; name: string } | null;
   }[];
   createdAt: Date;
 };
@@ -45,6 +49,8 @@ export type PackageFormState = {
   facilityScore: number;
   departureScore: number;
   durationDays: number;
+  rating: number;
+  reviews: number;
   images: string[];
   isPublished: boolean;
   priceTiers: {
@@ -52,5 +58,6 @@ export type PackageFormState = {
     maxPax: number;
     price: string;
     originalPrice: string;
+    vehicleTypeId: string;
   }[];
 };

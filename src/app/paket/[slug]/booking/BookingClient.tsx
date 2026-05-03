@@ -18,6 +18,8 @@ import {
   ArrowLeft,
   Clock,
   MapPin,
+  Bus,
+  Tag,
 } from "lucide-react";
 import Link from "next/link";
 import { createBooking, getAvailableQuota } from "@/lib/actions/bookings";
@@ -40,16 +42,23 @@ type BankAccount = {
   imageUrl: string | null;
 };
 
+type VehicleType = {
+  id: string;
+  name: string;
+};
+
 export function BookingClient({ 
   packageData,
   session,
   bankAccounts = [],
+  vehicleTypes = [],
   adminPhone = "",
   slug = "",
 }: { 
   packageData: any;
   session: any;
   bankAccounts?: BankAccount[];
+  vehicleTypes?: VehicleType[];
   adminPhone?: string;
   slug?: string;
 }) {
@@ -57,6 +66,7 @@ export function BookingClient({
   const t = (translations[locale as keyof typeof translations] as any)?.bookingPage || translations.id.bookingPage;
   const [pax, setPax] = useState(1);
   const [date, setDate] = useState("");
+  const [selectedVehicleTypeId, setSelectedVehicleTypeId] = useState<string | null>(null);
   
   // Pre-fill fields from session if available
   const [name, setName] = useState(session?.name || "");
@@ -99,15 +109,27 @@ export function BookingClient({
     }
   }, [quotaInfo, pax]);
 
+  // Kendaraan yang tersedia = kendaraan unik dari priceTiers paket
+  const availableVehicleIds = new Set(
+    (packageData.priceTiers as any[]).map((t: any) => t.vehicleTypeId).filter(Boolean)
+  );
+  const displayedVehicleTypes = vehicleTypes.filter((v) => availableVehicleIds.has(v.id));
+  const haVehicleChoice = displayedVehicleTypes.length > 0;
+
+  // Auto-select jika hanya 1 kendaraan
+  const effectiveVehicleId =
+    selectedVehicleTypeId ??
+    (displayedVehicleTypes.length === 1 ? displayedVehicleTypes[0].id : null);
+
   // --- Pricing logic ---
   const getUnitPrice = (p: number) => {
-    const tier = packageData.priceTiers.find(
-      (t: any) => p >= t.minPax && p <= t.maxPax
-    );
+    const tiersForVehicle = effectiveVehicleId
+      ? (packageData.priceTiers as any[]).filter((t: any) => t.vehicleTypeId === effectiveVehicleId)
+      : (packageData.priceTiers as any[]);
+
+    const tier = tiersForVehicle.find((t: any) => p >= t.minPax && p <= t.maxPax);
     if (tier) return Number(tier.price);
-    const sorted = [...packageData.priceTiers].sort(
-      (a: any, b: any) => Number(a.price) - Number(b.price)
-    );
+    const sorted = [...tiersForVehicle].sort((a: any, b: any) => Number(a.price) - Number(b.price));
     return sorted.length > 0 ? Number(sorted[0].price) : 0;
   };
 
@@ -118,13 +140,21 @@ export function BookingClient({
   if (paymentType === "HALF") amountToPay = totalPrice * 0.5;
   if (paymentType === "DP") amountToPay = totalPrice * 0.3;
 
-  const currentTier = packageData.priceTiers.find(
-    (t: any) => pax >= t.minPax && pax <= t.maxPax
-  );
+  const tiersForCurrentVehicle = effectiveVehicleId
+    ? (packageData.priceTiers as any[]).filter((t: any) => t.vehicleTypeId === effectiveVehicleId)
+    : (packageData.priceTiers as any[]);
+  const currentTier = tiersForCurrentVehicle.find((t: any) => pax >= t.minPax && pax <= t.maxPax);
   const savings =
     currentTier?.originalPrice
       ? Number(currentTier.originalPrice) * pax - totalPrice
       : 0;
+
+  // Helper untuk klik tarif
+  const handleTierClick = (vehicleId: string | null, minPax: number) => {
+    if (vehicleId) setSelectedVehicleTypeId(vehicleId);
+    setPax(minPax);
+    // Scroll smooth ke input tanggal jika perlu (opsional)
+  };
 
   const formatPrice = (amount: number) => {
     if (locale === "en") return `$ ${(amount / 15000).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
@@ -212,6 +242,7 @@ export function BookingClient({
           tourDate: new Date(date),
           pax,
           paymentType,
+          vehicleTypeId: effectiveVehicleId ?? undefined,
         });
 
         if (result) {
@@ -353,6 +384,110 @@ export function BookingClient({
           </div>
 
           <CardContent className="p-6 space-y-6">
+            {/* Tabel Tarif Interaktif */}
+            {packageData.priceTiers && packageData.priceTiers.length > 0 && (
+              <div className="space-y-3">
+                <Label className="text-xs font-semibold text-slate-600 flex items-center gap-2">
+                  <Tag className="w-3 h-3 text-primary-500" />
+                  Pilih Paket & Tarif (Klik untuk pilih)
+                </Label>
+                <div className="space-y-4">
+                  {Object.entries(
+                    (packageData.priceTiers as any[]).reduce((acc: any, tier: any) => {
+                      const vId = tier.vehicleTypeId || "standard";
+                      const vName = tier.vehicleType?.name || "Standar";
+                      if (!acc[vId]) acc[vId] = { name: vName, tiers: [] };
+                      acc[vId].tiers.push(tier);
+                      return acc;
+                    }, {})
+                  ).map(([vId, data]: [string, any]) => (
+                    <div key={vId} className="rounded-xl border border-slate-100 overflow-hidden bg-slate-50/30">
+                      <div className="px-3 py-1.5 bg-slate-100/50 border-b border-slate-100 flex items-center gap-2">
+                        <Bus className="w-3 h-3 text-slate-400" />
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{data.name}</span>
+                      </div>
+                      <div className="divide-y divide-slate-100">
+                        {data.tiers.map((tier: any, idx: number) => {
+                          const isSelected = effectiveVehicleId === tier.vehicleTypeId && pax >= tier.minPax && pax <= tier.maxPax;
+                          return (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => handleTierClick(tier.vehicleTypeId, tier.minPax)}
+                              className={`w-full flex items-center justify-between px-4 py-3 text-left transition-all ${
+                                isSelected 
+                                  ? "bg-primary-50 ring-1 ring-inset ring-primary-200" 
+                                  : "bg-white hover:bg-slate-50"
+                              }`}
+                            >
+                              <div className="space-y-0.5">
+                                <p className={`text-xs font-bold ${isSelected ? "text-primary-700" : "text-slate-700"}`}>
+                                  {tier.minPax === tier.maxPax ? `${tier.minPax} Pax` : `${tier.minPax} - ${tier.maxPax} Pax`}
+                                </p>
+                                {isSelected && <p className="text-[9px] text-primary-500 font-medium">Paket Terpilih</p>}
+                              </div>
+                              <div className="text-right">
+                                {tier.originalPrice && Number(tier.originalPrice) > 0 && (
+                                  <p className="text-[9px] text-slate-400 line-through leading-none">
+                                    {formatPrice(Number(tier.originalPrice))}
+                                  </p>
+                                )}
+                                <p className={`text-sm font-black ${isSelected ? "text-primary-600" : "text-slate-900"}`}>
+                                  {formatPrice(Number(tier.price))}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Selector Kendaraan — tampil hanya jika ada lebih dari 1 pilihan */}
+            {haVehicleChoice && displayedVehicleTypes.length > 1 && (
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold text-slate-600">
+                  Pilih Kendaraan
+                </Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {displayedVehicleTypes.map((v) => (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => setSelectedVehicleTypeId(v.id)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all duration-200 ${
+                        effectiveVehicleId === v.id
+                          ? "border-primary-500 bg-primary-50 shadow-sm shadow-primary-500/15"
+                          : "border-slate-200 bg-white hover:border-slate-300"
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                        effectiveVehicleId === v.id ? "bg-primary-100" : "bg-slate-100"
+                      }`}>
+                        <Bus className={`w-4 h-4 ${
+                          effectiveVehicleId === v.id ? "text-primary-600" : "text-slate-400"
+                        }`} />
+                      </div>
+                      <div>
+                        <p className={`text-sm font-bold leading-tight ${
+                          effectiveVehicleId === v.id ? "text-primary-700" : "text-slate-700"
+                        }`}>{v.name}</p>
+                        {effectiveVehicleId === v.id && (
+                          <p className="text-[10px] text-primary-500 mt-0.5">Dipilih</p>
+                        )}
+                      </div>
+                      {effectiveVehicleId === v.id && (
+                        <CheckCircle className="w-4 h-4 text-primary-500 ml-auto shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Tanggal & Quota */}
             <div className="space-y-1">
               <Label className="text-xs font-semibold text-slate-600">

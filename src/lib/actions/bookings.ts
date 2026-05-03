@@ -72,6 +72,7 @@ export async function createBooking(data: {
   pax: number;
   paymentType: "DP" | "HALF" | "FULL";
   notes?: string;
+  vehicleTypeId?: string;
 }) {
   const pkg = await prisma.tourPackage.findUnique({ 
     where: { id: data.packageId },
@@ -97,17 +98,21 @@ export async function createBooking(data: {
     throw new Error(`Sisa kuota untuk tanggal ini hanya ${remainingQuota} pax. Mohon kurangi jumlah peserta.`);
   }
 
-  // 2. Logic Harga Bertingkat (Tiered Pricing)
+  // 2. Logic Harga Bertingkat (Tiered Pricing) — filter by vehicleType + pax range
   let unitPrice = 0;
-  
-  const applicableTier = pkg.priceTiers.find(tier => 
-    data.pax >= tier.minPax && data.pax <= tier.maxPax
+
+  const tiersForVehicle = data.vehicleTypeId
+    ? pkg.priceTiers.filter((t) => t.vehicleTypeId === data.vehicleTypeId)
+    : pkg.priceTiers;
+
+  const applicableTier = tiersForVehicle.find(
+    (tier) => data.pax >= tier.minPax && data.pax <= tier.maxPax
   );
 
   if (applicableTier) {
     unitPrice = Number(applicableTier.price);
   } else {
-    const sortedTiers = [...pkg.priceTiers].sort((a, b) => Number(a.price) - Number(b.price));
+    const sortedTiers = [...tiersForVehicle].sort((a, b) => Number(a.price) - Number(b.price));
     unitPrice = sortedTiers.length > 0 ? Number(sortedTiers[0].price) : 0;
   }
 
@@ -139,6 +144,7 @@ export async function createBooking(data: {
       status: "PENDING",
       notes: data.notes,
       paymentDeadline,
+      vehicleTypeId: data.vehicleTypeId ?? null,
     },
   });
 

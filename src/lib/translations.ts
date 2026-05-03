@@ -247,6 +247,11 @@ export const translations = {
             priceDisclaimer: "*Harga dapat berubah sewaktu-waktu tergantung musim dan ketersediaan kuota.",
             helpTitle: "Butuh Bantuan?",
             helpSubtitle: "Hubungi konsultan travel kami",
+            pricingTitle: "Daftar Tarif Wisata",
+            paxRangeLabel: "Jumlah Peserta",
+            pricePerPaxLabel: "Harga per Orang",
+            pricingNote: "Harga di atas dapat berubah sewaktu-waktu tergantung ketersediaan.",
+            defaultVehicle: "Standar",
         },
         bookingPage: {
             backToDetail: "Kembali ke Detail Paket",
@@ -562,6 +567,11 @@ export const translations = {
             priceDisclaimer: "*Prices may change depending on the season and quota availability.",
             helpTitle: "Need Help?",
             helpSubtitle: "Contact our travel consultant",
+            pricingTitle: "Tour Pricing List",
+            paxRangeLabel: "Number of Participants",
+            pricePerPaxLabel: "Price per Person",
+            pricingNote: "Prices above are subject to change depending on availability.",
+            defaultVehicle: "Standard",
         },
         bookingPage: {
             backToDetail: "Back to Package Detail",

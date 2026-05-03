@@ -33,16 +33,21 @@ const emptyForm: PackageFormState = {
   facilityScore: 3,
   departureScore: 1,
   durationDays: 1,
+  rating: 0,
+  reviews: 0,
   images: [],
   isPublished: false,
   priceTiers: [],
 };
 
+type VehicleType = { id: string; name: string };
+
 interface PackagesClientProps {
   initialPackages: Package[];
+  vehicleTypes: VehicleType[];
 }
 
-export function PackagesClient({ initialPackages }: PackagesClientProps) {
+export function PackagesClient({ initialPackages, vehicleTypes }: PackagesClientProps) {
   const [packages, setPackages] = useState<Package[]>(initialPackages);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Package | null>(null);
@@ -83,6 +88,8 @@ export function PackagesClient({ initialPackages }: PackagesClientProps) {
       facilityScore: pkg.facilityScore,
       departureScore: pkg.departureScore,
       durationDays: pkg.durationDays,
+      rating: pkg.rating || 0,
+      reviews: pkg.reviews || 0,
       images: pkg.images || [],
       isPublished: pkg.isPublished,
       priceTiers: (pkg.priceTiers || []).map((t) => ({
@@ -90,6 +97,7 @@ export function PackagesClient({ initialPackages }: PackagesClientProps) {
         maxPax: t.maxPax,
         price: String(t.price),
         originalPrice: t.originalPrice ? String(t.originalPrice) : "",
+        vehicleTypeId: t.vehicleTypeId ?? "",
       })),
     });
     setOpen(true);
@@ -140,6 +148,7 @@ export function PackagesClient({ initialPackages }: PackagesClientProps) {
         maxPax: Number(t.maxPax),
         price: Number(t.price),
         originalPrice: t.originalPrice ? Number(t.originalPrice) : undefined,
+        vehicleTypeId: t.vehicleTypeId || null,
       })),
     };
 
@@ -175,7 +184,7 @@ export function PackagesClient({ initialPackages }: PackagesClientProps) {
   function addTier() {
     f("priceTiers", [
       ...form.priceTiers,
-      { minPax: 1, maxPax: 99, price: "", originalPrice: "" },
+      { minPax: 1, maxPax: 99, price: "", originalPrice: "", vehicleTypeId: "" },
     ]);
   }
 
@@ -238,6 +247,7 @@ export function PackagesClient({ initialPackages }: PackagesClientProps) {
         isPending={isPending}
         form={form}
         isTranslating={isTranslating}
+        vehicleTypes={vehicleTypes}
         onFieldChange={f}
         onAutoTranslate={handleAutoTranslate}
         onAddTier={addTier}

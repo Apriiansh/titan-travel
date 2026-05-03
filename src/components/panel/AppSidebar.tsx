@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Users, FileText, Activity, LogOut, Package, BarChart, TrendingUp, Image as ImageIcon, MessageCircle, CheckSquare, Landmark, Compass } from "lucide-react"
+import { Home, Users, FileText, Activity, LogOut, Package, BarChart, TrendingUp, Image as ImageIcon, MessageCircle, CheckSquare, Landmark, Compass, Bus } from "lucide-react"
 import Image from "next/image"
 import {
   Sidebar,
@@ -34,6 +34,7 @@ export function AppSidebar({ user }: { user: { name: string; email: string; role
       items: [
         { title: "Manajemen Booking", url: "/admin/bookings", icon: CheckSquare, iconKey: "CheckSquare" },
         { title: "Paket Wisata", url: "/admin/packages", icon: Package, iconKey: "Package" },
+        { title: "Tipe Kendaraan", url: "/admin/vehicles", icon: Bus, iconKey: "Bus" },
       ]
     },
     {

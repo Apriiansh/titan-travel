@@ -7,20 +7,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ImageUpload } from "@/components/panel/ImageUpload";
-import { 
-  MapPin, 
-  Clock, 
-  Users, 
-  Loader2, 
-  Sparkles 
+import {
+  MapPin,
+  Clock,
+  Users,
+  Loader2,
+  Sparkles,
+  Star,
+  MessageSquare,
 } from "lucide-react";
 import { PackageFormState } from "../types";
 import { PriceTierSection } from "./PriceTierSection";
 import { TopsisScoreSection } from "./TopsisScoreSection";
 
+type VehicleType = { id: string; name: string };
+
 interface PackageFormProps {
   form: PackageFormState;
   isTranslating: boolean;
+  vehicleTypes: VehicleType[];
   onFieldChange: (field: string, value: any) => void;
   onAutoTranslate: () => void;
   onAddTier: () => void;
@@ -31,6 +36,7 @@ interface PackageFormProps {
 export function PackageForm({
   form,
   isTranslating,
+  vehicleTypes,
   onFieldChange,
   onAutoTranslate,
   onAddTier,
@@ -40,7 +46,6 @@ export function PackageForm({
   return (
     <div className="p-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
         {/* --- KOLOM KIRI: MAIN CONTENT (7/12) --- */}
         <div className="lg:col-span-7 space-y-8">
           <div className="flex items-center justify-between mb-2">
@@ -120,7 +125,9 @@ export function PackageForm({
                       </div>
                       <Input
                         value={form[locationKey] as string}
-                        onChange={(e) => onFieldChange(locationKey, e.target.value)}
+                        onChange={(e) =>
+                          onFieldChange(locationKey, e.target.value)
+                        }
                         placeholder="Bali, Indonesia"
                         className={`rounded-md h-9 text-xs ${lang === "en" ? "border-primary-200 bg-primary-50/10" : ""}`}
                       />
@@ -134,7 +141,9 @@ export function PackageForm({
                       </div>
                       <Input
                         value={form[durationKey] as string}
-                        onChange={(e) => onFieldChange(durationKey, e.target.value)}
+                        onChange={(e) =>
+                          onFieldChange(durationKey, e.target.value)
+                        }
                         placeholder="3D 2N"
                         className={`rounded-md h-9 text-xs ${lang === "en" ? "border-primary-200 bg-primary-50/10" : ""}`}
                       />
@@ -170,7 +179,9 @@ export function PackageForm({
                 type="number"
                 min={1}
                 value={form.capacity}
-                onChange={(e) => onFieldChange("capacity", parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  onFieldChange("capacity", parseInt(e.target.value) || 0)
+                }
                 placeholder="Contoh: 10"
                 className="rounded-md font-bold text-lg h-12 w-32 border-primary-100"
               />
@@ -179,7 +190,8 @@ export function PackageForm({
               </p>
             </div>
             <p className="text-[10px] text-muted-foreground italic leading-tight">
-              *User tidak akan bisa memesan lebih dari kapasitas ini untuk satu tanggal keberangkatan.
+              *User tidak akan bisa memesan lebih dari kapasitas ini untuk satu
+              tanggal keberangkatan.
             </p>
           </div>
 
@@ -200,19 +212,66 @@ export function PackageForm({
 
         {/* --- KOLOM KANAN: SIDEBAR (5/12) --- */}
         <div className="lg:col-span-5 space-y-6">
-          <PriceTierSection 
+          <PriceTierSection
             priceTiers={form.priceTiers}
+            vehicleTypes={vehicleTypes}
             onAddTier={onAddTier}
             onRemoveTier={onRemoveTier}
             onUpdateTier={onUpdateTier}
           />
 
-          <TopsisScoreSection 
+          <TopsisScoreSection
             facilityScore={form.facilityScore}
             departureScore={form.departureScore}
             durationDays={form.durationDays}
             onChange={onFieldChange}
           />
+
+          {/* --- RATING & REVIEWS --- */}
+          <div className="p-5 rounded-2xl bg-white border border-card-border shadow-sm space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+              <Label className="text-sm font-bold text-slate-900 block">
+                Rating & Ulasan (Social Proof)
+              </Label>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
+                  Rating (1-5)
+                </Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={form.rating ?? 0}
+                  onChange={(e) =>
+                    onFieldChange("rating", parseFloat(e.target.value) || 0)
+                  }
+                  placeholder="4.8"
+                  className="h-9 text-xs rounded-md"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
+                  Total Ulasan
+                </Label>
+                <Input
+                  type="number"
+                  value={form.reviews ?? 0}
+                  onChange={(e) =>
+                    onFieldChange("reviews", parseInt(e.target.value) || 0)
+                  }
+                  placeholder="120"
+                  className="h-9 text-xs rounded-md"
+                />
+              </div>
+            </div>
+            <p className="text-[9px] text-muted-foreground italic leading-tight">
+              * Nilai ini akan tampil sebagai rating bintang di halaman paket.
+            </p>
+          </div>
 
           <div className="p-5 rounded-xl bg-muted/20 border border-card-border space-y-4">
             <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">

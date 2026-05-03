@@ -2,11 +2,21 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, Tag, X } from "lucide-react";
 import { PackageFormState } from "../types";
 
+type VehicleType = { id: string; name: string };
+
 interface PriceTierSectionProps {
   priceTiers: PackageFormState["priceTiers"];
+  vehicleTypes: VehicleType[];
   onAddTier: () => void;
   onRemoveTier: (index: number) => void;
   onUpdateTier: (index: number, field: string, value: string) => void;
@@ -14,6 +24,7 @@ interface PriceTierSectionProps {
 
 export function PriceTierSection({
   priceTiers,
+  vehicleTypes,
   onAddTier,
   onRemoveTier,
   onUpdateTier,
@@ -33,7 +44,7 @@ export function PriceTierSection({
           onClick={onAddTier}
           className="h-7 text-[9px] gap-1 text-primary-600 px-3 border border-primary-100 bg-primary-50/50"
         >
-          <Plus className="w-3 h-3" /> Tambah Tier
+          <Plus className="w-3 h-3" /> Tambah Tarif
         </Button>
       </div>
 
@@ -62,6 +73,33 @@ export function PriceTierSection({
               key={idx}
               className="p-3 rounded-lg bg-card-bg border border-card-border shadow-sm space-y-3 relative group/tier"
             >
+              {vehicleTypes.length > 0 && (
+                <div className="space-y-1">
+                  <Label className="text-[9px] text-muted-foreground">
+                    Tipe Kendaraan
+                  </Label>
+                  <Select
+                    value={tier.vehicleTypeId || "none"}
+                    onValueChange={(val) => onUpdateTier(idx, "vehicleTypeId", val === "none" ? "" : (val ?? ""))}
+                  >
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder="Pilih kendaraan (opsional)">
+                        {tier.vehicleTypeId 
+                          ? vehicleTypes.find(v => v.id === tier.vehicleTypeId)?.name 
+                          : "Pilih kendaraan (opsional)"}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">— Tidak ada —</SelectItem>
+                      {vehicleTypes.map((v) => (
+                        <SelectItem key={v.id} value={v.id}>
+                          {v.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-[9px] text-muted-foreground">
