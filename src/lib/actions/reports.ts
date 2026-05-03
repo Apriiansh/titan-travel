@@ -3,7 +3,9 @@
 import { prisma } from "@/lib/prisma";
 
 export async function getBookingReport(startDate?: string, endDate?: string) {
-  const where: any = {};
+  const where: any = {
+    status: { in: ["CONFIRMED", "COMPLETED"] }
+  };
   
   if (startDate && endDate) {
     where.createdAt = {
@@ -17,13 +19,19 @@ export async function getBookingReport(startDate?: string, endDate?: string) {
     include: {
       package: true,
       user: true,
+      vehicleType: { select: { name: true } },
     },
     orderBy: {
       createdAt: "desc",
     },
   });
 
-  return bookings;
+  // Serialisasi data Decimal ke Number agar aman dikirim ke Client Component
+  return bookings.map(b => ({
+    ...b,
+    totalPrice: Number(b.totalPrice),
+    amountPaid: Number(b.amountPaid),
+  }));
 }
 
 export async function getTopsisReport() {

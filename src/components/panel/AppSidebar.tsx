@@ -62,15 +62,12 @@ export function AppSidebar({ user }: { user: { name: string; email: string; role
       label: "Menu Utama",
       items: [
         { title: "Dashboard", url: "/manager", icon: Home, iconKey: "Home" },
-        { title: "Validasi", url: "/manager/validation", icon: CheckSquare, iconKey: "CheckSquare" },
-        { title: "Aktivitas Sistem", url: "/manager/activity", icon: Activity, iconKey: "Activity" },
       ]
     },
     {
       label: "Laporan & Dokumen",
       items: [
         { title: "Laporan Transaksi", url: "/manager/reports/bookings", icon: FileText, iconKey: "FileText" },
-        { title: "Laporan TOPSIS", url: "/manager/reports/topsis", icon: TrendingUp, iconKey: "TrendingUp" },
       ]
     }
   ];
