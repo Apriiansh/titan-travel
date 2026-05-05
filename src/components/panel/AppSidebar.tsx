@@ -15,59 +15,65 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useLocale } from "@/lib/LocaleContext"
+import { translations } from "@/lib/translations"
 
 export function AppSidebar({ user }: { user: { name: string; email: string; role: string } }) {
   const pathname = usePathname();
   const isAdmin = user.role === "ADMIN";
+  const { dObj } = useLocale();
+  const t = dObj(translations);
+  const ta = t.adminPanel;
+  const tm = t.managerPanel;
 
   const adminMenuGroups = [
     {
-      label: "Menu Utama",
+      label: ta?.menu?.main || "Menu Utama",
       items: [
-        { title: "Dashboard Admin", url: "/admin", icon: Home, iconKey: "Home" },
-        { title: "Statistik Travel", url: "/admin/stats", icon: BarChart, iconKey: "BarChart" },
-        { title: "Analisis TOPSIS", url: "/admin/topsis", icon: TrendingUp, iconKey: "TrendingUp" },
+        { title: ta?.menu?.dashboard || "Dashboard Admin", url: "/admin", icon: Home, iconKey: "Home" },
+        { title: ta?.menu?.statistics || "Statistik Travel", url: "/admin/stats", icon: BarChart, iconKey: "BarChart" },
+        { title: ta?.menu?.topsisAnalysis || "Analisis TOPSIS", url: "/admin/topsis", icon: TrendingUp, iconKey: "TrendingUp" },
       ]
     },
     {
-      label: "Operasional & Transaksi",
+      label: ta?.menu?.operational || "Operasional & Transaksi",
       items: [
-        { title: "Manajemen Booking", url: "/admin/bookings", icon: CheckSquare, iconKey: "CheckSquare" },
-        { title: "Paket Wisata", url: "/admin/packages", icon: Package, iconKey: "Package" },
-        { title: "Tipe Kendaraan", url: "/admin/vehicles", icon: Bus, iconKey: "Bus" },
+        { title: ta?.menu?.bookings || "Manajemen Booking", url: "/admin/bookings", icon: CheckSquare, iconKey: "CheckSquare" },
+        { title: ta?.menu?.packages || "Paket Wisata", url: "/admin/packages", icon: Package, iconKey: "Package" },
+        { title: ta?.menu?.vehicles || "Tipe Kendaraan", url: "/admin/vehicles", icon: Bus, iconKey: "Bus" },
       ]
     },
     {
-      label: "Menu Konten Publik",
+      label: ta?.menu?.content || "Menu Konten Publik",
       items: [
-        { title: "Hero Banner", url: "/admin/content/hero", icon: ImageIcon, iconKey: "ImageIcon" },
-        { title: "Tentang Kami", url: "/admin/content/about", icon: FileText, iconKey: "FileText" },
-        { title: "Layanan Wisata", url: "/admin/content/services", icon: Compass, iconKey: "Compass" },
-        { title: "Testimoni", url: "/admin/content/testimonials", icon: MessageCircle, iconKey: "MessageCircle" },
-        { title: "Galeri Foto", url: "/admin/content/gallery", icon: ImageIcon, iconKey: "ImageIcon" },
+        { title: ta?.menu?.hero || "Hero Banner", url: "/admin/content/hero", icon: ImageIcon, iconKey: "ImageIcon" },
+        { title: ta?.menu?.about || "Tentang Kami", url: "/admin/content/about", icon: FileText, iconKey: "FileText" },
+        { title: ta?.menu?.services || "Layanan Wisata", url: "/admin/content/services", icon: Compass, iconKey: "Compass" },
+        { title: ta?.menu?.testimonials || "Testimoni", url: "/admin/content/testimonials", icon: MessageCircle, iconKey: "MessageCircle" },
+        { title: ta?.menu?.gallery || "Galeri Foto", url: "/admin/content/gallery", icon: ImageIcon, iconKey: "ImageIcon" },
       ]
     },
     {
-      label: "Pengaturan & Bantuan",
+      label: ta?.menu?.settings || "Pengaturan & Bantuan",
       items: [
-        { title: "Info Kontak & Chat", url: "/admin/settings/contact", icon: MessageCircle, iconKey: "MessageCircle" },
-        { title: "Rekening Bank", url: "/admin/settings/bank-accounts", icon: Landmark, iconKey: "Landmark" },
-        { title: "Kelola Pengguna", url: "/admin/users", icon: Users, iconKey: "Users" },
+        { title: ta?.menu?.contact || "Info Kontak & Chat", url: "/admin/settings/contact", icon: MessageCircle, iconKey: "MessageCircle" },
+        { title: ta?.menu?.bankAccounts || "Rekening Bank", url: "/admin/settings/bank-accounts", icon: Landmark, iconKey: "Landmark" },
+        { title: ta?.menu?.users || "Kelola Pengguna", url: "/admin/users", icon: Users, iconKey: "Users" },
       ]
     }
   ];
 
   const managerMenuGroups = [
     {
-      label: "Menu Utama",
+      label: tm?.menu?.main || "Menu Utama",
       items: [
-        { title: "Dashboard", url: "/manager", icon: Home, iconKey: "Home" },
+        { title: tm?.menu?.dashboard || "Dashboard", url: "/manager", icon: Home, iconKey: "Home" },
       ]
     },
     {
-      label: "Laporan & Dokumen",
+      label: tm?.menu?.reports || "Laporan & Dokumen",
       items: [
-        { title: "Laporan Transaksi", url: "/manager/reports/bookings", icon: FileText, iconKey: "FileText" },
+        { title: tm?.menu?.transactionReports || "Laporan Transaksi", url: "/manager/reports/bookings", icon: FileText, iconKey: "FileText" },
       ]
     }
   ];
@@ -93,7 +99,7 @@ export function AppSidebar({ user }: { user: { name: string; email: string; role
           <div className="flex flex-col">
             <span className="text-primary-950 leading-tight text-base tracking-tight">Titan Travel</span>
             <span className="text-[10px] font-bold uppercase tracking-widest text-primary-900/70">
-              {isAdmin ? "Admin Panel" : "Manager"}
+              {isAdmin ? (ta?.title || "Admin Panel") : (tm?.title || "Manager")}
             </span>
           </div>
         </Link>
@@ -151,7 +157,9 @@ export function AppSidebar({ user }: { user: { name: string; email: string; role
           <div className="w-8 h-8 rounded-lg bg-primary-700/10 flex items-center justify-center group-hover/logout:bg-rose-500/30 transition-colors">
             <LogOut className="w-4 h-4 text-red-600" />
           </div>
-          <span className="text-sm font-medium text-red-600 hover:text-rose-800">Keluar</span>
+          <span className="text-sm font-medium text-red-600 hover:text-rose-800">
+            {ta?.actions?.logout || "Keluar"}
+          </span>
         </button>
       </SidebarFooter>
     </Sidebar>

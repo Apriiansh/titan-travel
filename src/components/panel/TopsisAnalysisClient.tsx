@@ -19,6 +19,9 @@ import { TopsisResult } from "@/lib/topsis";
 import { SaveButton } from "./SaveButton";
 import { updateTopsisCriteria, getTopsisAnalysis } from "@/lib/actions/topsis";
 import { TopsisDetailDialog } from "@/app/(panel)/admin/topsis/components/TopsisDetailDialog";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
+import { formatCurrency } from "@/lib/utils";
 
 interface TopsisAnalysisClientProps {
   initialData: {
@@ -36,6 +39,9 @@ export function TopsisAnalysisClient({
   const [isPending, setIsPending] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   
+  const { dObj, locale, rates } = useLocale();
+  const t = dObj(translations).adminPanel.topsis;
+
   // State for detail dialog
   const [selectedResult, setSelectedResult] = useState<any>(null);
   const [showDetail, setShowDetail] = useState(false);
@@ -85,8 +91,8 @@ export function TopsisAnalysisClient({
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <PageHeader
-        title="Analisis Rekomendasi TOPSIS"
-        description="Hasil perhitungan perankingan paket wisata berdasarkan kriteria objektif."
+        title={t?.title || "Analisis Rekomendasi TOPSIS"}
+        description={t?.description || "Hasil perhitungan perankingan paket wisata berdasarkan kriteria objektif."}
         action={
           <button
             onClick={() => setIsEditing(!isEditing)}
@@ -99,12 +105,12 @@ export function TopsisAnalysisClient({
             {isEditing ? (
               <>
                 <X className="w-4 h-4" />
-                <span>Batal Edit</span>
+                <span>{t?.cancelBtn || "Batal Edit"}</span>
               </>
             ) : (
               <>
                 <Edit2 className="w-4 h-4" />
-                <span>Atur Kriteria</span>
+                <span>{t?.editBtn || "Atur Kriteria"}</span>
               </>
             )}
           </button>
@@ -119,10 +125,10 @@ export function TopsisAnalysisClient({
           </div>
           <div>
             <p className="text-sm text-foreground-secondary">
-              Total Alternatif
+              {t?.overview?.totalAlternatives || "Total Alternatif"}
             </p>
             <p className="text-2xl font-bold text-foreground">
-              {data.results.length} Paket
+              {data.results.length} {t?.overview?.packageUnit || "Paket"}
             </p>
           </div>
         </div>
@@ -132,7 +138,7 @@ export function TopsisAnalysisClient({
             <Scale className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm text-foreground-secondary">Kriteria Aktif</p>
+            <p className="text-sm text-foreground-secondary">{t?.overview?.activeCriteria || "Kriteria Aktif"}</p>
             <p className="text-2xl font-bold text-foreground">
               {data.criteria.length} Kriteria
             </p>
@@ -144,7 +150,7 @@ export function TopsisAnalysisClient({
             <TrendingUp className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm text-foreground-secondary">Metode</p>
+            <p className="text-sm text-foreground-secondary">{t?.overview?.method || "Metode"}</p>
             <p className="text-2xl font-bold text-foreground">TOPSIS</p>
           </div>
         </div>
@@ -154,10 +160,10 @@ export function TopsisAnalysisClient({
         {/* Criteria Summary / Editor */}
         <div className="lg:col-span-1 space-y-6">
           <FormCard
-            title={isEditing ? "Master Data Kriteria" : "Konfigurasi Kriteria"}
+            title={isEditing ? (t?.criteriaCard?.editTitle || "Master Data Kriteria") : (t?.criteriaCard?.title || "Konfigurasi Kriteria")}
           >
             <p className="text-sm text-foreground-secondary -mt-4 mb-4">
-              Bobot dan sifat penilaian.
+              {t?.criteriaCard?.subtitle || "Bobot dan sifat penilaian."}
             </p>
 
             <div className="space-y-4">
@@ -203,7 +209,7 @@ export function TopsisAnalysisClient({
 
                     <div className="flex justify-between items-center text-sm gap-4">
                       <span className="text-foreground-secondary text-xs shrink-0">
-                        Bobot (0-1)
+                        {t?.criteriaCard?.weightLabel || "Bobot (0-1)"}
                       </span>
                       {isEditing ? (
                         <input
@@ -241,7 +247,7 @@ export function TopsisAnalysisClient({
                 <div className="pt-4 border-t border-card-border space-y-4">
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-foreground-secondary">
-                      Total Bobot
+                      {t?.criteriaCard?.totalWeight || "Total Bobot"}
                     </span>
                     <span
                       className={`font-bold ${isWeightValid ? "text-green-500" : "text-red-500"}`}
@@ -254,7 +260,7 @@ export function TopsisAnalysisClient({
                     <div className="p-3 rounded-lg bg-red-500/5 border border-red-500/20 flex gap-2">
                       <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
                       <p className="text-[10px] text-red-500">
-                        Total bobot harus tepat 100% (1.0).
+                        {t?.criteriaCard?.weightError || "Total bobot harus tepat 100% (1.0)."}
                       </p>
                     </div>
                   )}
@@ -273,8 +279,7 @@ export function TopsisAnalysisClient({
                 <div className="p-4 rounded-lg bg-primary-500/5 border border-primary-500/20 flex gap-3">
                   <Info className="w-5 h-5 text-primary-500 shrink-0" />
                   <p className="text-xs text-foreground-secondary leading-relaxed">
-                    Semakin tinggi bobot, semakin besar pengaruh kriteria
-                    tersebut terhadap hasil akhir.
+                    {t?.criteriaCard?.info || "Semakin tinggi bobot, semakin besar pengaruh kriteria tersebut terhadap hasil akhir."}
                   </p>
                 </div>
               )}
@@ -288,10 +293,10 @@ export function TopsisAnalysisClient({
             <div className="p-6 border-b border-card-border bg-foreground/5 flex justify-between items-center">
               <div>
                 <h3 className="text-lg font-bold text-foreground">
-                  Peringkat Alternatif
+                  {t?.resultsTable?.title || "Peringkat Alternatif"}
                 </h3>
                 <p className="text-sm text-foreground-secondary">
-                  Hasil akhir nilai preferensi (Vi)
+                  {t?.resultsTable?.subtitle || "Hasil akhir nilai preferensi (Vi)"}
                 </p>
               </div>
               <div className="p-2 bg-yellow-500/10 rounded-lg text-yellow-600">
@@ -304,16 +309,16 @@ export function TopsisAnalysisClient({
                 <thead>
                   <tr className="border-b border-card-border bg-foreground/2">
                     <th className="px-6 py-4 text-xs font-bold text-foreground-secondary uppercase">
-                      Rank
+                      {t?.resultsTable?.rank || "Rank"}
                     </th>
                     <th className="px-6 py-4 text-xs font-bold text-foreground-secondary uppercase">
-                      Paket Wisata
+                      {t?.resultsTable?.package || "Paket Wisata"}
                     </th>
                     <th className="px-6 py-4 text-xs font-bold text-foreground-secondary uppercase text-center">
-                      Skor (Vi)
+                      {t?.resultsTable?.score || "Skor (Vi)"}
                     </th>
                     <th className="px-6 py-4 text-xs font-bold text-foreground-secondary uppercase text-right">
-                      Aksi
+                      {t?.resultsTable?.action || "Aksi"}
                     </th>
                   </tr>
                 </thead>
@@ -325,7 +330,7 @@ export function TopsisAnalysisClient({
                         className="px-6 py-12 text-center text-foreground-secondary"
                       >
                         <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                        Belum ada data paket wisata untuk dianalisis.
+                        {t?.resultsTable?.empty || "Belum ada data paket wisata untuk dianalisis."}
                       </td>
                     </tr>
                   ) : (
@@ -349,7 +354,7 @@ export function TopsisAnalysisClient({
                           </p>
                           <div className="flex gap-4 mt-1">
                             <span className="text-[10px] text-foreground-secondary">
-                              C1: Rp{res.c1_price.toLocaleString()}
+                              C1: {formatCurrency(res.c1_price, locale, rates)}
                             </span>
                             <span className="text-[10px] text-foreground-secondary">
                               C2: {res.c2_facilities}/5
@@ -381,7 +386,7 @@ export function TopsisAnalysisClient({
                             }}
                             className="p-2 rounded-lg hover:bg-primary-500/10 text-foreground-secondary hover:text-primary-600 transition-colors flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider ml-auto"
                           >
-                            <span>Detail Math</span>
+                            <span>{t?.resultsTable?.detailMath || "Detail Math"}</span>
                             <ArrowRight className="w-3.5 h-3.5" />
                           </button>
                         </td>
@@ -394,8 +399,7 @@ export function TopsisAnalysisClient({
 
             <div className="p-4 bg-foreground/2 border-t border-card-border">
               <p className="text-[11px] text-center text-foreground-secondary italic">
-                *Nilai Preferensi (Vi) dihitung berdasarkan jarak kedekatan
-                dengan solusi ideal positif.
+                {t?.resultsTable?.footerNote || "*Nilai Preferensi (Vi) dihitung berdasarkan jarak kedekatan dengan solusi ideal positif."}
               </p>
             </div>
           </div>

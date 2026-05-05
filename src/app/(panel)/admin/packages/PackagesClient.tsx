@@ -15,6 +15,8 @@ import { useRouter } from "next/navigation";
 import { Package, PackageFormState } from "./types";
 import { PackageTable } from "./components/PackageTable";
 import { PackageDialog } from "./components/PackageDialog";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 const emptyForm: PackageFormState = {
   titleId: "",
@@ -55,6 +57,8 @@ export function PackagesClient({ initialPackages, vehicleTypes }: PackagesClient
   const [isPending, startTransition] = useTransition();
   const [isTranslating, setIsTranslating] = useState(false);
   const router = useRouter();
+  const { dObj } = useLocale();
+  const t = dObj(translations).adminPanel.packages;
 
   useEffect(() => {
     setPackages(initialPackages);
@@ -219,15 +223,15 @@ export function PackagesClient({ initialPackages, vehicleTypes }: PackagesClient
   return (
     <>
       <PageHeader
-        title="Paket Wisata"
-        description="Kelola paket perjalanan dengan rincian dalam 3 bahasa (ID, EN, MS)"
+        title={t?.title || "Paket Wisata"}
+        description={t?.description || "Kelola paket perjalanan dengan rincian dalam 3 bahasa (ID, EN, MS)"}
         action={
           <Button
             onClick={openCreate}
             className="bg-primary-500 hover:bg-primary-600 text-white gap-2 rounded-md shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            Tambah Paket
+            {t?.addBtn || "Tambah Paket"}
           </Button>
         }
       />

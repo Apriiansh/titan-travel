@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/panel/PageHeader";
+import { formatCurrency } from "@/lib/utils";
 import {
   AreaChart,
   Area,
@@ -26,6 +27,8 @@ import {
   Clock,
   XCircle
 } from "lucide-react";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 interface StatsClientProps {
   data: any;
@@ -35,49 +38,51 @@ const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
 
 export function StatsClient({ data }: StatsClientProps) {
   const { summary, monthlyData, topPackages, statusStats } = data;
+  const { dObj, locale, rates } = useLocale();
+  const t = dObj(translations).adminPanel.adminStats;
 
   const statusPieData = [
-    { name: "Confirmed", value: statusStats.CONFIRMED, color: "#10b981" },
-    { name: "Pending", value: statusStats.PENDING, color: "#f59e0b" },
-    { name: "Completed", value: statusStats.COMPLETED, color: "#3b82f6" },
-    { name: "Cancelled", value: statusStats.CANCELLED, color: "#ef4444" },
+    { name: t?.charts?.confirmed || "Confirmed", value: statusStats.CONFIRMED, color: "#10b981" },
+    { name: t?.charts?.pending || "Pending", value: statusStats.PENDING, color: "#f59e0b" },
+    { name: t?.charts?.completed || "Completed", value: statusStats.COMPLETED, color: "#3b82f6" },
+    { name: t?.charts?.cancelled || "Cancelled", value: statusStats.CANCELLED, color: "#ef4444" },
   ].filter(d => d.value > 0);
 
   return (
     <div className="space-y-8 pb-12">
       <PageHeader
-        title="Dashboard Statistik"
-        description="Pantau performa bisnis Titan Travel secara real-time"
+        title={t?.title || "Dashboard Statistik"}
+        description={t?.description || "Pantau performa bisnis Titan Travel secara real-time"}
       />
 
       {/* 4 SUMMARY CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          label="Total Pendapatan"
-          value={`Rp ${summary.totalRevenue.toLocaleString("id-ID")}`}
+          label={t?.cards?.revenue || "Total Pendapatan"}
+          value={formatCurrency(summary.totalRevenue, locale, rates)}
           icon={<Wallet className="w-5 h-5" />}
-          trend="+12% bulan ini"
+          trend={t?.cards?.trendRevenue || "+12% bulan ini"}
           color="primary"
         />
         <StatCard
-          label="Total Booking"
+          label={t?.cards?.bookings || "Total Booking"}
           value={summary.totalBookings}
           icon={<ShoppingBag className="w-5 h-5" />}
-          trend="Semua status"
+          trend={t?.cards?.trendBookings || "Semua status"}
           color="success"
         />
         <StatCard
-          label="Total Peserta"
+          label={t?.cards?.pax || "Total Peserta"}
           value={`${summary.totalPax} Pax`}
           icon={<Users className="w-5 h-5" />}
-          trend="Total dari semua tour"
+          trend={t?.cards?.trendPax || "Total dari semua tour"}
           color="accent"
         />
         <StatCard
-          label="Piutang (Pending)"
-          value={`Rp ${summary.totalPendingRevenue.toLocaleString("id-ID")}`}
+          label={t?.cards?.pending || "Piutang (Pending)"}
+          value={formatCurrency(summary.totalPendingRevenue, locale, rates)}
           icon={<ArrowUpRight className="w-5 h-5" />}
-          trend="Belum lunas"
+          trend={t?.cards?.trendPending || "Belum lunas"}
           color="danger"
         />
       </div>
@@ -87,14 +92,14 @@ export function StatsClient({ data }: StatsClientProps) {
         <div className="lg:col-span-2 bg-card-bg border border-card-border rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h3 className="font-bold text-foreground">Tren Pendapatan</h3>
-              <p className="text-xs text-foreground-secondary">Akumulasi pembayaran diterima tahun ini</p>
+              <h3 className="font-bold text-foreground">{t?.cards?.revenueTrend || "Tren Pendapatan"}</h3>
+              <p className="text-xs text-foreground-secondary">{t?.cards?.revenueSubtitle || "Akumulasi pembayaran diterima tahun ini"}</p>
             </div>
             <div className="p-2 bg-primary-500/10 text-primary-500 rounded-xl">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
-          <div className="h-[350px] w-full">
+          <div className="h-87.5 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={monthlyData}>
                 <defs>
@@ -126,7 +131,7 @@ export function StatsClient({ data }: StatsClientProps) {
                     color: "var(--foreground)" 
                   }}
                   itemStyle={{ color: "var(--foreground)" }}
-                  formatter={(val: any) => [`Rp ${val.toLocaleString("id-ID")}`, "Revenue"]}
+                  formatter={(val: any) => [formatCurrency(val, locale, rates), t?.charts?.revenue || "Revenue"]}
                 />
                 <Area 
                   type="monotone" 
@@ -143,10 +148,10 @@ export function StatsClient({ data }: StatsClientProps) {
 
         {/* STATUS PIE CHART (1/3 width) */}
         <div className="bg-card-bg border border-card-border rounded-2xl p-6 shadow-sm">
-          <h3 className="font-bold text-foreground mb-2">Status Pesanan</h3>
-          <p className="text-xs text-foreground-secondary mb-8">Distribusi status booking saat ini</p>
+          <h3 className="font-bold text-foreground mb-2">{t?.cards?.orderStatus || "Status Pesanan"}</h3>
+          <p className="text-xs text-foreground-secondary mb-8">{t?.cards?.orderSubtitle || "Distribusi status booking saat ini"}</p>
           
-          <div className="h-[250px] w-full relative">
+          <div className="h-62.5 w-full relative">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -179,9 +184,10 @@ export function StatsClient({ data }: StatsClientProps) {
           </div>
 
           <div className="space-y-3 mt-4">
-            <StatusRow label="Confirmed" count={statusStats.CONFIRMED} color="bg-emerald-500" icon={<CheckCircle className="w-3 h-3"/>} />
-            <StatusRow label="Pending" count={statusStats.PENDING} color="bg-amber-500" icon={<Clock className="w-3 h-3"/>} />
-            <StatusRow label="Cancelled" count={statusStats.CANCELLED} color="bg-rose-500" icon={<XCircle className="w-3 h-3"/>} />
+            <StatusRow label={t?.charts?.confirmed || "Confirmed"} count={statusStats.CONFIRMED} color="bg-emerald-500" icon={<CheckCircle className="w-3 h-3"/>} />
+            <StatusRow label={t?.charts?.pending || "Pending"} count={statusStats.PENDING} color="bg-amber-500" icon={<Clock className="w-3 h-3"/>} />
+            <StatusRow label={t?.charts?.completed || "Completed"} count={statusStats.COMPLETED} color="bg-emerald-500" icon={<CheckCircle className="w-3 h-3"/>} />
+            <StatusRow label={t?.charts?.cancelled || "Cancelled"} count={statusStats.CANCELLED} color="bg-rose-500" icon={<XCircle className="w-3 h-3"/>} />
           </div>
         </div>
       </div>
@@ -193,12 +199,12 @@ export function StatsClient({ data }: StatsClientProps) {
             <Package className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-foreground">5 Paket Terpopuler</h3>
-            <p className="text-xs text-foreground-secondary">Berdasarkan total peserta (pax) yang sudah memesan</p>
+            <h3 className="font-bold text-foreground">{t?.cards?.topPackages || "5 Paket Terpopuler"}</h3>
+            <p className="text-xs text-foreground-secondary">{t?.cards?.topPackagesSubtitle || "Berdasarkan total peserta (pax) yang sudah memesan"}</p>
           </div>
         </div>
         
-        <div className="h-[300px] w-full">
+        <div className="h-75 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={topPackages} layout="vertical" margin={{ left: 40, right: 40 }}>
               <XAxis type="number" hide />

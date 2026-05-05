@@ -5,6 +5,7 @@ import {
     createContext,
     useContext,
     useState,
+    useEffect,
     ReactNode,
     startTransition
 } from "react";
@@ -14,6 +15,13 @@ export type Locale = "en" | "id" | "ms";
 interface LocaleContextValue {
     locale: Locale;
     setLocale: (locale: Locale) => void;
+    // Currency Rates
+    rates: {
+        USD: number; // 1 USD in IDR
+        MYR: number; // 1 MYR in IDR
+        USD_TO_MYR: number; // 1 USD in MYR
+        loading: boolean;
+    };
     // Helper to get string from { en, id, ms } object based on current locale
     dt: (data: Record<string, any> | string | unknown, fallback?: string) => string;
     // Helper to get the FULL locale sub-object (for nested arrays/objects like stats, services)
@@ -23,10 +31,39 @@ interface LocaleContextValue {
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-    // English is the primary source, but we can default to Indonesian for now 
-    // depending on preference, user originally asked for ID fallback but english input in CMS.
-    // Let's use 'en' as default or detect from browser later. For now 'id'.
     const [locale, setLocaleState] = useState<Locale>("en");
+    const [rates, setRates] = useState({
+        USD: 16000, 
+        MYR: 3500,  
+        USD_TO_MYR: 4.7,
+        loading: true
+    });
+
+    useEffect(() => {
+        const fetchRates = async () => {
+            try {
+                // Fetch rates based on IDR (since our DB uses IDR as base)
+                const response = await fetch("https://open.er-api.com/v6/latest/IDR");
+                const resData = await response.json();
+                
+                if (resData && resData.rates) {
+                    const usdInIdr = 1 / resData.rates.USD;
+                    const myrInIdr = 1 / resData.rates.MYR;
+                    
+                    setRates({
+                        USD: usdInIdr,
+                        MYR: myrInIdr,
+                        USD_TO_MYR: resData.rates.MYR / resData.rates.USD, // USD to MYR
+                        loading: false
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to fetch exchange rates", err);
+                setRates(prev => ({ ...prev, loading: false }));
+            }
+        };
+        fetchRates();
+    }, []);
 
     const setLocale = (newLocale: Locale) => {
         startTransition(() => {
@@ -53,7 +90,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <LocaleContext.Provider value={{ locale, setLocale, dt, dObj }}>
+        <LocaleContext.Provider value={{ locale, setLocale, dt, dObj, rates }}>
             {children}
         </LocaleContext.Provider>
     );

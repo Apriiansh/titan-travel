@@ -21,6 +21,9 @@ import {
 import { deleteBooking, updateBookingStatus, verifyPayment, verifySettlement } from "@/lib/actions/bookings";
 import { Trash2, Loader2, MessageSquare, MoreVertical, ExternalLink, Calendar, Users, CreditCard, Image as ImageIcon, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
+import { formatCurrency } from "@/lib/utils";
 
 type Booking = {
   id: string;
@@ -41,18 +44,20 @@ type Booking = {
   package?: any;
 };
 
-const STATUS_CONFIG = {
-  PENDING: { label: "Pending", variant: "secondary" as const, color: "bg-muted text-foreground-secondary border-card-border" },
-  CONFIRMED: { label: "Confirmed", variant: "default" as const, color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
-  CANCELLED: { label: "Cancelled", variant: "destructive" as const, color: "bg-destructive/10 text-destructive border-destructive/20" },
-  COMPLETED: { label: "Completed", variant: "outline" as const, color: "bg-primary-500/10 text-primary-600 border-primary-500/20" },
-};
-
 export function BookingsClient({ initialData }: { initialData: Booking[] }) {
   const [data, setData] = useState(initialData);
   const [isPending, startTransition] = useTransition();
   const [filter, setFilter] = useState<string>("ALL");
   const router = useRouter();
+  const { dObj, locale, rates, dt } = useLocale();
+  const t = dObj(translations).adminPanel.bookings;
+
+  const STATUS_CONFIG = {
+    PENDING: { label: t?.pending || "Pending", variant: "secondary" as const, color: "bg-muted text-foreground-secondary border-card-border" },
+    CONFIRMED: { label: t?.confirmed || "Confirmed", variant: "default" as const, color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" },
+    CANCELLED: { label: t?.cancelled || "Cancelled", variant: "destructive" as const, color: "bg-destructive/10 text-destructive border-destructive/20" },
+    COMPLETED: { label: t?.completed || "Completed", variant: "outline" as const, color: "bg-primary-500/10 text-primary-600 border-primary-500/20" },
+  };
 
   const refresh = () => router.refresh();
 
@@ -101,17 +106,17 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
   }
 
   const sendWhatsApp = (booking: Booking) => {
-    const pkgTitle = booking.package?.title?.id || "Paket Wisata";
+    const pkgTitle = dt(booking.package?.title) || t?.waMessage?.package || "Paket Wisata";
     const dateStr = booking.tourDate 
-      ? new Date(booking.tourDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+      ? new Date(booking.tourDate).toLocaleDateString(locale === "id" ? "id-ID" : locale === "ms" ? "en-MY" : "en-US", { day: "numeric", month: "long", year: "numeric" })
       : "-";
     
     const balance = booking.totalPrice - booking.amountPaid;
     const balanceStr = balance > 0 
-      ? `\n\n*Sisa Tagihan:* Rp ${balance.toLocaleString("id-ID")}\nMohon lakukan pelunasan sebelum keberangkatan.`
-      : "\n\n*Status:* Lunas. Terima kasih!";
+      ? `\n\n*${t?.waMessage?.remaining || "Sisa Tagihan"}:* ${formatCurrency(balance, locale, rates)}\n${t?.waMessage?.paymentNote || "Mohon lakukan pelunasan sebelum keberangkatan."}`
+      : `\n\n${t?.waMessage?.paidNote || "*Status:* Lunas. Terima kasih!"}`;
 
-    const message = `Halo Kak *${booking.name}*,\n\nKami dari *Titan Travel* ingin mengonfirmasi pesanan Anda:\n\n📌 *Paket:* ${pkgTitle}\n📅 *Tanggal:* ${dateStr}\n👥 *Peserta:* ${booking.pax} Orang\n💰 *Total:* Rp ${Number(booking.totalPrice).toLocaleString("id-ID")}${balanceStr}\n\nApakah ada yang bisa kami bantu terkait persiapan perjalanannya?\n\nTerima kasih! 🙏`;
+    const message = `${t?.waMessage?.greeting?.replace("{name}", booking.name) || `Halo Kak *${booking.name}*`},\n\n${t?.waMessage?.intro || "Kami dari *Titan Travel* ingin mengonfirmasi pesanan Anda:"}\n\n📌 *${t?.waMessage?.package || "Paket"}:* ${pkgTitle}\n📅 *${t?.waMessage?.date || "Tanggal"}:* ${dateStr}\n👥 *${t?.waMessage?.pax || "Peserta"}:* ${booking.pax} ${locale === "id" ? "Orang" : "Pax"}\n💰 *${t?.waMessage?.total || "Total"}:* ${formatCurrency(booking.totalPrice, locale, rates)}${balanceStr}\n\n${t?.waMessage?.helpNote || "Apakah ada yang bisa kami bantu terkait persiapan perjalanannya?"}\n\n${t?.waMessage?.closing || "Terima kasih! 🙏"}`;
     
     const phone = booking.phone.startsWith("0") ? "62" + booking.phone.slice(1) : booking.phone;
     window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`, "_blank");
@@ -120,19 +125,19 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Manajemen Booking"
-        description="Kelola reservasi, pantau pembayaran, dan hubungi pelanggan"
+        title={t?.title || "Manajemen Booking"}
+        description={t?.description || "Kelola reservasi, pantau pembayaran, dan hubungi pelanggan"}
         action={
           <Select value={filter} onValueChange={(val) => setFilter(val ?? "ALL")}>
             <SelectTrigger className="w-45 bg-card-bg border-card-border">
-              <SelectValue placeholder="Filter Status" />
+              <SelectValue placeholder={t?.filter || "Filter Status"} />
             </SelectTrigger>
             <SelectContent className="bg-card-bg border-card-border">
-              <SelectItem value="ALL">Semua Status</SelectItem>
-              <SelectItem value="PENDING">⌛ Pending</SelectItem>
-              <SelectItem value="CONFIRMED">✅ Confirmed</SelectItem>
-              <SelectItem value="COMPLETED">⭐ Selesai</SelectItem>
-              <SelectItem value="CANCELLED">❌ Dibatalkan</SelectItem>
+              <SelectItem value="ALL">{t?.allStatus || "Semua Status"}</SelectItem>
+              <SelectItem value="PENDING">{t?.pending || "⌛ Pending"}</SelectItem>
+              <SelectItem value="CONFIRMED">{t?.confirmed || "✅ Confirmed"}</SelectItem>
+              <SelectItem value="COMPLETED">{t?.completed || "⭐ Selesai"}</SelectItem>
+              <SelectItem value="CANCELLED">{t?.cancelled || "❌ Dibatalkan"}</SelectItem>
             </SelectContent>
           </Select>
         }
@@ -144,18 +149,18 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
             <div className="w-16 h-16 rounded-full bg-foreground/5 flex items-center justify-center mb-4">
               <Calendar className="w-8 h-8 opacity-20" />
             </div>
-            <p className="text-sm font-medium">Belum ada data booking untuk kategori ini.</p>
+            <p className="text-sm font-medium">{t?.empty || "Belum ada data booking untuk kategori ini."}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr className="border-b border-card-border bg-muted/30">
-                  <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">Informasi Pelanggan</th>
-                  <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">Paket & Jadwal</th>
-                  <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">Status Pembayaran</th>
-                  <th className="text-center px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">Status</th>
-                  <th className="text-center px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">Aksi</th>
+                  <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">{t?.table?.customerInfo || "Informasi Pelanggan"}</th>
+                  <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">{t?.table?.packageSchedule || "Paket & Jadwal"}</th>
+                  <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">{t?.table?.paymentStatus || "Status Pembayaran"}</th>
+                  <th className="text-center px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">{t?.table?.status || "Status"}</th>
+                  <th className="text-center px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">{t?.table?.action || "Aksi"}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-card-border">
@@ -188,18 +193,18 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                             </div>
                             <div>
                               <p className="font-bold text-foreground leading-tight">
-                                {booking.package?.title?.id || "Paket Wisata"}
+                                {dt(booking.package?.title) || "Paket Wisata"}
                               </p>
                               <p className="text-[11px] text-foreground-secondary mt-0.5">
                                 {booking.tourDate
-                                  ? new Date(booking.tourDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+                                  ? new Date(booking.tourDate).toLocaleDateString(locale === "id" ? "id-ID" : locale === "ms" ? "en-MY" : "en-US", { day: "numeric", month: "long", year: "numeric" })
                                   : "Tanggal belum dipilih"}
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-1.5 text-[11px] font-bold text-foreground-secondary bg-foreground/5 w-fit px-2 py-0.5 rounded-md">
                             <Users className="w-3 h-3" />
-                            {booking.pax} Peserta
+                            {booking.pax} {locale === "id" ? "Peserta" : "Pax"}
                           </div>
                         </div>
                       </td>
@@ -208,23 +213,23 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                       <td className="px-6 py-5">
                         <div className="space-y-1.5">
                           <div className="flex justify-between items-end">
-                            <span className="text-[10px] font-bold text-foreground-secondary uppercase">Total</span>
-                            <span className="font-black text-foreground">Rp {Number(booking.totalPrice).toLocaleString("id-ID")}</span>
+                            <span className="text-[10px] font-bold text-foreground-secondary uppercase">{t?.payment?.total || "Total"}</span>
+                            <span className="font-black text-foreground">{formatCurrency(booking.totalPrice, locale, rates)}</span>
                           </div>
                           <div className="flex justify-between items-end">
-                            <span className="text-[10px] font-bold text-emerald-500 uppercase">Dibayar</span>
-                            <span className="font-bold text-emerald-600">Rp {Number(booking.amountPaid).toLocaleString("id-ID")}</span>
+                            <span className="text-[10px] font-bold text-emerald-500 uppercase">{t?.payment?.paid || "Dibayar"}</span>
+                            <span className="font-bold text-emerald-600">{formatCurrency(booking.amountPaid, locale, rates)}</span>
                           </div>
                           {balance > 0 && (
                             <div className="flex justify-between items-end pt-1 border-t border-card-border">
-                              <span className="text-[10px] font-bold text-destructive uppercase tracking-tighter">Sisa</span>
-                              <span className="font-black text-destructive">Rp {balance.toLocaleString("id-ID")}</span>
+                              <span className="text-[10px] font-bold text-destructive uppercase tracking-tighter">{t?.payment?.remaining || "Sisa"}</span>
+                              <span className="font-black text-destructive">{formatCurrency(balance, locale, rates)}</span>
                             </div>
                           )}
                           {isFullyPaid && (
                             <div className="mt-1 flex items-center justify-center gap-1 py-0.5 px-2 bg-emerald-500/10 text-emerald-600 rounded text-[9px] font-bold uppercase tracking-widest border border-emerald-500/20">
                               <CreditCard className="w-2.5 h-2.5" />
-                              Lunas
+                              {t?.payment?.fullPayment || "Lunas"}
                             </div>
                           )}
                           {/* Payment Proof */}
@@ -236,7 +241,7 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                               className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-primary-600 hover:text-primary-700 transition-colors"
                             >
                               <ImageIcon className="w-3 h-3" />
-                              Lihat Bukti Bayar
+                              {t?.payment?.viewProof || "Lihat Bukti Bayar"}
                               <ExternalLink className="w-2.5 h-2.5" />
                             </a>
                           )}
@@ -254,7 +259,7 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                               disabled={isPending}
                             >
                               <CheckCircle className="w-3 h-3" />
-                              Verifikasi Pembayaran
+                              {t?.payment?.verifyPayment || "Verifikasi Pembayaran"}
                             </Button>
                           )}
                           {/* Settlement Proof */}
@@ -266,7 +271,7 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                               className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
                             >
                               <ImageIcon className="w-3 h-3" />
-                              Lihat Bukti Pelunasan
+                              {t?.payment?.viewSettlement || "Lihat Bukti Pelunasan"}
                               <ExternalLink className="w-2.5 h-2.5" />
                             </a>
                           )}
@@ -278,7 +283,7 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                               disabled={isPending}
                             >
                               <CheckCircle className="w-3 h-3" />
-                              Verifikasi Pelunasan
+                              {t?.payment?.verifySettlement || "Verifikasi Pelunasan"}
                             </Button>
                           )}
                         </div>
@@ -303,7 +308,7 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                           </SelectContent>
                         </Select>
                         <p className="text-[10px] text-foreground-secondary mt-2 font-medium">
-                          Dibuat: {new Date(booking.createdAt).toLocaleDateString("id-ID")}
+                          {locale === "id" ? "Dibuat" : locale === "ms" ? "Dibuat" : "Created"}: {new Date(booking.createdAt).toLocaleDateString(locale === "id" ? "id-ID" : locale === "ms" ? "en-MY" : "en-US")}
                         </p>
                       </td>
 
@@ -317,7 +322,7 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                             onClick={() => sendWhatsApp(booking)}
                           >
                             <MessageSquare className="w-3.5 h-3.5" />
-                            Notify via WhatsApp
+                            {t?.actions?.whatsapp || "Notify via WhatsApp"}
                           </Button>
 
                           <DropdownMenu>
@@ -332,7 +337,7 @@ export function BookingsClient({ initialData }: { initialData: Booking[] }) {
                                     onSelect={(e) => e.preventDefault()}
                                   >
                                     {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                                    Hapus Pesanan
+                                    {t?.actions?.delete || "Hapus Pesanan"}
                                   </DropdownMenuItem>
                                 }
                                 onConfirm={() => handleDelete(booking.id)}

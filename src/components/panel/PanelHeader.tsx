@@ -8,9 +8,11 @@ import {
   Home, Package, CheckSquare, BarChart, TrendingUp, 
   ImageIcon, FileText, MessageCircle, Users,
   Landmark, Compass, Activity, ChevronRight,
-  ChevronDown, Sun, Moon, UserCircle, LogOut
+  ChevronDown, Sun, Moon, UserCircle, LogOut, Globe
 } from "lucide-react"
 import { useTheme } from "@/components/ThemeProvider"
+import { useLocale } from "@/lib/LocaleContext"
+import type { Locale } from "@/lib/LocaleContext"
 
 const BREADCRUMB_MAP: Record<string, { label: string; icon: typeof Home; color: string }> = {
   "/admin": { label: "Dashboard", icon: Home, color: "text-blue-500" },
@@ -46,6 +48,7 @@ function getGreeting(): string {
 export function PanelHeader({ user }: { user: { name: string; email: string; role: string } }) {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const { locale, setLocale } = useLocale();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -83,7 +86,7 @@ export function PanelHeader({ user }: { user: { name: string; email: string; rol
   }, []);
 
   return (
-    <header className="sticky top-0 z-10 border-b border-card-border bg-background/80 backdrop-blur-lg">
+    <header className="sticky top-0 z-30 border-b border-card-border bg-background/80 backdrop-blur-lg">
       <div className="h-0.5 bg-linear-to-r from-primary-500 via-accent-500 to-primary-500" />
       <div className="flex h-14 items-center gap-4 px-4 lg:px-6">
         <SidebarTrigger className="text-foreground-secondary hover:text-foreground transition-colors" />
@@ -143,6 +146,29 @@ export function PanelHeader({ user }: { user: { name: string; email: string; rol
                   {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                   {theme === "dark" ? "Mode Terang" : "Mode Gelap"}
                 </button>
+
+                {/* Language Toggle */}
+                <div className="px-4 py-2.5">
+                  <div className="flex items-center gap-2 text-sm text-foreground-secondary mb-2">
+                    <Globe className="w-4 h-4" />
+                    <span>Bahasa / Language</span>
+                  </div>
+                  <div className="flex items-center gap-1 bg-primary-500/5 rounded-lg p-1">
+                    {(["id", "en", "ms"] as Locale[]).map((l) => (
+                      <button
+                        key={l}
+                        onClick={() => { setLocale(l); setDropdownOpen(false); }}
+                        className={`flex-1 py-1.5 px-2 rounded-md text-xs font-bold transition-all ${
+                          locale === l
+                            ? "bg-primary-500 text-white shadow-sm"
+                            : "text-foreground-secondary hover:text-foreground hover:bg-primary-500/10"
+                        }`}
+                      >
+                        {l.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
                 {/* Account Link */}
                 <Link

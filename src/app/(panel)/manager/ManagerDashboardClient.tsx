@@ -12,6 +12,9 @@ import {
 } from "lucide-react";
 import { RevenueChart } from "./components/RevenueChart";
 import { getManagerDashboardStats } from "@/lib/actions/dashboard";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
+import { formatCurrency } from "@/lib/utils";
 
 interface TopPackage {
   id: string;
@@ -37,6 +40,8 @@ export function ManagerDashboardClient({
   const [stats, setStats] = useState(initialStats);
   const [period, setPeriod] = useState("6months");
   const [isPending, startTransition] = useTransition();
+  const { dObj, locale, rates } = useLocale();
+  const t = dObj(translations).managerPanel;
 
   const handlePeriodChange = (newPeriod: string) => {
     setPeriod(newPeriod);
@@ -46,24 +51,16 @@ export function ManagerDashboardClient({
     });
   };
 
-  const formatCurrency = (value: number, locale: string = "id-ID", currency: string = "IDR") => {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: currency,
-      maximumFractionDigits: 0,
-    }).format(value);
-  };
-
   return (
-    <div className="flex flex-1 flex-col gap-8 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-8">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight text-foreground font-(family-name:--font-playfair)">
-            Beranda Manager
+            {t?.title || "Dashboard Manager"}
           </h1>
           <p className="text-sm text-foreground-secondary font-medium">
-            Halo, <span className="text-primary-600 font-bold">{userName}</span>. Pantau pertumbuhan bisnis dan performa titan travel.
+            {t?.greeting || "Hello"}, <span className="text-primary-600 font-bold">{userName}</span>. {t?.description || "Monitor business growth and performance."}
           </p>
         </div>
       </div>
@@ -78,15 +75,15 @@ export function ManagerDashboardClient({
             <div className="p-3 rounded-xl bg-primary-500/10 text-primary-600">
               <Banknote className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-foreground-secondary uppercase tracking-wider">Total Omzet</h3>
+            <h3 className="text-sm font-bold text-foreground-secondary uppercase tracking-wider">{t?.stats?.totalRevenue || "Total Revenue"}</h3>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-black text-foreground">
-              {formatCurrency(stats.totalRevenue)}
+              {formatCurrency(stats.totalRevenue, locale, rates)}
             </span>
           </div>
           <p className="text-[10px] text-foreground-secondary mt-2 font-medium italic">
-            * Berdasarkan pesanan yang telah dikonfirmasi/selesai
+            * {t?.stats?.confirmedOrdersNote || "Based on confirmed/completed orders"}
           </p>
         </div>
 
@@ -98,16 +95,16 @@ export function ManagerDashboardClient({
             <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600">
               <CalendarCheck className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-foreground-secondary uppercase tracking-wider">Booking Selesai</h3>
+            <h3 className="text-sm font-bold text-foreground-secondary uppercase tracking-wider">{t?.stats?.completedBookings || "Completed Bookings"}</h3>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-black text-foreground">
               {stats.completedBookings}
             </span>
-            <span className="text-xs font-bold text-emerald-600 uppercase">Pesanan</span>
+            <span className="text-xs font-bold text-emerald-600 uppercase">Bookings</span>
           </div>
           <p className="text-[10px] text-foreground-secondary mt-2 font-medium italic">
-            * Total seluruh perjalanan yang telah terlaksana
+            * {t?.stats?.completedTripsNote || "Total completed trips"}
           </p>
         </div>
       </div>
@@ -127,14 +124,14 @@ export function ManagerDashboardClient({
         <div className="bg-card-bg border border-card-border rounded-2xl p-6 shadow-sm flex flex-col h-full">
           <div className="flex items-center gap-2 text-amber-500 mb-6">
             <Medal className="w-4 h-4" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-amber-600">Paket Terpopuler</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-amber-600">{t?.stats?.topPackages || "Top Packages"}</h3>
           </div>
 
           <div className="flex-1 space-y-6">
             {stats.topPackages.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-foreground-secondary text-center">
                 <PackageIcon className="w-12 h-12 mb-3 opacity-20" />
-                <p className="text-xs font-medium italic">Belum ada data performa paket</p>
+                <p className="text-xs font-medium italic">{t?.stats?.noPackageData || "No package performance data yet"}</p>
               </div>
             ) : (
               stats.topPackages.map((pkg, idx) => (
@@ -149,11 +146,11 @@ export function ManagerDashboardClient({
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600">
                         <Wallet className="w-3 h-3" />
-                        {formatCurrency(pkg.totalRevenue)}
+                        {formatCurrency(pkg.totalRevenue, locale, rates)}
                       </div>
                       <div className="flex items-center gap-1 text-[10px] font-bold text-foreground-secondary">
                         <Users className="w-3 h-3" />
-                        {pkg.bookingCount} Booking
+                        {pkg.bookingCount} {t?.stats?.bookingsLabel || "Bookings"}
                       </div>
                     </div>
                   </div>
@@ -164,7 +161,7 @@ export function ManagerDashboardClient({
 
           <div className="mt-6 pt-4 border-t border-card-border">
             <p className="text-[9px] text-foreground-secondary italic leading-tight uppercase tracking-tight font-bold">
-              * Diurutkan berdasarkan akumulasi pendapatan tertinggi
+              * {t?.stats?.sortedByRevenue || "Sorted by highest revenue accumulation"}
             </p>
           </div>
         </div>

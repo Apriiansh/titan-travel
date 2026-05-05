@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Tag, Loader2, CheckCircle } from "lucide-react";
 import { PackageForm } from "./PackageForm";
 import { PackageFormState } from "../types";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 type VehicleType = { id: string; name: string };
 
@@ -43,13 +45,18 @@ export function PackageDialog({
   onUpdateTier,
   onSubmit,
 }: PackageDialogProps) {
+  const { locale } = useLocale();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl p-0 overflow-hidden border-none rounded-2xl shadow-2xl flex flex-col max-h-[95vh]">
         <DialogHeader className="p-6 bg-muted/30 border-b border-card-border shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Tag className="w-5 h-5 text-primary-500" />
-            {editing ? "Edit Detail Paket" : "Buat Paket Wisata Baru"}
+            {editing 
+              ? (locale === "id" ? "Edit Detail Paket" : locale === "ms" ? "Edit Butiran Pakej" : "Edit Package Details") 
+              : (locale === "id" ? "Buat Paket Wisata Baru" : locale === "ms" ? "Buat Pakej Pelancongan Baru" : "Create New Tour Package")
+            }
           </DialogTitle>
         </DialogHeader>
 
@@ -72,19 +79,22 @@ export function PackageDialog({
             onClick={() => onOpenChange(false)}
             className="rounded-md text-xs tracking-wider uppercase font-bold px-6 h-10"
           >
-            Batal
+            {locale === "id" ? "Batal" : locale === "ms" ? "Batal" : "Cancel"}
           </Button>
           <Button
             onClick={onSubmit}
             disabled={isPending}
-            className="bg-primary-500 hover:bg-primary-600 text-white min-w-[150px] rounded-md shadow-md text-xs tracking-wider uppercase font-bold h-10"
+            className="bg-primary-500 hover:bg-primary-600 text-white min-w-37.5 rounded-md shadow-md text-xs tracking-wider uppercase font-bold h-10"
           >
             {isPending ? (
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
             ) : (
               <CheckCircle className="w-4 h-4 mr-2" />
             )}
-            {editing ? "Simpan Perubahan" : "Buat Paket"}
+            {editing 
+              ? (locale === "id" ? "Simpan Perubahan" : locale === "ms" ? "Simpan Perubahan" : "Save Changes") 
+              : (locale === "id" ? "Buat Paket" : locale === "ms" ? "Buat Pakej" : "Create Package")
+            }
           </Button>
         </div>
       </DialogContent>

@@ -14,6 +14,9 @@ import {
   Image as ImageIcon 
 } from "lucide-react";
 import { Package } from "../types";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
+import { formatCurrency } from "@/lib/utils";
 
 interface PackageTableProps {
   packages: Package[];
@@ -30,13 +33,16 @@ export function PackageTable({
   onTogglePublish, 
   isPending 
 }: PackageTableProps) {
+  const { dObj, locale, rates, dt } = useLocale();
+  const t = dObj(translations).adminPanel.packages;
+
   if (packages.length === 0) {
     return (
       <div className="rounded-md border border-card-border bg-card-bg shadow-sm overflow-hidden p-24">
         <div className="flex flex-col items-center justify-center text-foreground-secondary space-y-4">
           <Tag className="w-12 h-12 text-muted-foreground/20" />
           <p className="text-sm font-medium">
-            Belum ada paket wisata. Tambahkan yang pertama!
+            {t?.empty || "Belum ada paket wisata. Tambahkan yang pertama!"}
           </p>
         </div>
       </div>
@@ -50,22 +56,22 @@ export function PackageTable({
           <thead>
             <tr className="border-b border-card-border bg-muted/30">
               <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">
-                Paket
+                {t?.table?.package || "Paket"}
               </th>
               <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px] hidden md:table-cell">
-                Lokasi
+                {t?.table?.location || "Lokasi"}
               </th>
               <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px] hidden lg:table-cell">
-                Durasi
+                {t?.table?.duration || "Durasi"}
               </th>
               <th className="text-right px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">
-                Harga
+                {t?.table?.price || "Harga"}
               </th>
               <th className="text-center px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">
-                Status
+                {t?.table?.status || "Status"}
               </th>
               <th className="text-center px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">
-                Aksi
+                {t?.table?.action || "Aksi"}
               </th>
             </tr>
           </thead>
@@ -78,7 +84,7 @@ export function PackageTable({
                       {pkg.images?.[0] ? (
                         <SafeImage
                           src={pkg.images[0]}
-                          alt={pkg.title.id || "Package"}
+                          alt={dt(pkg.title) || "Package"}
                           fill
                           sizes="40px"
                           className="object-cover"
@@ -88,39 +94,34 @@ export function PackageTable({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-foreground truncate max-w-[200px]">
-                        {pkg.title.id}
+                      <p className="font-semibold text-foreground truncate max-w-50">
+                        {dt(pkg.title)}
                       </p>
-                      <div className="flex items-center gap-2">
-                        <p className="text-[10px] text-foreground-secondary truncate max-w-[150px]">
-                          {pkg.title.en}
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 text-foreground-secondary hidden md:table-cell">
                   <div className="flex items-center gap-1.5">
                     <MapPin className="w-3 h-3 text-muted-foreground" />
-                    <span className="truncate max-w-[120px]">
-                      {pkg.location.id}
+                    <span className="truncate max-w-30">
+                      {dt(pkg.location)}
                     </span>
                   </div>
                 </td>
                 <td className="px-6 py-4 text-foreground-secondary hidden lg:table-cell">
                   <div className="flex items-center gap-1.5">
                     <Clock className="w-3 h-3 text-muted-foreground" />
-                    <span>{pkg.duration.id}</span>
+                    <span>{dt(pkg.duration)}</span>
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div>
                     <p className="font-bold text-primary-600">
-                      Rp {Number(pkg.price).toLocaleString("id-ID")}
+                      {formatCurrency(Number(pkg.price), locale, rates)}
                     </p>
                     {pkg.originalPrice && Number(pkg.originalPrice) > 0 && (
                       <p className="text-[10px] text-muted-foreground line-through decoration-red-400/50">
-                        Rp {Number(pkg.originalPrice).toLocaleString("id-ID")}
+                        {formatCurrency(Number(pkg.originalPrice), locale, rates)}
                       </p>
                     )}
                   </div>
@@ -141,11 +142,11 @@ export function PackageTable({
                     >
                       {pkg.isPublished ? (
                         <>
-                          <Eye className="w-2.5 h-2.5" /> Publik
+                          <Eye className="w-2.5 h-2.5" /> {t?.status?.published || "Publik"}
                         </>
                       ) : (
                         <>
-                          <EyeOff className="w-2.5 h-2.5" /> Draft
+                          <EyeOff className="w-2.5 h-2.5" /> {t?.status?.draft || "Draft"}
                         </>
                       )}
                     </Badge>

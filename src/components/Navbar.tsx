@@ -22,10 +22,8 @@ import type { Locale } from "@/lib/translations";
 export default function Navbar({ data }: { data?: any }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [rate, setRate] = useState<number | null>(null);
-  const [rateLoading, setRateLoading] = useState(true);
   const { theme, toggleTheme } = useTheme();
-  const { locale, setLocale, dObj } = useLocale();
+  const { locale, setLocale, dObj, rates } = useLocale();
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
   const [hoveredAuth, setHoveredAuth] = useState<"login" | "register" | null>(
     null,
@@ -36,21 +34,6 @@ export default function Navbar({ data }: { data?: any }) {
 
   // Localize the whole settings object first
   const d = dObj(data) || {};
-
-  useEffect(() => {
-    const fetchRate = async () => {
-      try {
-        const response = await fetch("https://open.er-api.com/v6/latest/USD");
-        const resData = await response.json();
-        setRate(resData.rates.IDR);
-      } catch (err) {
-        console.error("Failed to fetch exchange rate", err);
-      } finally {
-        setRateLoading(false);
-      }
-    };
-    fetchRate();
-  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -137,7 +120,7 @@ export default function Navbar({ data }: { data?: any }) {
           )}
 
           {/* Exchange Rate Badge */}
-          {rateLoading ? (
+          {rates.loading ? (
             <div
               className={`hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium border animate-pulse ${
                 isScrolled
@@ -146,9 +129,9 @@ export default function Navbar({ data }: { data?: any }) {
               }`}
             >
               <RefreshCw className="w-3 h-3 animate-spin" />
-              {locale === "id" ? "Memuat Kurs..." : "Loading Rate..."}
+              {locale === "id" ? "Memuat Kurs..." : locale === "ms" ? "Memuatkan Kurs..." : "Loading Rate..."}
             </div>
-          ) : rate ? (
+          ) : rates.USD || rates.USD_TO_MYR ? (
             <div
               className={`hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs font-medium border ${
                 isScrolled
@@ -159,11 +142,19 @@ export default function Navbar({ data }: { data?: any }) {
               <TrendingUp className="w-3 h-3 text-emerald-500" />
               <span className="opacity-70">USD</span>
               <strong className={isScrolled ? "text-foreground" : "text-white"}>
-                {new Intl.NumberFormat("id-ID", {
-                  style: "currency",
-                  currency: "IDR",
-                  maximumFractionDigits: 0,
-                }).format(rate)}
+                {locale === "ms" ? (
+                  new Intl.NumberFormat("en-MY", {
+                    style: "currency",
+                    currency: "MYR",
+                    maximumFractionDigits: 2,
+                  }).format(rates.USD_TO_MYR)
+                ) : (
+                  new Intl.NumberFormat("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                    maximumFractionDigits: 0,
+                  }).format(rates.USD)
+                )}
               </strong>
             </div>
           ) : null}

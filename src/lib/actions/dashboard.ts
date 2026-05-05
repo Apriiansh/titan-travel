@@ -30,6 +30,63 @@ export async function getDashboardStats() {
     },
   });
 
+  // Add revenue and chart data for admin as well
+  const [totalRevenueResult, packagesList] = await Promise.all([
+    prisma.booking.aggregate({
+      where: {
+        status: { in: ["CONFIRMED", "COMPLETED"] },
+      },
+      _sum: {
+        amountPaid: true,
+      },
+    }),
+    prisma.tourPackage.findMany({
+      include: {
+        bookings: {
+          where: { status: { in: ["CONFIRMED", "COMPLETED"] } },
+          select: { amountPaid: true },
+        },
+      },
+    }),
+  ]);
+
+  const topPackages = packagesList
+    .map((pkg) => ({
+      id: pkg.id,
+      title: (pkg.title as any).id || (pkg.title as any).en || "Untitled",
+      totalRevenue: pkg.bookings.reduce((sum, b) => sum + Number(b.amountPaid), 0),
+      bookingCount: pkg.bookings.length,
+    }))
+    .sort((a, b) => b.totalRevenue - a.totalRevenue)
+    .slice(0, 3);
+
+  const chartData = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const monthName = d.toLocaleDateString("id-ID", { month: "short" });
+    const startOfMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+    const endOfMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+
+    const monthlyRevenue = await prisma.booking.aggregate({
+      where: {
+        status: { in: ["CONFIRMED", "COMPLETED"] },
+        createdAt: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+      _sum: {
+        amountPaid: true,
+      },
+    });
+
+    chartData.push({
+      name: monthName,
+      revenue: Number(monthlyRevenue._sum.amountPaid || 0),
+    });
+  }
+
   return {
     packages,
     publishedPackages,
@@ -39,6 +96,9 @@ export async function getDashboardStats() {
     bookings,
     pendingBookings,
     recentBookings,
+    totalRevenue: Number(totalRevenueResult._sum.amountPaid || 0),
+    topPackages,
+    chartData,
   };
 }
 

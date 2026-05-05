@@ -21,6 +21,8 @@ import {
   updateVehicleType,
 } from "@/lib/actions/vehicle-types";
 import { Bus, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 type VehicleType = {
   id: string;
@@ -37,6 +39,8 @@ export function VehiclesClient({ initialData }: { initialData: VehicleType[] }) 
   const [editing, setEditing] = useState<VehicleType | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [isPending, startTransition] = useTransition();
+  const { dObj, locale } = useLocale();
+  const t = dObj(translations).adminPanel.vehicles;
 
   function openCreate() {
     setEditing(null);
@@ -73,15 +77,15 @@ export function VehiclesClient({ initialData }: { initialData: VehicleType[] }) 
   return (
     <>
       <PageHeader
-        title="Tipe Kendaraan"
-        description="Kelola jenis kendaraan yang tersedia untuk paket wisata"
+        title={t?.title || "Tipe Kendaraan"}
+        description={t?.description || "Kelola jenis kendaraan yang tersedia untuk paket wisata"}
         action={
           <Button
             onClick={openCreate}
             className="bg-primary-500 hover:bg-primary-600 text-white gap-2"
           >
             <Plus className="w-4 h-4" />
-            Tambah Kendaraan
+            {t?.addBtn || "Tambah Kendaraan"}
           </Button>
         }
       />
@@ -90,7 +94,7 @@ export function VehiclesClient({ initialData }: { initialData: VehicleType[] }) 
         {data.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-foreground-secondary">
             <Bus className="w-10 h-10 mb-3 opacity-30" />
-            <p className="text-sm">Belum ada tipe kendaraan</p>
+            <p className="text-sm">{t?.empty || "Belum ada tipe kendaraan"}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -98,16 +102,16 @@ export function VehiclesClient({ initialData }: { initialData: VehicleType[] }) 
               <thead>
                 <tr className="border-b border-card-border bg-card-border/20">
                   <th className="text-left px-4 py-3 font-semibold text-foreground-secondary">
-                    Nama Kendaraan
+                    {t?.table?.name || "Nama Kendaraan"}
                   </th>
                   <th className="text-center px-4 py-3 font-semibold text-foreground-secondary">
-                    Status
+                    {t?.table?.status || "Status"}
                   </th>
                   <th className="text-right px-4 py-3 font-semibold text-foreground-secondary hidden md:table-cell">
-                    Dibuat
+                    {t?.table?.created || "Dibuat"}
                   </th>
                   <th className="text-center px-4 py-3 font-semibold text-foreground-secondary">
-                    Aksi
+                    {t?.table?.action || "Aksi"}
                   </th>
                 </tr>
               </thead>
@@ -136,11 +140,14 @@ export function VehiclesClient({ initialData }: { initialData: VehicleType[] }) 
                             : "bg-slate-100 text-slate-500 hover:bg-slate-100 border-none"
                         }
                       >
-                        {vehicle.isActive ? "Aktif" : "Nonaktif"}
+                        {vehicle.isActive 
+                          ? (locale === "en" ? "Active" : locale === "ms" ? "Aktif" : "Aktif")
+                          : (locale === "en" ? "Inactive" : locale === "ms" ? "Tidak Aktif" : "Nonaktif")
+                        }
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-right text-foreground-secondary hidden md:table-cell">
-                      {new Date(vehicle.createdAt).toLocaleDateString("id-ID")}
+                      {new Date(vehicle.createdAt).toLocaleDateString(locale === "id" ? "id-ID" : locale === "ms" ? "en-MY" : "en-US")}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-1">
@@ -178,21 +185,21 @@ export function VehiclesClient({ initialData }: { initialData: VehicleType[] }) 
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {editing ? "Edit Kendaraan" : "Tambah Kendaraan"}
+              {editing ? (t?.form?.editTitle || "Edit Kendaraan") : (t?.form?.addTitle || "Tambah Kendaraan")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Nama Kendaraan</Label>
+              <Label>{t?.form?.nameLabel || "Nama Kendaraan"}</Label>
               <Input
                 value={form.name}
                 onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-                placeholder="Cth: Bus, Hiace, ELF, Pesawat"
+                placeholder={t?.form?.namePlaceholder || "Cth: Bus, Hiace, ELF, Pesawat"}
               />
             </div>
             {editing && (
               <div className="flex items-center justify-between p-3 rounded-lg border border-card-border">
-                <Label className="text-sm font-medium cursor-pointer">Aktif</Label>
+                <Label className="text-sm font-medium cursor-pointer">{t?.form?.activeLabel || "Aktif"}</Label>
                 <Switch
                   checked={form.isActive}
                   onCheckedChange={(val) =>
@@ -203,7 +210,7 @@ export function VehiclesClient({ initialData }: { initialData: VehicleType[] }) 
             )}
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setOpen(false)}>
-                Batal
+                {locale === "en" ? "Cancel" : locale === "ms" ? "Batal" : "Batal"}
               </Button>
               <Button
                 onClick={handleSubmit}
@@ -211,7 +218,10 @@ export function VehiclesClient({ initialData }: { initialData: VehicleType[] }) 
                 className="bg-primary-500 hover:bg-primary-600 text-white"
               >
                 {isPending && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
-                {editing ? "Simpan" : "Tambah"}
+                {editing 
+                  ? (locale === "en" ? "Save" : locale === "ms" ? "Simpan" : "Simpan") 
+                  : (locale === "en" ? "Add" : locale === "ms" ? "Tambah" : "Tambah")
+                }
               </Button>
             </div>
           </div>
