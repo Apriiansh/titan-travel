@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/select";
 import { Plus, Tag, X } from "lucide-react";
 import { PackageFormState } from "../types";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 type VehicleType = { id: string; name: string };
 
@@ -29,13 +31,16 @@ export function PriceTierSection({
   onRemoveTier,
   onUpdateTier,
 }: PriceTierSectionProps) {
+  const { dObj } = useLocale();
+  const t = dObj(translations).adminPanel.packages.form.sections.pricing;
+
   return (
     <div className="p-5 rounded-xl bg-muted/20 border border-card-border space-y-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Tag className="w-4 h-4 text-primary-500" />
           <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            Harga & Diskon
+            {t?.title || "Harga & Diskon"}
           </Label>
         </div>
         <Button
@@ -44,27 +49,19 @@ export function PriceTierSection({
           onClick={onAddTier}
           className="h-7 text-[9px] gap-1 text-primary-600 px-3 border border-primary-100 bg-primary-50/50"
         >
-          <Plus className="w-3 h-3" /> Tambah Tarif
+          <Plus className="w-3 h-3" /> {t?.addBtn || "Tambah Tarif"}
         </Button>
       </div>
 
       <div className="p-3 rounded-lg bg-amber-500/5 border border-amber-500/10">
         <p className="text-[9px] text-amber-700 leading-relaxed italic">
-          <strong>Tips:</strong> Kamu bisa ketik{" "}
-          <code className="bg-amber-100 px-1 rounded text-amber-900 font-bold">
-            %
-          </code>{" "}
-          di kolom Harga Promo (cth:{" "}
-          <code className="bg-amber-100 px-1 rounded text-amber-900 font-bold">
-            %10
-          </code>
-          ) untuk hitung otomatis dari Harga Asli.
+          <strong>Tips:</strong> {t?.tip || "Kamu bisa ketik % di kolom Harga Promo (cth: %10) untuk hitung otomatis dari Harga Asli."}
         </p>
       </div>
 
       {priceTiers.length === 0 ? (
         <p className="text-[10px] text-muted-foreground text-center py-4 border-2 border-dashed rounded-lg">
-          Belum ada tier harga.
+          {t?.empty || "Belum ada tier harga."}
         </p>
       ) : (
         <div className="space-y-4">
@@ -76,21 +73,21 @@ export function PriceTierSection({
               {vehicleTypes.length > 0 && (
                 <div className="space-y-1">
                   <Label className="text-[9px] text-muted-foreground">
-                    Tipe Kendaraan
+                    {t?.fields?.vehicle || "Tipe Kendaraan"}
                   </Label>
                   <Select
                     value={tier.vehicleTypeId || "none"}
                     onValueChange={(val) => onUpdateTier(idx, "vehicleTypeId", val === "none" ? "" : (val ?? ""))}
                   >
                     <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="Pilih kendaraan (opsional)">
+                      <SelectValue placeholder={t?.fields?.vehiclePlaceholder || "Pilih kendaraan (opsional)"}>
                         {tier.vehicleTypeId 
                           ? vehicleTypes.find(v => v.id === tier.vehicleTypeId)?.name 
-                          : "Pilih kendaraan (opsional)"}
+                          : (t?.fields?.vehiclePlaceholder || "Pilih kendaraan (opsional)")}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">— Tidak ada —</SelectItem>
+                      <SelectItem value="none">{t?.fields?.none || "— Tidak ada —"}</SelectItem>
                       {vehicleTypes.map((v) => (
                         <SelectItem key={v.id} value={v.id}>
                           {v.name}
@@ -103,7 +100,7 @@ export function PriceTierSection({
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-[9px] text-muted-foreground">
-                    Min Pax
+                    {t?.fields?.minPax || "Min Pax"}
                   </Label>
                   <Input
                     type="number"
@@ -114,7 +111,7 @@ export function PriceTierSection({
                 </div>
                 <div className="space-y-1">
                   <Label className="text-[9px] text-muted-foreground">
-                    Max Pax
+                    {t?.fields?.maxPax || "Max Pax"}
                   </Label>
                   <Input
                     type="number"
@@ -127,7 +124,7 @@ export function PriceTierSection({
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-[9px] text-muted-foreground">
-                    Harga Asli (Coret)
+                    {t?.fields?.originalPrice || "Harga Asli (Coret)"}
                   </Label>
                   <Input
                     type="number"
@@ -136,19 +133,19 @@ export function PriceTierSection({
                       onUpdateTier(idx, "originalPrice", e.target.value)
                     }
                     className="h-8 text-xs"
-                    placeholder="Cth: 1000000"
+                    placeholder={t?.fields?.originalPricePlaceholder || "Cth: 1000000"}
                   />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-[9px] text-muted-foreground">
-                    Harga Promo / %
+                    {t?.fields?.promoPrice || "Harga Promo / %"}
                   </Label>
                   <Input
                     type="text"
                     value={tier.price}
                     onChange={(e) => onUpdateTier(idx, "price", e.target.value)}
                     className="h-8 text-xs border-primary-200"
-                    placeholder="% atau Rp"
+                    placeholder={t?.fields?.pricePlaceholder || "% atau Rp"}
                   />
                 </div>
               </div>

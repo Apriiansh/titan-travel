@@ -29,6 +29,8 @@ import {
   deleteBankAccount,
 } from "@/lib/actions/bank-accounts";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 type BankAccount = {
   id: string;
@@ -69,6 +71,10 @@ export function BankAccountsClient({
   const [form, setForm] = useState<FormData>(emptyForm);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const { dObj } = useLocale();
+  const t = dObj(translations).adminPanel.bankAccounts;
+  const common = dObj(translations).adminPanel.actions;
+  const deleteConfirm = dObj(translations).adminPanel.common.deleteConfirm;
 
   const openCreate = () => {
     setEditId(null);
@@ -118,7 +124,7 @@ export function BankAccountsClient({
   };
 
   const handleDelete = (id: string) => {
-    if (!confirm("Hapus rekening ini?")) return;
+    if (!confirm(deleteConfirm?.title || "Hapus rekening ini?")) return;
     startTransition(async () => {
       await deleteBankAccount(id);
       setAccounts((prev) => prev.filter((a) => a.id !== id));
@@ -140,15 +146,15 @@ export function BankAccountsClient({
   return (
     <>
       <PageHeader
-        title="Rekening Bank"
-        description="Kelola rekening bank yang ditampilkan ke pelanggan saat pembayaran"
+        title={t?.title || "Rekening Bank"}
+        description={t?.description || "Kelola rekening bank yang ditampilkan ke pelanggan saat pembayaran"}
         action={
           <Button
             onClick={openCreate}
             className="bg-primary-500 hover:bg-primary-600 text-white rounded-lg h-10 px-5 gap-2 font-bold text-sm"
           >
             <Plus className="w-4 h-4" />
-            Tambah Rekening
+            {t?.addBtn || "Tambah Rekening"}
           </Button>
         }
       />
@@ -158,10 +164,9 @@ export function BankAccountsClient({
           <FormCard>
             <div className="text-center py-12 text-foreground-secondary">
               <Landmark className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <p className="font-semibold">Belum ada rekening bank</p>
+              <p className="font-semibold">{t?.empty?.split(". ")[0] || "Belum ada rekening bank"}</p>
               <p className="text-sm mt-1">
-                Tambahkan rekening agar pelanggan bisa melakukan transfer
-                pembayaran.
+                {t?.empty?.split(". ")[1] || "Tambahkan rekening agar pelanggan bisa melakukan transfer pembayaran."}
               </p>
             </div>
           </FormCard>
@@ -192,7 +197,7 @@ export function BankAccountsClient({
                     </p>
                     {!account.isActive && (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-bold uppercase">
-                        Nonaktif
+                        {t?.inactiveBadge || "Nonaktif"}
                       </span>
                     )}
                   </div>
@@ -237,28 +242,28 @@ export function BankAccountsClient({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">
-              {editId ? "Edit Rekening" : "Tambah Rekening Baru"}
+              {editId ? (t?.form?.editTitle || "Edit Rekening") : (t?.form?.addTitle || "Tambah Rekening Baru")}
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-5 pt-2">
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase text-foreground-secondary">
-                Nama Bank
+                {t?.form?.bankNameLabel || "Nama Bank"}
               </Label>
               <Input
                 value={form.bankName}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, bankName: e.target.value }))
                 }
-                placeholder="Bank Mandiri / BCA / QRIS"
+                placeholder={t?.form?.bankNamePlaceholder || "Bank Mandiri / BCA / QRIS"}
                 className="h-10 rounded-lg"
               />
             </div>
 
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase text-foreground-secondary">
-                Nomor Rekening
+                {t?.form?.accountNumberLabel || "Nomor Rekening"}
               </Label>
               <Input
                 value={form.accountNumber}
@@ -268,28 +273,28 @@ export function BankAccountsClient({
                     accountNumber: e.target.value,
                   }))
                 }
-                placeholder="113-00-1394650-8"
+                placeholder={t?.form?.accountNumberPlaceholder || "113-00-1394650-8"}
                 className="h-10 rounded-lg font-mono"
               />
             </div>
 
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase text-foreground-secondary">
-                Nama Pemilik Rekening
+                {t?.form?.accountNameLabel || "Nama Pemilik Rekening"}
               </Label>
               <Input
                 value={form.accountName}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, accountName: e.target.value }))
                 }
-                placeholder="CV TITAN JAYA TRAVELINDO"
+                placeholder={t?.form?.accountNamePlaceholder || "CV TITAN JAYA TRAVELINDO"}
                 className="h-10 rounded-lg"
               />
             </div>
 
             <ImageUpload
-              label="Gambar / QRIS (Opsional)"
-              helperText="Upload foto QRIS atau logo bank"
+              label={t?.form?.imageLabel || "Gambar / QRIS (Opsional)"}
+              helperText={t?.form?.imageHelper || "Upload foto QRIS atau logo bank"}
               value={form.imageUrl}
               onChange={(url) =>
                 setForm((prev) => ({
@@ -301,9 +306,9 @@ export function BankAccountsClient({
 
             <div className="flex items-center justify-between pt-2">
               <div>
-                <Label className="text-sm font-semibold">Aktif</Label>
+                <Label className="text-sm font-semibold">{t?.form?.activeLabel || "Aktif"}</Label>
                 <p className="text-xs text-foreground-secondary">
-                  Tampilkan ke pelanggan saat pembayaran
+                  {t?.form?.activeHelper || "Tampilkan ke pelanggan saat pembayaran"}
                 </p>
               </div>
               <Switch
@@ -320,7 +325,7 @@ export function BankAccountsClient({
                 onClick={() => setIsOpen(false)}
                 className="rounded-lg h-10 px-5"
               >
-                Batal
+                {common?.cancel || "Batal"}
               </Button>
               <Button
                 onClick={handleSave}
@@ -333,7 +338,7 @@ export function BankAccountsClient({
                 className="bg-primary-500 hover:bg-primary-600 text-white rounded-lg h-10 px-5 gap-2 font-bold"
               >
                 {isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                {editId ? "Simpan Perubahan" : "Tambah Rekening"}
+                {editId ? (common?.save || "Simpan Perubahan") : (t?.addBtn || "Tambah Rekening")}
               </Button>
             </div>
           </div>

@@ -45,7 +45,9 @@ export function PackageDialog({
   onUpdateTier,
   onSubmit,
 }: PackageDialogProps) {
-  const { locale } = useLocale();
+  const { dObj, locale } = useLocale();
+  const t = dObj(translations).adminPanel;
+  const tp = t.packages;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -54,8 +56,8 @@ export function PackageDialog({
           <DialogTitle className="flex items-center gap-2">
             <Tag className="w-5 h-5 text-primary-500" />
             {editing 
-              ? (locale === "id" ? "Edit Detail Paket" : locale === "ms" ? "Edit Butiran Pakej" : "Edit Package Details") 
-              : (locale === "id" ? "Buat Paket Wisata Baru" : locale === "ms" ? "Buat Pakej Pelancongan Baru" : "Create New Tour Package")
+              ? (tp?.form?.editTitle || "Edit Detail Paket") 
+              : (tp?.form?.addTitle || "Buat Paket Wisata Baru")
             }
           </DialogTitle>
         </DialogHeader>
@@ -79,7 +81,7 @@ export function PackageDialog({
             onClick={() => onOpenChange(false)}
             className="rounded-md text-xs tracking-wider uppercase font-bold px-6 h-10"
           >
-            {locale === "id" ? "Batal" : locale === "ms" ? "Batal" : "Cancel"}
+            {t?.actions?.cancel || "Batal"}
           </Button>
           <Button
             onClick={onSubmit}
@@ -92,8 +94,8 @@ export function PackageDialog({
               <CheckCircle className="w-4 h-4 mr-2" />
             )}
             {editing 
-              ? (locale === "id" ? "Simpan Perubahan" : locale === "ms" ? "Simpan Perubahan" : "Save Changes") 
-              : (locale === "id" ? "Buat Paket" : locale === "ms" ? "Buat Pakej" : "Create Package")
+              ? (t?.actions?.save || "Simpan Perubahan") 
+              : (tp?.addBtn || "Buat Paket")
             }
           </Button>
         </div>

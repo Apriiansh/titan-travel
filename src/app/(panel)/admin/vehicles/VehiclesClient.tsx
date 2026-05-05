@@ -141,8 +141,8 @@ export function VehiclesClient({ initialData }: { initialData: VehicleType[] }) 
                         }
                       >
                         {vehicle.isActive 
-                          ? (locale === "en" ? "Active" : locale === "ms" ? "Aktif" : "Aktif")
-                          : (locale === "en" ? "Inactive" : locale === "ms" ? "Tidak Aktif" : "Nonaktif")
+                          ? (dObj(translations).adminPanel.packages.status.active || "Aktif")
+                          : (dObj(translations).adminPanel.packages.status.inactive || "Nonaktif")
                         }
                       </Badge>
                     </td>
@@ -210,7 +210,7 @@ export function VehiclesClient({ initialData }: { initialData: VehicleType[] }) 
             )}
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => setOpen(false)}>
-                {locale === "en" ? "Cancel" : locale === "ms" ? "Batal" : "Batal"}
+                {dObj(translations).adminPanel.actions.cancel || "Batal"}
               </Button>
               <Button
                 onClick={handleSubmit}
@@ -219,8 +219,8 @@ export function VehiclesClient({ initialData }: { initialData: VehicleType[] }) 
               >
                 {isPending && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
                 {editing 
-                  ? (locale === "en" ? "Save" : locale === "ms" ? "Simpan" : "Simpan") 
-                  : (locale === "en" ? "Add" : locale === "ms" ? "Tambah" : "Tambah")
+                  ? (dObj(translations).adminPanel.actions.save || "Simpan") 
+                  : (dObj(translations).adminPanel.actions.addNew || "Tambah")
                 }
               </Button>
             </div>

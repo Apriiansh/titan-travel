@@ -14,11 +14,12 @@ import {
   Loader2,
   Sparkles,
   Star,
-  MessageSquare,
 } from "lucide-react";
 import { PackageFormState } from "../types";
 import { PriceTierSection } from "./PriceTierSection";
 import { TopsisScoreSection } from "./TopsisScoreSection";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 type VehicleType = { id: string; name: string };
 
@@ -43,6 +44,9 @@ export function PackageForm({
   onRemoveTier,
   onUpdateTier,
 }: PackageFormProps) {
+  const { dObj, locale } = useLocale();
+  const t = dObj(translations).adminPanel.packages.form;
+
   return (
     <div className="p-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -50,7 +54,7 @@ export function PackageForm({
         <div className="lg:col-span-7 space-y-8">
           <div className="flex items-center justify-between mb-2">
             <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Detail Informasi & Deskripsi
+              {t?.sections?.info || "Detail Informasi & Deskripsi"}
             </Label>
             <Button
               variant="ghost"
@@ -64,7 +68,7 @@ export function PackageForm({
               ) : (
                 <Sparkles className="w-3 h-3" />
               )}
-              Auto-Translate
+              {t?.actions?.autoTranslate || "Auto-Translate"}
             </Button>
           </div>
 
@@ -74,7 +78,7 @@ export function PackageForm({
                 value="en"
                 className="text-[10px] rounded-sm uppercase font-bold"
               >
-                EN (Source)
+                EN ({locale === "id" ? "Sumber" : locale === "ms" ? "Sumber" : "Source"})
               </TabsTrigger>
               <TabsTrigger
                 value="id"
@@ -105,12 +109,12 @@ export function PackageForm({
                 >
                   <div className="space-y-1.5">
                     <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                      Judul Paket ({lang.toUpperCase()})
+                      {t?.fields?.title?.replace("{lang}", lang.toUpperCase()) || `Judul Paket (${lang.toUpperCase()})`}
                     </Label>
                     <Input
                       value={form[titleKey] as string}
                       onChange={(e) => onFieldChange(titleKey, e.target.value)}
-                      placeholder={`Judul paket dalam bahasa ${lang}`}
+                      placeholder={t?.placeholders?.title?.replace("{lang}", lang) || `Judul paket dalam bahasa ${lang}`}
                       className={`rounded-md font-bold h-10 ${lang === "en" ? "border-primary-200 bg-primary-50/10" : ""}`}
                     />
                   </div>
@@ -120,7 +124,7 @@ export function PackageForm({
                       <div className="flex items-center gap-1.5">
                         <MapPin className="w-3 h-3 text-primary-500" />
                         <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                          Lokasi
+                          {t?.fields?.location || "Lokasi"}
                         </Label>
                       </div>
                       <Input
@@ -128,7 +132,7 @@ export function PackageForm({
                         onChange={(e) =>
                           onFieldChange(locationKey, e.target.value)
                         }
-                        placeholder="Bali, Indonesia"
+                        placeholder={t?.placeholders?.location || "Bali, Indonesia"}
                         className={`rounded-md h-9 text-xs ${lang === "en" ? "border-primary-200 bg-primary-50/10" : ""}`}
                       />
                     </div>
@@ -136,7 +140,7 @@ export function PackageForm({
                       <div className="flex items-center gap-1.5">
                         <Clock className="w-3 h-3 text-primary-500" />
                         <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                          Durasi
+                          {t?.fields?.duration || "Durasi"}
                         </Label>
                       </div>
                       <Input
@@ -144,7 +148,7 @@ export function PackageForm({
                         onChange={(e) =>
                           onFieldChange(durationKey, e.target.value)
                         }
-                        placeholder="3D 2N"
+                        placeholder={t?.placeholders?.duration || "3D 2N"}
                         className={`rounded-md h-9 text-xs ${lang === "en" ? "border-primary-200 bg-primary-50/10" : ""}`}
                       />
                     </div>
@@ -152,13 +156,13 @@ export function PackageForm({
 
                   <div className="space-y-1.5">
                     <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                      Deskripsi Perjalanan ({lang.toUpperCase()})
+                      {t?.fields?.description?.replace("{lang}", lang.toUpperCase()) || `Deskripsi Perjalanan (${lang.toUpperCase()})`}
                     </Label>
                     <Textarea
                       rows={8}
                       value={form[descKey] as string}
                       onChange={(e) => onFieldChange(descKey, e.target.value)}
-                      placeholder={`Jelaskan aktivitas atau keunggulan paket ini dalam bahasa ${lang}...`}
+                      placeholder={t?.placeholders?.description?.replace("{lang}", lang) || `Jelaskan aktivitas atau keunggulan paket ini dalam bahasa ${lang}...`}
                       className={`rounded-md text-xs resize-none leading-relaxed ${lang === "en" ? "border-primary-200 bg-primary-50/10" : ""}`}
                     />
                   </div>
@@ -171,7 +175,7 @@ export function PackageForm({
             <div className="flex items-center gap-1.5">
               <Users className="w-4 h-4 text-primary-500" />
               <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
-                Kapasitas Peserta (Maksimal)
+                {t?.sections?.capacity || "Kapasitas Peserta (Maksimal)"}
               </Label>
             </div>
             <div className="flex items-center gap-4">
@@ -182,26 +186,25 @@ export function PackageForm({
                 onChange={(e) =>
                   onFieldChange("capacity", parseInt(e.target.value) || 0)
                 }
-                placeholder="Contoh: 10"
+                placeholder={t?.placeholders?.capacity || "Contoh: 10"}
                 className="rounded-md font-bold text-lg h-12 w-32 border-primary-100"
               />
               <p className="text-sm text-muted-foreground font-medium">
-                Peserta / Orang
+                {t?.fields?.capacityUnit || "Peserta / Orang"}
               </p>
             </div>
             <p className="text-[10px] text-muted-foreground italic leading-tight">
-              *User tidak akan bisa memesan lebih dari kapasitas ini untuk satu
-              tanggal keberangkatan.
+              {t?.notes?.capacity || "*User tidak akan bisa memesan lebih dari kapasitas ini untuk satu tanggal keberangkatan."}
             </p>
           </div>
 
           <div className="space-y-4">
             <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Galeri Visual
+              {t?.sections?.visuals || "Galeri Visual"}
             </Label>
             <ImageUpload
-              label="Foto Paket"
-              helperText="Pilih beberapa foto terbaik."
+              label={t?.fields?.images || "Foto Paket"}
+              helperText={t?.fields?.imagesHelper || "Pilih beberapa foto terbaik."}
               multiple
               aspectRatio={16 / 9}
               value={form.images}
@@ -232,13 +235,13 @@ export function PackageForm({
             <div className="flex items-center gap-2 mb-2">
               <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
               <Label className="text-sm font-bold text-slate-900 block">
-                Rating & Ulasan (Social Proof)
+                {t?.sections?.social || "Rating & Ulasan (Social Proof)"}
               </Label>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                  Rating (1-5)
+                  {t?.fields?.rating || "Rating (1-5)"}
                 </Label>
                 <Input
                   type="number"
@@ -255,7 +258,7 @@ export function PackageForm({
               </div>
               <div className="space-y-1.5">
                 <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                  Total Ulasan
+                  {t?.fields?.reviews || "Total Ulasan"}
                 </Label>
                 <Input
                   type="number"
@@ -269,13 +272,13 @@ export function PackageForm({
               </div>
             </div>
             <p className="text-[9px] text-muted-foreground italic leading-tight">
-              * Nilai ini akan tampil sebagai rating bintang di halaman paket.
+              {t?.notes?.social || "* Nilai ini akan tampil sebagai rating bintang di halaman paket."}
             </p>
           </div>
 
           <div className="p-5 rounded-xl bg-muted/20 border border-card-border space-y-4">
             <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-              Status Paket
+              {t?.sections?.status || "Status Paket"}
             </Label>
             <div className="flex items-center justify-between p-3 rounded-lg bg-white border border-card-border shadow-sm">
               <div className="flex items-center gap-3">
@@ -284,16 +287,16 @@ export function PackageForm({
                   onCheckedChange={(val) => onFieldChange("isPublished", val)}
                 />
                 <Label className="text-xs font-medium cursor-pointer">
-                  Publikasikan Paket
+                  {t?.fields?.publish || "Publikasikan Paket"}
                 </Label>
               </div>
               {form.isPublished ? (
                 <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none px-2 py-0.5 text-[9px]">
-                  Live
+                  {dObj(translations).adminPanel.packages.status.live || "Live"}
                 </Badge>
               ) : (
                 <Badge className="bg-slate-100 text-slate-500 hover:bg-slate-100 border-none px-2 py-0.5 text-[9px]">
-                  Draft
+                  {dObj(translations).adminPanel.packages.status.draft || "Draft"}
                 </Badge>
               )}
             </div>

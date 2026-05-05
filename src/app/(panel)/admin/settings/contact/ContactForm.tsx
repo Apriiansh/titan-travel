@@ -12,6 +12,8 @@ import { translateToAll } from "@/lib/actions/translate";
 import { useCmsForm } from "@/hooks/useCmsForm";
 import { Phone, Languages } from "lucide-react";
 import type { Locale } from "@/lib/types/cms";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 interface LocaleContact {
   badge: string;
@@ -38,6 +40,8 @@ const CONTACT_FIELDS = ["badge", "title1", "title2", "subtitle", "address", "off
 export function ContactForm({ initial }: ContactFormProps) {
   const { form, setForm, isPending, isTranslating, startTranslating, saved, save, updateLocale } =
     useCmsForm(initial);
+  const { dObj } = useLocale();
+  const t = dObj(translations).adminPanel.contactSettings;
 
   function handleSave() {
     save(async (data) => {
@@ -72,17 +76,17 @@ export function ContactForm({ initial }: ContactFormProps) {
   return (
     <>
       <PageHeader
-        title="Info Kontak"
-        description="Atur informasi kontak, alamat, dan jam operasional untuk seluruh bahasa"
+        title={t?.title || "Info Kontak"}
+        description={t?.description || "Atur informasi kontak, alamat, dan jam operasional untuk seluruh bahasa"}
         action={<SaveButton isPending={isPending} saved={saved} onClick={handleSave} />}
       />
 
       <div className="space-y-6">
-        <FormCard title="Kontak & Media Sosial Utama" icon={Phone}>
+        <FormCard title={t?.globalSection?.title || "Kontak & Media Sosial Utama"} icon={Phone}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                Nomor WhatsApp (Global)
+                {t?.globalSection?.whatsappLabel || "Nomor WhatsApp (Global)"}
               </Label>
               <Input
                 value={form.whatsapp}
@@ -91,12 +95,12 @@ export function ContactForm({ initial }: ContactFormProps) {
                 className="rounded-md h-10"
               />
               <p className="text-[10px] text-foreground-secondary italic">
-                Gunakan format kode negara (misal 62)
+                {t?.globalSection?.whatsappHint || "Gunakan format kode negara (misal 62)"}
               </p>
             </div>
             <div className="space-y-2">
               <Label className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-                Email (Global)
+                {t?.globalSection?.emailLabel || "Email (Global)"}
               </Label>
               <Input
                 type="email"
@@ -110,7 +114,7 @@ export function ContactForm({ initial }: ContactFormProps) {
 
           <div className="space-y-2">
             <Label className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">
-              Google Maps Embed URL (Global)
+              {t?.globalSection?.mapsLabel || "Google Maps Embed URL (Global)"}
             </Label>
             <Input
               value={form.mapsEmbed}
@@ -119,12 +123,12 @@ export function ContactForm({ initial }: ContactFormProps) {
               className="rounded-md h-10"
             />
             <p className="text-[10px] text-foreground-secondary italic">
-              Ambil dari menu Share {">"} Embed a map di Google Maps
+              {t?.globalSection?.mapsHint || 'Ambil dari menu Share > Embed a map di Google Maps'}
             </p>
           </div>
         </FormCard>
 
-        <FormCard title="Lokalisasi Konten Kontak" icon={Languages}>
+        <FormCard title={t?.localizationSection?.title || "Lokalisasi Konten Kontak"} icon={Languages}>
           <LocaleTabs
             onTranslate={handleAutoTranslate}
             isTranslating={isTranslating}
@@ -135,12 +139,12 @@ export function ContactForm({ initial }: ContactFormProps) {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                      Badge Text ({lang.toUpperCase()})
+                      {t?.localizationSection?.badgeLabel?.replace("{lang}", lang.toUpperCase()) || `Badge Text (${lang.toUpperCase()})`}
                     </Label>
                     <Input
                       value={form[lang].badge}
                       onChange={(e) => updateLocale(lang, "badge", e.target.value)}
-                      placeholder="Hubungi Kami"
+                      placeholder={t?.localizationSection?.placeholders?.badge || "Hubungi Kami"}
                       className={`rounded-md h-10 ${lang === "en" ? "border-primary-200 bg-primary-50/10" : ""}`}
                     />
                   </div>
@@ -148,7 +152,7 @@ export function ContactForm({ initial }: ContactFormProps) {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                        Judul Baris 1 ({lang.toUpperCase()})
+                        {t?.localizationSection?.title1Label?.replace("{lang}", lang.toUpperCase()) || `Judul Baris 1 (${lang.toUpperCase()})`}
                       </Label>
                       <Input
                         value={form[lang].title1}
@@ -158,7 +162,7 @@ export function ContactForm({ initial }: ContactFormProps) {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                        Judul Baris 2 ({lang.toUpperCase()})
+                        {t?.localizationSection?.title2Label?.replace("{lang}", lang.toUpperCase()) || `Judul Baris 2 (${lang.toUpperCase()})`}
                       </Label>
                       <Input
                         value={form[lang].title2}
@@ -172,7 +176,7 @@ export function ContactForm({ initial }: ContactFormProps) {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                      Subjudul ({lang.toUpperCase()})
+                      {t?.localizationSection?.subtitleLabel?.replace("{lang}", lang.toUpperCase()) || `Subjudul (${lang.toUpperCase()})`}
                     </Label>
                     <Textarea
                       rows={2}
@@ -184,7 +188,7 @@ export function ContactForm({ initial }: ContactFormProps) {
 
                   <div className="space-y-2">
                     <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                      Alamat Lengkap ({lang.toUpperCase()})
+                      {t?.localizationSection?.addressLabel?.replace("{lang}", lang.toUpperCase()) || `Alamat Lengkap (${lang.toUpperCase()})`}
                     </Label>
                     <Textarea
                       rows={3}
@@ -196,12 +200,12 @@ export function ContactForm({ initial }: ContactFormProps) {
 
                   <div className="space-y-2">
                     <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
-                      Jam Operasional ({lang.toUpperCase()})
+                      {t?.localizationSection?.hoursLabel?.replace("{lang}", lang.toUpperCase()) || `Jam Operasional (${lang.toUpperCase()})`}
                     </Label>
                     <Input
                       value={form[lang].officeHours}
                       onChange={(e) => updateLocale(lang, "officeHours", e.target.value)}
-                      placeholder="Senin - Sabtu: 08:00 - 17:00"
+                      placeholder={t?.localizationSection?.placeholders?.hours || "Senin - Sabtu: 08:00 - 17:00"}
                       className={`rounded-md h-10 ${lang === "en" ? "border-primary-200 bg-primary-50/10" : ""}`}
                     />
                   </div>

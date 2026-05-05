@@ -24,6 +24,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 interface TopsisScoreSectionProps {
   facilityScore: number;
@@ -38,6 +40,9 @@ export function TopsisScoreSection({
   durationDays,
   onChange,
 }: TopsisScoreSectionProps) {
+  const { dObj } = useLocale();
+  const t = dObj(translations).adminPanel.packages.form.sections.topsis;
+
   return (
     <TooltipProvider>
       <div className="p-6 rounded-2xl bg-white border border-card-border shadow-sm space-y-6 relative overflow-hidden">
@@ -51,9 +56,11 @@ export function TopsisScoreSection({
             </div>
             <div>
               <Label className="text-sm font-bold text-slate-900 block">
-                Kriteria Rekomendasi
+                {t?.title || "Kriteria Rekomendasi"}
               </Label>
-              <p className="text-[10px] text-slate-500 font-medium">Pengaturan Algoritma TOPSIS</p>
+              <p className="text-[10px] text-slate-500 font-medium">
+                {t?.subtitle || "Pengaturan Algoritma TOPSIS"}
+              </p>
             </div>
           </div>
           <Tooltip>
@@ -62,8 +69,8 @@ export function TopsisScoreSection({
                 <Info className="w-4 h-4" />
               </div>
             </TooltipTrigger>
-            <TooltipContent className="max-w-[200px] text-[11px] p-3 leading-relaxed">
-              Nilai ini digunakan oleh sistem untuk meranking paket wisata berdasarkan preferensi pengguna.
+            <TooltipContent className="max-w-50 text-[11px] p-3 leading-relaxed">
+              {t?.tooltip || "Nilai ini digunakan oleh sistem untuk meranking paket wisata berdasarkan preferensi pengguna."}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -75,7 +82,7 @@ export function TopsisScoreSection({
               <div className="flex items-center gap-2">
                 <Star className="w-3.5 h-3.5 text-amber-500" />
                 <Label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
-                  Kualitas Fasilitas (C2)
+                  {t?.fields?.facility || "Kualitas Fasilitas (C2)"}
                 </Label>
               </div>
               <span className="text-xs font-black text-primary-600 bg-primary-50 px-2.5 py-0.5 rounded-full border border-primary-100">
@@ -110,7 +117,7 @@ export function TopsisScoreSection({
             <div className="flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-blue-500" />
               <Label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
-                Waktu Berangkat (C3)
+                {t?.fields?.departure || "Waktu Berangkat (C3)"}
               </Label>
             </div>
             <Select
@@ -120,29 +127,29 @@ export function TopsisScoreSection({
               <SelectTrigger className="h-10 bg-slate-50/50 border-slate-200 text-xs font-semibold rounded-xl focus:ring-primary-500/20">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="rounded-xl shadow-xl min-w-[280px]">
+              <SelectContent className="rounded-xl shadow-xl min-w-70">
                 <SelectItem value="1" className="py-2.5">
                   <div className="flex items-center gap-2">
                     <Zap className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Pagi (Skor 1 - Prioritas Cepat)</span>
+                    <span>{t?.fields?.morning || "Pagi (Skor 1 - Prioritas Cepat)"}</span>
                   </div>
                 </SelectItem>
                 <SelectItem value="2" className="py-2.5">
                   <div className="flex items-center gap-2">
                     <Coffee className="w-3.5 h-3.5 text-blue-500" />
-                    <span>Siang (Skor 2 - Standar)</span>
+                    <span>{t?.fields?.afternoon || "Siang (Skor 2 - Standar)"}</span>
                   </div>
                 </SelectItem>
                 <SelectItem value="3" className="py-2.5">
                   <div className="flex items-center gap-2">
                     <Moon className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Malam (Skor 3 - Santai)</span>
+                    <span>{t?.fields?.evening || "Malam (Skor 3 - Santai)"}</span>
                   </div>
                 </SelectItem>
               </SelectContent>
             </Select>
             <p className="text-[9px] text-slate-400 font-medium italic">
-              *Dalam TOPSIS, waktu yang lebih awal (skor kecil) dianggap lebih efisien.
+              {t?.notes?.departure || "*Dalam TOPSIS, waktu yang lebih awal (skor kecil) dianggap lebih efisien."}
             </p>
           </div>
 
@@ -151,7 +158,7 @@ export function TopsisScoreSection({
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-3.5 h-3.5 text-emerald-500" />
               <Label className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
-                Durasi Perjalanan (C4)
+                {t?.fields?.duration || "Durasi Perjalanan (C4)"}
               </Label>
             </div>
             <div className="relative">
@@ -163,7 +170,9 @@ export function TopsisScoreSection({
                 className="h-10 pl-10 bg-slate-50/50 border-slate-200 font-bold text-sm rounded-xl"
               />
               <Clock className="w-4 h-4 text-slate-300 absolute left-3.5 top-3" />
-              <span className="absolute right-10 top-3 text-[10px] font-bold text-slate-400 uppercase">Hari</span>
+              <span className="absolute right-10 top-3 text-[10px] font-bold text-slate-400 uppercase">
+                {t?.fields?.dayUnit || "Hari"}
+              </span>
             </div>
           </div>
         </div>

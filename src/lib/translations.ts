@@ -257,6 +257,78 @@ export const translations = {
                 bankAccounts: "Rekening Bank",
                 users: "Kelola Pengguna",
             },
+            users: {
+                title: "Kelola Pengguna",
+                description: "Manajemen akun admin, manajer, dan pengguna terdaftar",
+                addBtn: "Tambah Pengguna",
+                table: {
+                    user: "Pengguna",
+                    email: "Email",
+                    role: "Role",
+                    joined: "Bergabung",
+                    action: "Aksi",
+                },
+                form: {
+                    addTitle: "Tambah Pengguna Baru",
+                    editTitle: "Edit Pengguna",
+                    nameLabel: "Nama Lengkap",
+                    namePlaceholder: "Contoh: Budi Santoso",
+                    emailLabel: "Email",
+                    emailPlaceholder: "budi@example.com",
+                    passwordLabel: "Password",
+                    passwordEditLabel: "Password Baru (kosongkan jika tidak diubah)",
+                    passwordPlaceholder: "••••••••",
+                    roleLabel: "Role",
+                    saveBtn: "Simpan Perubahan",
+                    createBtn: "Buat Akun",
+                }
+            },
+            bankAccounts: {
+                title: "Rekening Bank",
+                description: "Kelola rekening bank yang ditampilkan ke pelanggan saat pembayaran",
+                addBtn: "Tambah Rekening",
+                empty: "Belum ada rekening bank. Tambahkan rekening agar pelanggan bisa melakukan transfer pembayaran.",
+                inactiveBadge: "Nonaktif",
+                form: {
+                    addTitle: "Tambah Rekening Baru",
+                    editTitle: "Edit Rekening",
+                    bankNameLabel: "Nama Bank",
+                    bankNamePlaceholder: "Bank Mandiri / BCA / QRIS",
+                    accountNumberLabel: "Nomor Rekening",
+                    accountNumberPlaceholder: "113-00-1394650-8",
+                    accountNameLabel: "Nama Pemilik Rekening",
+                    accountNamePlaceholder: "CV TITAN JAYA TRAVELINDO",
+                    imageLabel: "Gambar / QRIS (Opsional)",
+                    imageHelper: "Upload foto QRIS atau logo bank",
+                    activeLabel: "Aktif",
+                    activeHelper: "Tampilkan ke pelanggan saat pembayaran",
+                }
+            },
+            contactSettings: {
+                title: "Info Kontak",
+                description: "Atur informasi kontak, alamat, dan jam operasional untuk seluruh bahasa",
+                globalSection: {
+                    title: "Kontak & Media Sosial Utama",
+                    whatsappLabel: "Nomor WhatsApp (Global)",
+                    whatsappHint: "Gunakan format kode negara (misal 62)",
+                    emailLabel: "Email (Global)",
+                    mapsLabel: "Google Maps Embed URL (Global)",
+                    mapsHint: "Ambil dari menu Share > Embed a map di Google Maps",
+                },
+                localizationSection: {
+                    title: "Lokalisasi Konten Kontak",
+                    badgeLabel: "Badge Text ({lang})",
+                    title1Label: "Judul Baris 1 ({lang})",
+                    title2Label: "Judul Baris 2 ({lang})",
+                    subtitleLabel: "Subjudul ({lang})",
+                    addressLabel: "Alamat Lengkap ({lang})",
+                    hoursLabel: "Jam Operasional ({lang})",
+                    placeholders: {
+                        badge: "Hubungi Kami",
+                        hours: "Senin - Sabtu: 08:00 - 17:00",
+                    }
+                }
+            },
             bookings: {
                 title: "Manajemen Booking",
                 description: "Kelola reservasi, pantau pembayaran, dan hubungi pelanggan",
@@ -318,6 +390,81 @@ export const translations = {
                 status: {
                     published: "Publik",
                     draft: "Draft",
+                    active: "Aktif",
+                    inactive: "Nonaktif",
+                    live: "Live",
+                },
+                form: {
+                    addTitle: "Buat Paket Wisata Baru",
+                    editTitle: "Edit Detail Paket",
+                    sections: {
+                        info: "Detail Informasi & Deskripsi",
+                        capacity: "Kapasitas Peserta (Maksimal)",
+                        visuals: "Galeri Visual",
+                        social: "Rating & Ulasan (Social Proof)",
+                        status: "Status Paket",
+                        pricing: {
+                            title: "Harga & Diskon",
+                            addBtn: "Tambah Tarif",
+                            tip: "Kamu bisa ketik % di kolom Harga Promo (cth: %10) untuk hitung otomatis dari Harga Asli.",
+                            empty: "Belum ada tier harga.",
+                            fields: {
+                                vehicle: "Tipe Kendaraan",
+                                vehiclePlaceholder: "Pilih kendaraan (opsional)",
+                                none: "— Tidak ada —",
+                                minPax: "Min Pax",
+                                maxPax: "Max Pax",
+                                originalPrice: "Harga Asli (Coret)",
+                                promoPrice: "Harga Promo / %",
+                                pricePlaceholder: "% atau Rp",
+                                originalPricePlaceholder: "Cth: 1000000",
+                            }
+                        },
+                        topsis: {
+                            title: "Kriteria Rekomendasi",
+                            subtitle: "Pengaturan Algoritma TOPSIS",
+                            tooltip: "Nilai ini digunakan oleh sistem untuk meranking paket wisata berdasarkan preferensi pengguna.",
+                            fields: {
+                                facility: "Kualitas Fasilitas (C2)",
+                                departure: "Waktu Berangkat (C3)",
+                                duration: "Durasi Perjalanan (C4)",
+                                morning: "Pagi (Skor 1 - Prioritas Cepat)",
+                                afternoon: "Siang (Skor 2 - Standar)",
+                                evening: "Malam (Skor 3 - Santai)",
+                                dayUnit: "Hari",
+                            },
+                            notes: {
+                                departure: "*Dalam TOPSIS, waktu yang lebih awal (skor kecil) dianggap lebih efisien.",
+                            }
+                        }
+                    },
+                    fields: {
+                        title: "Judul Paket ({lang})",
+                        location: "Lokasi",
+                        duration: "Durasi",
+                        description: "Deskripsi Perjalanan ({lang})",
+                        capacity: "Kapasitas Peserta",
+                        capacityUnit: "Peserta / Orang",
+                        images: "Foto Paket",
+                        imagesHelper: "Pilih beberapa foto terbaik.",
+                        rating: "Rating (1-5)",
+                        reviews: "Total Ulasan",
+                        publish: "Publikasikan Paket",
+                    },
+                    placeholders: {
+                        title: "Judul paket dalam bahasa {lang}",
+                        location: "Bali, Indonesia",
+                        duration: "3D 2N",
+                        description: "Jelajahi keindahan paket ini...",
+                        capacity: "Contoh: 10",
+                    },
+                    notes: {
+                        capacity: "*User tidak akan bisa memesan lebih dari kapasitas ini untuk satu tanggal keberangkatan.",
+                        social: "*Nilai ini akan tampil sebagai rating bintang di halaman paket.",
+                    },
+                    actions: {
+                        autoTranslate: "Auto-Translate",
+                    }
                 }
             },
             vehicles: {
@@ -482,6 +629,32 @@ export const translations = {
                 success: "Berhasil",
                 confirm: "Konfirmasi",
                 close: "Tutup",
+                imageUpload: {
+                    uploadBtn: "Upload Gambar",
+                    addBtn: "Tambah Foto",
+                    urlPlaceholder: "Atau masukkan URL gambar langsung...",
+                    urlHint: "Gunakan link langsung ke gambar (bukan link halaman web). URL harus diakhiri ekstensi gambar atau berupa direct image link.",
+                    previewBtn: "Preview",
+                    cancelBtn: "Batal",
+                    useUrlBtn: "Gunakan URL",
+                    cropTitle: "Sesuaikan Tampilan Gambar",
+                    zoomLabel: "Zoom",
+                    cropAndUploadBtn: "Pangkas & Upload",
+                    uploadingBtn: "Mengupload...",
+                    errors: {
+                        fileTooLarge: "File terlalu besar ({size} MB). Maksimal {max} MB.",
+                        processFailed: "Gagal memproses gambar. Coba lagi.",
+                        uploadFailed: "Gagal mengupload gambar. Coba lagi.",
+                        loadFailed: "Gambar tidak bisa dimuat. Pastikan URL valid dan berupa link langsung ke gambar.",
+                        genericError: "Terjadi kesalahan saat mengolah gambar.",
+                    }
+                },
+                deleteConfirm: {
+                    title: "Konfirmasi Hapus",
+                    description: "Tindakan ini tidak dapat dibatalkan. Data akan dihapus secara permanen.",
+                    cancelBtn: "Batal",
+                    deleteBtn: "Hapus",
+                }
             },
             adminStats: {
                 title: "Dashboard Statistik",
@@ -944,6 +1117,78 @@ export const translations = {
                 bankAccounts: "Bank Accounts",
                 users: "Manage Users",
             },
+            users: {
+                title: "Manage Users",
+                description: "Management of admin, manager, and registered user accounts",
+                addBtn: "Add User",
+                table: {
+                    user: "User",
+                    email: "Email",
+                    role: "Role",
+                    joined: "Joined",
+                    action: "Action",
+                },
+                form: {
+                    addTitle: "Add New User",
+                    editTitle: "Edit User",
+                    nameLabel: "Full Name",
+                    namePlaceholder: "e.g., John Doe",
+                    emailLabel: "Email",
+                    emailPlaceholder: "john@example.com",
+                    passwordLabel: "Password",
+                    passwordEditLabel: "New Password (leave blank if unchanged)",
+                    passwordPlaceholder: "••••••••",
+                    roleLabel: "Role",
+                    saveBtn: "Save Changes",
+                    createBtn: "Create Account",
+                }
+            },
+            bankAccounts: {
+                title: "Bank Accounts",
+                description: "Manage bank accounts displayed to customers during payment",
+                addBtn: "Add Account",
+                empty: "No bank accounts yet. Add an account so customers can make transfer payments.",
+                inactiveBadge: "Inactive",
+                form: {
+                    addTitle: "Add New Account",
+                    editTitle: "Edit Account",
+                    bankNameLabel: "Bank Name",
+                    bankNamePlaceholder: "Bank Name / QRIS",
+                    accountNumberLabel: "Account Number",
+                    accountNumberPlaceholder: "113-00-1394650-8",
+                    accountNameLabel: "Account Owner Name",
+                    accountNamePlaceholder: "Account Holder Name",
+                    imageLabel: "Image / QRIS (Optional)",
+                    imageHelper: "Upload QRIS photo or bank logo",
+                    activeLabel: "Active",
+                    activeHelper: "Show to customers during payment",
+                }
+            },
+            contactSettings: {
+                title: "Contact Info",
+                description: "Set contact information, address, and operational hours for all languages",
+                globalSection: {
+                    title: "Main Contact & Social Media",
+                    whatsappLabel: "WhatsApp Number (Global)",
+                    whatsappHint: "Use country code format (e.g., 62)",
+                    emailLabel: "Email (Global)",
+                    mapsLabel: "Google Maps Embed URL (Global)",
+                    mapsHint: "Get from Share > Embed a map menu in Google Maps",
+                },
+                localizationSection: {
+                    title: "Contact Content Localization",
+                    badgeLabel: "Badge Text ({lang})",
+                    title1Label: "Title Row 1 ({lang})",
+                    title2Label: "Title Row 2 ({lang})",
+                    subtitleLabel: "Subtitle ({lang})",
+                    addressLabel: "Full Address ({lang})",
+                    hoursLabel: "Operational Hours ({lang})",
+                    placeholders: {
+                        badge: "Contact Us",
+                        hours: "Mon - Sat: 08:00 - 17:00",
+                    }
+                }
+            },
             bookings: {
                 title: "Booking Management",
                 description: "Manage reservations, monitor payments, and contact customers",
@@ -1005,6 +1250,81 @@ export const translations = {
                 status: {
                     published: "Published",
                     draft: "Draft",
+                    active: "Active",
+                    inactive: "Inactive",
+                    live: "Live",
+                },
+                form: {
+                    addTitle: "Create New Tour Package",
+                    editTitle: "Edit Package Details",
+                    sections: {
+                        info: "Information Details & Description",
+                        capacity: "Participant Capacity (Maximum)",
+                        visuals: "Visual Gallery",
+                        social: "Rating & Reviews (Social Proof)",
+                        status: "Package Status",
+                        pricing: {
+                            title: "Pricing & Discounts",
+                            addBtn: "Add Tier",
+                            tip: "You can type % in the Promo Price field (e.g., %10) to automatically calculate from the Original Price.",
+                            empty: "No price tiers yet.",
+                            fields: {
+                                vehicle: "Vehicle Type",
+                                vehiclePlaceholder: "Select vehicle (optional)",
+                                none: "— None —",
+                                minPax: "Min Pax",
+                                maxPax: "Max Pax",
+                                originalPrice: "Original Price (Strikethrough)",
+                                promoPrice: "Promo Price / %",
+                                pricePlaceholder: "% or $",
+                                originalPricePlaceholder: "e.g., 1000000",
+                            }
+                        },
+                        topsis: {
+                            title: "Recommendation Criteria",
+                            subtitle: "TOPSIS Algorithm Settings",
+                            tooltip: "This value is used by the system to rank tour packages based on user preferences.",
+                            fields: {
+                                facility: "Facility Quality (C2)",
+                                departure: "Departure Time (C3)",
+                                duration: "Travel Duration (C4)",
+                                morning: "Morning (Score 1 - Fast Priority)",
+                                afternoon: "Afternoon (Score 2 - Standard)",
+                                evening: "Evening (Score 3 - Relaxed)",
+                                dayUnit: "Days",
+                            },
+                            notes: {
+                                departure: "*In TOPSIS, earlier time (lower score) is considered more efficient.",
+                            }
+                        }
+                    },
+                    fields: {
+                        title: "Package Title ({lang})",
+                        location: "Location",
+                        duration: "Duration",
+                        description: "Travel Description ({lang})",
+                        capacity: "Participant Capacity",
+                        capacityUnit: "Participants / People",
+                        images: "Package Photos",
+                        imagesHelper: "Choose several best photos.",
+                        rating: "Rating (1-5)",
+                        reviews: "Total Reviews",
+                        publish: "Publish Package",
+                    },
+                    placeholders: {
+                        title: "Package title in {lang}",
+                        location: "Bali, Indonesia",
+                        duration: "3D 2N",
+                        description: "Describe the activities or highlights...",
+                        capacity: "e.g., 10",
+                    },
+                    notes: {
+                        capacity: "*Users won't be able to book more than this capacity for a single departure date.",
+                        social: "*This value will appear as star ratings on the package page.",
+                    },
+                    actions: {
+                        autoTranslate: "Auto-Translate",
+                    }
                 }
             },
             vehicles: {
@@ -1182,6 +1502,32 @@ export const translations = {
                 success: "Success",
                 confirm: "Confirm",
                 close: "Close",
+                imageUpload: {
+                    uploadBtn: "Upload Image",
+                    addBtn: "Add Photo",
+                    urlPlaceholder: "Or enter direct image URL...",
+                    urlHint: "Use a direct link to the image (not a webpage link). The URL must end with an image extension or be a direct image link.",
+                    previewBtn: "Preview",
+                    cancelBtn: "Cancel",
+                    useUrlBtn: "Use URL",
+                    cropTitle: "Adjust Image View",
+                    zoomLabel: "Zoom",
+                    cropAndUploadBtn: "Crop & Upload",
+                    uploadingBtn: "Uploading...",
+                    errors: {
+                        fileTooLarge: "File too large ({size} MB). Maximum {max} MB.",
+                        processFailed: "Failed to process image. Try again.",
+                        uploadFailed: "Failed to upload image. Try again.",
+                        loadFailed: "Image could not be loaded. Ensure the URL is valid and a direct link to an image.",
+                        genericError: "An error occurred while processing the image.",
+                    }
+                },
+                deleteConfirm: {
+                    title: "Confirm Deletion",
+                    description: "This action cannot be undone. Data will be permanently deleted.",
+                    cancelBtn: "Cancel",
+                    deleteBtn: "Delete",
+                }
             },
             adminStats: {
                 title: "Statistics Dashboard",
@@ -1657,6 +2003,78 @@ export const translations = {
                 bankAccounts: "Akaun Bank",
                 users: "Urus Pengguna",
             },
+            users: {
+                title: "Urus Pengguna",
+                description: "Pengurusan akaun admin, pengurus, dan pengguna berdaftar",
+                addBtn: "Tambah Pengguna",
+                table: {
+                    user: "Pengguna",
+                    email: "Emel",
+                    role: "Peranan",
+                    joined: "Sertai",
+                    action: "Tindakan",
+                },
+                form: {
+                    addTitle: "Tambah Pengguna Baru",
+                    editTitle: "Edit Pengguna",
+                    nameLabel: "Nama Penuh",
+                    namePlaceholder: "Cth: Budi Santoso",
+                    emailLabel: "Emel",
+                    emailPlaceholder: "budi@example.com",
+                    passwordLabel: "Kata Laluan",
+                    passwordEditLabel: "Kata Laluan Baru (biarkan kosong jika tidak diubah)",
+                    passwordPlaceholder: "••••••••",
+                    roleLabel: "Peranan",
+                    saveBtn: "Simpan Perubahan",
+                    createBtn: "Buat Akaun",
+                }
+            },
+            bankAccounts: {
+                title: "Akaun Bank",
+                description: "Urus akaun bank yang dipaparkan kepada pelanggan semasa pembayaran",
+                addBtn: "Tambah Akaun",
+                empty: "Tiada akaun bank lagi. Tambah akaun supaya pelanggan boleh membuat pembayaran pindahan.",
+                inactiveBadge: "Tidak Aktif",
+                form: {
+                    addTitle: "Tambah Akaun Baru",
+                    editTitle: "Edit Akaun",
+                    bankNameLabel: "Nama Bank",
+                    bankNamePlaceholder: "Nama Bank / QRIS",
+                    accountNumberLabel: "Nombor Akaun",
+                    accountNumberPlaceholder: "113-00-1394650-8",
+                    accountNameLabel: "Nama Pemilik Akaun",
+                    accountNamePlaceholder: "Nama Pemilik Akaun",
+                    imageLabel: "Imej / QRIS (Pilihan)",
+                    imageHelper: "Muat naik foto QRIS atau logo bank",
+                    activeLabel: "Aktif",
+                    activeHelper: "Paparkan kepada pelanggan semasa pembayaran",
+                }
+            },
+            contactSettings: {
+                title: "Info Hubungan",
+                description: "Tetapkan maklumat hubungan, alamat, dan waktu operasi untuk semua bahasa",
+                globalSection: {
+                    title: "Hubungan Utama & Media Sosial",
+                    whatsappLabel: "Nombor WhatsApp (Global)",
+                    whatsappHint: "Gunakan format kod negara (cth: 62)",
+                    emailLabel: "Emel (Global)",
+                    mapsLabel: "URL Embed Google Maps (Global)",
+                    mapsHint: "Ambil dari menu Share > Embed a map di Google Maps",
+                },
+                localizationSection: {
+                    title: "Lokalisasi Kandungan Hubungan",
+                    badgeLabel: "Teks Lencana ({lang})",
+                    title1Label: "Tajuk Baris 1 ({lang})",
+                    title2Label: "Tajuk Baris 2 ({lang})",
+                    subtitleLabel: "Subtajuk ({lang})",
+                    addressLabel: "Alamat Penuh ({lang})",
+                    hoursLabel: "Waktu Operasi ({lang})",
+                    placeholders: {
+                        badge: "Hubungi Kami",
+                        hours: "Isnin - Sabtu: 08:00 - 17:00",
+                    }
+                }
+            },
             bookings: {
                 title: "Pengurusan Tempahan",
                 description: "Urus tempahan, pantau pembayaran, dan hubungi pelanggan",
@@ -1718,6 +2136,81 @@ export const translations = {
                 status: {
                     published: "Awam",
                     draft: "Draf",
+                    active: "Aktif",
+                    inactive: "Tidak Aktif",
+                    live: "Langsung",
+                },
+                form: {
+                    addTitle: "Buat Pakej Pelancongan Baru",
+                    editTitle: "Edit Butiran Pakej",
+                    sections: {
+                        info: "Butiran Maklumat & Penerangan",
+                        capacity: "Kapasiti Peserta (Maksimum)",
+                        visuals: "Galeri Visual",
+                        social: "Penarafan & Ulasan (Bukti Sosial)",
+                        status: "Status Pakej",
+                        pricing: {
+                            title: "Harga & Diskaun",
+                            addBtn: "Tambah Tarif",
+                            tip: "Anda boleh taip % dalam ruangan Harga Promo (cth: %10) untuk pengiraan automatik dari Harga Asal.",
+                            empty: "Tiada tier harga lagi.",
+                            fields: {
+                                vehicle: "Jenis Kenderaan",
+                                vehiclePlaceholder: "Pilih kenderaan (pilihan)",
+                                none: "— Tiada —",
+                                minPax: "Min Pax",
+                                maxPax: "Max Pax",
+                                originalPrice: "Harga Asal (Coret)",
+                                promoPrice: "Harga Promo / %",
+                                pricePlaceholder: "% atau RM",
+                                originalPricePlaceholder: "Cth: 1000000",
+                            }
+                        },
+                        topsis: {
+                            title: "Kriteria Rekomendasi",
+                            subtitle: "Tetapan Algoritma TOPSIS",
+                            tooltip: "Nilai ini digunakan oleh sistem untuk menyusun kedudukan pakej pelancongan berdasarkan keutamaan pengguna.",
+                            fields: {
+                                facility: "Kualiti Kemudahan (C2)",
+                                departure: "Waktu Perlepasan (C3)",
+                                duration: "Tempoh Perjalanan (C4)",
+                                morning: "Pagi (Skor 1 - Keutamaan Pantas)",
+                                afternoon: "Tengah Hari (Skor 2 - Standard)",
+                                evening: "Malam (Skor 3 - Santai)",
+                                dayUnit: "Hari",
+                            },
+                            notes: {
+                                departure: "*Dalam TOPSIS, waktu yang lebih awal (skor kecil) dianggap lebih efisien.",
+                            }
+                        }
+                    },
+                    fields: {
+                        title: "Tajuk Pakej ({lang})",
+                        location: "Lokasi",
+                        duration: "Durasi",
+                        description: "Penerangan Perjalanan ({lang})",
+                        capacity: "Kapasiti Peserta",
+                        capacityUnit: "Peserta / Orang",
+                        images: "Foto Pakej",
+                        imagesHelper: "Pilih beberapa foto terbaik.",
+                        rating: "Penarafan (1-5)",
+                        reviews: "Jumlah Ulasan",
+                        publish: "Terbitkan Pakej",
+                    },
+                    placeholders: {
+                        title: "Tajuk pakej dalam bahasa {lang}",
+                        location: "Bali, Indonesia",
+                        duration: "3H 2M",
+                        description: "Terangkan aktiviti atau kelebihan pakej ini...",
+                        capacity: "Cth: 10",
+                    },
+                    notes: {
+                        capacity: "*Pengguna tidak akan dapat menempah lebih daripada kapasiti ini untuk satu tarikh perlepasan.",
+                        social: "*Nilai ini akan muncul sebagai penarafan bintang pada halaman pakej.",
+                    },
+                    actions: {
+                        autoTranslate: "Terjemah Automatik",
+                    }
                 }
             },
             vehicles: {
@@ -1882,6 +2375,32 @@ export const translations = {
                 success: "Berjaya",
                 confirm: "Sahkan",
                 close: "Tutup",
+                imageUpload: {
+                    uploadBtn: "Muat Naik Imej",
+                    addBtn: "Tambah Foto",
+                    urlPlaceholder: "Atau masukkan URL imej terus...",
+                    urlHint: "Gunakan pautan terus ke imej (bukan pautan halaman web). URL mesti diakhiri dengan sambungan imej atau pautan imej terus.",
+                    previewBtn: "Pratonton",
+                    cancelBtn: "Batal",
+                    useUrlBtn: "Gunakan URL",
+                    cropTitle: "Laraskan Paparan Imej",
+                    zoomLabel: "Zum",
+                    cropAndUploadBtn: "Pangkas & Muat Naik",
+                    uploadingBtn: "Memuat naik...",
+                    errors: {
+                        fileTooLarge: "Fail terlalu besar ({size} MB). Maksimum {max} MB.",
+                        processFailed: "Gagal memproses imej. Cuba lagi.",
+                        uploadFailed: "Gagal memuat naik imej. Cuba lagi.",
+                        loadFailed: "Imej tidak dapat dimuatkan. Pastikan URL sah dan pautan terus ke imej.",
+                        genericError: "Berlaku ralat semasa memproses imej.",
+                    }
+                },
+                deleteConfirm: {
+                    title: "Sahkan Pemadaman",
+                    description: "Tindakan ini tidak boleh dibatalkan. Data akan dipadamkan secara kekal.",
+                    cancelBtn: "Batal",
+                    deleteBtn: "Padam",
+                }
             },
             adminStats: {
                 title: "Dashboard Statistik",

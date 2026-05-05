@@ -17,6 +17,8 @@ import { getCroppedImg } from "@/lib/utils/crop";
 import { uploadFile } from "@/lib/actions/upload";
 import { X, Upload, Image as ImageIcon, Loader2, Plus, Info, AlertCircle, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 interface ImageUploadProps {
   value: string | string[];
@@ -41,6 +43,9 @@ export function ImageUpload({
   maxDimension = 2400,
   quality = 0.82,
 }: ImageUploadProps) {
+  const { dObj } = useLocale();
+  const t = dObj(translations).adminPanel.common.imageUpload;
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -71,7 +76,12 @@ export function ImageUpload({
     const file = e.target.files[0];
 
     if (file.size > maxSizeMB * 1024 * 1024) {
-      setUploadError(`File terlalu besar (${(file.size / 1024 / 1024).toFixed(1)} MB). Maksimal ${maxSizeMB} MB.`);
+      setUploadError(
+        t?.errors?.fileTooLarge
+          ?.replace("{size}", (file.size / 1024 / 1024).toFixed(1))
+          ?.replace("{max}", maxSizeMB.toString()) || 
+        `File terlalu besar (${(file.size / 1024 / 1024).toFixed(1)} MB). Maksimal ${maxSizeMB} MB.`
+      );
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -99,7 +109,7 @@ export function ImageUpload({
 
     try {
       const blob = await getCroppedImg(previewUrl, croppedAreaPixels, 0, quality, maxDimension);
-      if (!blob) throw new Error("Gagal memproses gambar. Coba lagi.");
+      if (!blob) throw new Error(t?.errors?.processFailed || "Gagal memproses gambar. Coba lagi.");
 
       // Use the original file extension but keep JPEG MIME type since canvas always outputs JPEG
       const ext = selectedFile?.name.split(".").pop() ?? "jpg";
@@ -115,12 +125,12 @@ export function ImageUpload({
         onChange(multiple ? [...values, result.url] : result.url);
         resetCropper();
       } else {
-        setUploadError(result.error ?? "Gagal mengupload gambar. Coba lagi.");
+        setUploadError(result.error ?? (t?.errors?.uploadFailed || "Gagal mengupload gambar. Coba lagi."));
         setIsUploading(false);
       }
     } catch (err) {
       console.error("[ImageUpload] Upload error:", err);
-      setUploadError(err instanceof Error ? err.message : "Terjadi kesalahan saat mengolah gambar.");
+      setUploadError(err instanceof Error ? err.message : (t?.errors?.genericError || "Terjadi kesalahan saat mengolah gambar."));
       setIsUploading(false);
     }
   };
@@ -184,7 +194,7 @@ export function ImageUpload({
                   {multiple ? <Plus className="w-5 h-5" /> : <Upload className="w-5 h-5" />}
                 </div>
                 <span className="text-[10px] font-medium uppercase tracking-wider">
-                  {multiple ? "Tambah Foto" : "Upload Gambar"}
+                  {multiple ? (t?.addBtn || "Tambah Foto") : (t?.uploadBtn || "Upload Gambar")}
                 </span>
               </>
             )}
@@ -223,7 +233,7 @@ export function ImageUpload({
               <ImageIcon className="h-4 w-4 text-foreground-secondary" />
             </div>
             <Input
-              placeholder="Atau masukkan URL gambar langsung..."
+              placeholder={t?.urlPlaceholder || "Atau masukkan URL gambar langsung..."}
               className="pl-9 h-9 text-xs"
               value={pendingUrl}
               onChange={(e) => {
@@ -246,17 +256,12 @@ export function ImageUpload({
               className="h-9 px-3 text-xs shrink-0"
               onClick={() => setShowUrlPreview(true)}
             >
-              Preview
+              {t?.previewBtn || "Preview"}
             </Button>
           )}
         </div>
         <div className="text-[10px] text-foreground-secondary/70 space-y-0.5 px-1">
-          <p>Gunakan <span className="font-semibold">link langsung ke gambar</span> (bukan link halaman web). URL harus diakhiri ekstensi gambar atau berupa direct image link.</p>
-          <p className="text-foreground-secondary/50">
-            ✅ https://images.unsplash.com/photo-xxx?auto=format&w=800
-            &nbsp;&bull;&nbsp; ✅ https://i.imgur.com/abc123.jpg
-            &nbsp;&bull;&nbsp; ❌ https://unsplash.com/photos/xxx
-          </p>
+          <p>{t?.urlHint || "Gunakan link langsung ke gambar (bukan link halaman web). URL harus diakhiri ekstensi gambar atau berupa direct image link."}</p>
         </div>
 
         {showUrlPreview && pendingUrl.trim() && (
@@ -268,7 +273,7 @@ export function ImageUpload({
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = "none";
-                  setUploadError("Gambar tidak bisa dimuat. Pastikan URL valid dan berupa link langsung ke gambar.");
+                  setUploadError(t?.errors?.loadFailed || "Gambar tidak bisa dimuat. Pastikan URL valid dan berupa link langsung ke gambar.");
                 }}
                 onLoad={() => setUploadError(null)}
               />
@@ -284,7 +289,7 @@ export function ImageUpload({
                   onClick={() => { setPendingUrl(""); setShowUrlPreview(false); setUploadError(null); }}
                 >
                   <X className="w-3.5 h-3.5 mr-1" />
-                  Batal
+                  {t?.cancelBtn || "Batal"}
                 </Button>
                 <Button
                   type="button"
@@ -298,7 +303,7 @@ export function ImageUpload({
                   }}
                 >
                   <Check className="w-3.5 h-3.5" />
-                  Gunakan URL
+                  {t?.useUrlBtn || "Gunakan URL"}
                 </Button>
               </div>
             </div>
@@ -315,7 +320,7 @@ export function ImageUpload({
           <DialogHeader className="px-5 py-3.5 bg-background border-b border-border">
             <div className="flex items-center justify-between">
               <DialogTitle className="text-sm font-semibold">
-                Sesuaikan Tampilan Gambar
+                {t?.cropTitle || "Sesuaikan Tampilan Gambar"}
               </DialogTitle>
               <Button
                 variant="ghost"
@@ -353,7 +358,9 @@ export function ImageUpload({
               </div>
             ) : (
               <div className="flex flex-1 items-center gap-3">
-                <span className="text-xs text-muted-foreground shrink-0 font-medium">Zoom</span>
+                <span className="text-xs text-muted-foreground shrink-0 font-medium">
+                  {t?.zoomLabel || "Zoom"}
+                </span>
                 <input
                   type="range"
                   value={zoom}
@@ -375,7 +382,7 @@ export function ImageUpload({
                 disabled={isUploading}
                 className="rounded-md h-9 px-4"
               >
-                Batal
+                {t?.cancelBtn || "Batal"}
               </Button>
               <Button
                 size="sm"
@@ -384,7 +391,7 @@ export function ImageUpload({
                 className="bg-primary-500 hover:bg-primary-600 text-white rounded-md gap-2 h-9 px-4"
               >
                 {isUploading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                {isUploading ? "Mengupload..." : "Pangkas & Upload"}
+                {isUploading ? (t?.uploadingBtn || "Mengupload...") : (t?.cropAndUploadBtn || "Pangkas & Upload")}
               </Button>
             </div>
           </div>

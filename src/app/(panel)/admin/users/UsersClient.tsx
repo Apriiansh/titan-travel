@@ -23,6 +23,8 @@ import {
 import { createUser, deleteUser, updateUser, getUsers } from "@/lib/actions/users";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 type User = {
   id: string;
@@ -47,6 +49,9 @@ export function UsersClient({ initialData }: { initialData: User[] }) {
   const [form, setForm] = useState(emptyForm);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const { dObj, locale } = useLocale();
+  const t = dObj(translations).adminPanel.users;
+  const common = dObj(translations).adminPanel.actions;
 
   const refresh = () => router.refresh();
   const f = (field: string, value: string) =>
@@ -88,12 +93,12 @@ export function UsersClient({ initialData }: { initialData: User[] }) {
   return (
     <>
       <PageHeader
-        title="Kelola Pengguna"
-        description="Manajemen akun admin, manajer, dan pengguna terdaftar"
+        title={t?.title || "Kelola Pengguna"}
+        description={t?.description || "Manajemen akun admin, manajer, dan pengguna terdaftar"}
         action={
           <Button onClick={openCreate} className="bg-primary-500 hover:bg-primary-600 text-white gap-2">
             <Plus className="w-4 h-4" />
-            Tambah Pengguna
+            {t?.addBtn || "Tambah Pengguna"}
           </Button>
         }
       />
@@ -103,11 +108,11 @@ export function UsersClient({ initialData }: { initialData: User[] }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-card-border bg-card-border/20">
-                <th className="text-left px-4 py-3 font-semibold text-foreground-secondary">Pengguna</th>
-                <th className="text-left px-4 py-3 font-semibold text-foreground-secondary hidden sm:table-cell">Email</th>
-                <th className="text-center px-4 py-3 font-semibold text-foreground-secondary">Role</th>
-                <th className="text-right px-4 py-3 font-semibold text-foreground-secondary hidden md:table-cell">Bergabung</th>
-                <th className="text-center px-4 py-3 font-semibold text-foreground-secondary">Aksi</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground-secondary">{t?.table?.user || "Pengguna"}</th>
+                <th className="text-left px-4 py-3 font-semibold text-foreground-secondary hidden sm:table-cell">{t?.table?.email || "Email"}</th>
+                <th className="text-center px-4 py-3 font-semibold text-foreground-secondary">{t?.table?.role || "Role"}</th>
+                <th className="text-right px-4 py-3 font-semibold text-foreground-secondary hidden md:table-cell">{t?.table?.joined || "Bergabung"}</th>
+                <th className="text-center px-4 py-3 font-semibold text-foreground-secondary">{t?.table?.action || "Aksi"}</th>
               </tr>
             </thead>
             <tbody>
@@ -126,7 +131,7 @@ export function UsersClient({ initialData }: { initialData: User[] }) {
                     <Badge variant={ROLE_BADGE[user.role]}>{user.role}</Badge>
                   </td>
                   <td className="px-4 py-3 text-right text-foreground-secondary hidden md:table-cell">
-                    {new Date(user.createdAt).toLocaleDateString("id-ID")}
+                    {new Date(user.createdAt).toLocaleDateString(locale === "id" ? "id-ID" : locale === "ms" ? "en-MY" : "en-US")}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-center gap-1">
@@ -153,23 +158,23 @@ export function UsersClient({ initialData }: { initialData: User[] }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit Pengguna" : "Tambah Pengguna"}</DialogTitle>
+            <DialogTitle>{editing ? (t?.form?.editTitle || "Edit Pengguna") : (t?.form?.addTitle || "Tambah Pengguna")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Nama Lengkap</Label>
-              <Input value={form.name} onChange={(e) => f("name", e.target.value)} placeholder="Budi Santoso" />
+              <Label>{t?.form?.nameLabel || "Nama Lengkap"}</Label>
+              <Input value={form.name} onChange={(e) => f("name", e.target.value)} placeholder={t?.form?.namePlaceholder || "Budi Santoso"} />
             </div>
             <div className="space-y-1.5">
-              <Label>Email</Label>
-              <Input type="email" value={form.email} onChange={(e) => f("email", e.target.value)} placeholder="budi@example.com" />
+              <Label>{t?.form?.emailLabel || "Email"}</Label>
+              <Input type="email" value={form.email} onChange={(e) => f("email", e.target.value)} placeholder={t?.form?.emailPlaceholder || "budi@example.com"} />
             </div>
             <div className="space-y-1.5">
-              <Label>{editing ? "Password Baru (kosongkan jika tidak diubah)" : "Password"}</Label>
-              <Input type="password" value={form.password} onChange={(e) => f("password", e.target.value)} placeholder="••••••••" />
+              <Label>{editing ? (t?.form?.passwordEditLabel || "Password Baru (kosongkan jika tidak diubah)") : (t?.form?.passwordLabel || "Password")}</Label>
+              <Input type="password" value={form.password} onChange={(e) => f("password", e.target.value)} placeholder={t?.form?.passwordPlaceholder || "••••••••"} />
             </div>
             <div className="space-y-1.5">
-              <Label>Role</Label>
+              <Label>{t?.form?.roleLabel || "Role"}</Label>
               <Select value={form.role} onValueChange={(val) => f("role", val ?? "USER")}>
                 <SelectTrigger>
                   <SelectValue />
@@ -182,10 +187,10 @@ export function UsersClient({ initialData }: { initialData: User[] }) {
               </Select>
             </div>
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setOpen(false)}>Batal</Button>
+              <Button variant="outline" onClick={() => setOpen(false)}>{common?.cancel || "Batal"}</Button>
               <Button onClick={handleSubmit} disabled={isPending} className="bg-primary-500 hover:bg-primary-600 text-white">
                 {isPending && <Loader2 className="w-4 h-4 mr-1 animate-spin" />}
-                {editing ? "Simpan" : "Buat Akun"}
+                {editing ? (t?.form?.saveBtn || "Simpan") : (t?.form?.createBtn || "Buat Akun")}
               </Button>
             </div>
           </div>
