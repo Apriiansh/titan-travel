@@ -24,6 +24,8 @@ import { useRouter } from "next/navigation";
 import { ImageUpload } from "@/components/panel/ImageUpload";
 import { Badge } from "@/components/ui/badge";
 import SafeImage from "@/components/ui/safe-image";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 type GalleryContent = {
   id: string;
@@ -61,6 +63,8 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
   const [isPending, startTransition] = useTransition();
   const [isTranslating, setIsTranslating] = useState(false);
   const router = useRouter();
+  const { dObj, locale, dt } = useLocale();
+  const t = dObj(translations).adminPanel.content.gallery;
 
   const refresh = () => router.refresh();
   const f = (field: string, value: string) =>
@@ -157,15 +161,15 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
   return (
     <>
       <PageHeader
-        title="Galeri Foto"
-        description="Kelola koleksi foto dalam tiga bahasa (ID, EN, MS)"
+        title={t?.title || "Galeri Foto"}
+        description={t?.description || "Kelola koleksi foto dalam tiga bahasa (ID, EN, MS)"}
         action={
           <Button
             onClick={openCreate}
             className="bg-primary-500 hover:bg-primary-600 text-white gap-2 rounded-md shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            Tambah Foto
+            {t?.addBtn || "Tambah Foto"}
           </Button>
         }
       />
@@ -173,7 +177,7 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
       {data.length === 0 ? (
         <div className="rounded-md border border-card-border bg-card-bg flex flex-col items-center justify-center py-24 text-foreground-secondary space-y-4">
           <ImageIcon className="w-12 h-12 text-muted-foreground/20" />
-          <p className="text-sm font-medium">Belum ada foto. Tambahkan yang pertama!</p>
+          <p className="text-sm font-medium">{t?.empty || "Belum ada foto. Tambahkan yang pertama!"}</p>
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -185,32 +189,32 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
               <div className="relative aspect-video overflow-hidden bg-muted">
                 <SafeImage
                   src={item.imageUrl || "/placeholder.jpg"}
-                  alt={item.title.id}
+                  alt={dt(item.title) || "Gallery Photo"}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                   <Button
-                      variant="secondary"
-                      size="icon"
-                      className="h-9 w-9 rounded-md bg-white/90 hover:bg-white text-primary-600 shadow-sm"
-                      onClick={() => openEdit(item)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <ConfirmDialog
-                      trigger={
-                        <Button
-                          variant="secondary"
-                          size="icon"
-                          className="h-9 w-9 rounded-md bg-white/90 hover:bg-red-50 text-red-500 shadow-sm"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      }
-                      onConfirm={() => handleDelete(item.id)}
-                    />
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-9 w-9 rounded-md bg-white/90 hover:bg-white text-primary-600 shadow-sm"
+                    onClick={() => openEdit(item)}
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="h-9 w-9 rounded-md bg-white/90 hover:bg-red-50 text-red-500 shadow-sm"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    }
+                    onConfirm={() => handleDelete(item.id)}
+                  />
                 </div>
               </div>
               <div className="p-4 space-y-1">
@@ -224,7 +228,7 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
                 </div>
                 <div className="pt-2 flex flex-wrap gap-1.5">
                   <span className="text-[10px] bg-muted px-2 py-0.5 rounded-full font-medium text-muted-foreground uppercase tracking-wider">
-                    {item.category.id}
+                    {dt(item.category)}
                   </span>
                 </div>
               </div>
@@ -238,7 +242,7 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
           <DialogHeader className="px-6 py-4 bg-muted/30 border-b border-card-border">
             <DialogTitle className="flex items-center gap-2 text-sm font-semibold">
               <ImageIcon className="w-4 h-4 text-primary-500" />
-              {editing ? "Edit Foto Galeri" : "Tambah Foto Baru"}
+              {editing ? (t?.form?.editTitle || "Edit Foto Galeri") : (t?.form?.addTitle || "Tambah Foto Baru")}
             </DialogTitle>
           </DialogHeader>
 
@@ -246,10 +250,12 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               {/* Media Upload */}
               <div className="space-y-4">
-                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preview Media</Label>
+                <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  {t?.previewMedia || "Preview Media"}
+                </Label>
                 <ImageUpload
-                   label="Foto Galeri"
-                   helperText="Maks 2MB. Rasio 4:3 direkomendasikan."
+                   label={t?.photoLabel || "Foto Galeri"}
+                   helperText={t?.photoHelper || "Maks 2MB. Rasio 4:3 direkomendasikan."}
                    aspectRatio={4 / 3}
                    value={form.imageUrl}
                    onChange={(url) => f("imageUrl", Array.isArray(url) ? url[0] : (url as string))}
@@ -262,7 +268,9 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
               {/* Translation Details */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                   <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Lokalisasi Informasi</Label>
+                   <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                     {t?.localization || "Lokalisasi Informasi"}
+                   </Label>
                    <Button 
                     variant="ghost" 
                     size="sm" 
@@ -274,7 +282,7 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
                     Auto-Translate
                   </Button>
                 </div>
-
+                
                 <Tabs defaultValue="en" className="w-full">
                   <TabsList className="grid w-full grid-cols-3 h-9 p-1 bg-muted/50 rounded-md">
                     <TabsTrigger value="en" className="text-[10px] rounded-sm uppercase font-bold">EN (Source)</TabsTrigger>
@@ -289,20 +297,24 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
                     return (
                       <TabsContent key={lang} value={lang} className="mt-4 space-y-4 animate-in fade-in-50 duration-200">
                         <div className="space-y-2">
-                          <Label className="text-[10px] uppercase font-bold text-foreground-secondary">Judul ({lang.toUpperCase()})</Label>
+                          <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
+                            {t?.form?.titleLabel?.replace("{lang}", lang.toUpperCase()) || `Judul (${lang.toUpperCase()})`}
+                          </Label>
                           <Input 
                             value={form[titleKey]} 
                             onChange={(e) => f(titleKey, e.target.value)} 
-                            placeholder="Contoh: Keindahan Pantai" 
+                            placeholder={t?.form?.titlePlaceholder || "Contoh: Keindahan Pantai"} 
                             className={`rounded-md h-9 ${lang === 'en' ? 'border-primary-200 bg-primary-50/10' : ''}`}
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[10px] uppercase font-bold text-foreground-secondary">Kategori ({lang.toUpperCase()})</Label>
+                          <Label className="text-[10px] uppercase font-bold text-foreground-secondary">
+                            {t?.form?.categoryLabel?.replace("{lang}", lang.toUpperCase()) || `Kategori (${lang.toUpperCase()})`}
+                          </Label>
                           <Input 
                             value={form[catKey]} 
                             onChange={(e) => f(catKey, e.target.value)} 
-                            placeholder="Contoh: Alam, Budaya" 
+                            placeholder={t?.form?.categoryPlaceholder || "Contoh: Alam, Budaya"} 
                             className={`rounded-md h-9 ${lang === 'en' ? 'border-primary-200 bg-primary-50/10' : ''}`}
                           />
                         </div>
@@ -315,18 +327,20 @@ export function GalleryClient({ initialData }: GalleryClientProps) {
           </div>
 
           <div className="flex justify-end gap-3 p-6 bg-muted/30 border-t border-card-border">
-            <Button variant="ghost" onClick={() => setOpen(false)} className="h-9 text-xs rounded-md">Batal</Button>
+            <Button variant="ghost" onClick={() => setOpen(false)} className="h-9 text-xs rounded-md">
+              {locale === "id" ? "Batal" : locale === "ms" ? "Batal" : "Cancel"}
+            </Button>
             <Button
               onClick={handleSubmit}
               disabled={isPending}
-              className="bg-primary-500 hover:bg-primary-600 text-white min-w-[120px] rounded-md shadow-sm h-9 text-xs"
+              className="bg-primary-500 hover:bg-primary-600 text-white min-w-30 rounded-md shadow-sm h-9 text-xs"
             >
               {isPending ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin mr-2" />
               ) : (
                 <CheckCircle className="w-3.5 h-3.5 mr-2" />
               )}
-              {editing ? "Simpan Perubahan" : "Simpan Foto"}
+              {editing ? (dObj(translations).adminPanel.actions.save || "Simpan Perubahan") : (t?.form?.saveBtn || "Simpan Foto")}
             </Button>
           </div>
         </DialogContent>

@@ -13,6 +13,8 @@ import { translateToAll } from "@/lib/actions/translate";
 import { useCmsForm } from "@/hooks/useCmsForm";
 import { Info, Languages } from "lucide-react";
 import type { Locale } from "@/lib/types/cms";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 interface LocaleAbout {
   badge: string;
@@ -37,6 +39,8 @@ const ABOUT_TEXT_FIELDS = ["badge", "title1", "title2", "desc1", "desc2", "years
 export function AboutForm({ initial }: AboutFormProps) {
   const { form, setForm, isPending, isTranslating, startTranslating, saved, save, updateLocale } =
     useCmsForm(initial);
+  const { dObj } = useLocale();
+  const t = dObj(translations).adminPanel.content.about;
 
   function handleSave() {
     save(async (data) => {
@@ -71,16 +75,16 @@ export function AboutForm({ initial }: AboutFormProps) {
   return (
     <>
       <PageHeader
-        title="Tentang Kami"
-        description="Atur konten halaman tentang untuk seluruh bahasa"
+        title={t?.title || "Tentang Kami"}
+        description={t?.description || "Atur konten halaman tentang untuk seluruh bahasa"}
         action={<SaveButton isPending={isPending} saved={saved} onClick={handleSave} />}
       />
 
       <div className="space-y-6">
-        <FormCard title="Media Utama" icon={Info}>
+        <FormCard title={t?.mediaSection || "Media Utama"} icon={Info}>
           <ImageUpload
-            label="Foto Utama Tentang Kami"
-            helperText="Rasio 4:3 direkomendasikan."
+            label={t?.imageLabel || "Foto Utama Tentang Kami"}
+            helperText={t?.imageHelper || "Rasio 4:3 direkomendasikan."}
             aspectRatio={4 / 3}
             value={form.imageUrl}
             onChange={(url) =>
@@ -98,26 +102,28 @@ export function AboutForm({ initial }: AboutFormProps) {
             <FormCard>
               <div className="flex items-center gap-2 mb-4">
                 <Languages className="w-4 h-4 text-primary-500" />
-                <h3 className="font-semibold text-sm">Informasi Dasar ({lang.toUpperCase()})</h3>
+                <h3 className="font-semibold text-sm">
+                  {t?.basicInfo?.replace("{lang}", lang.toUpperCase()) || `Informasi Dasar (${lang.toUpperCase()})`}
+                </h3>
               </div>
 
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>Badge Text</Label>
+                    <Label>{t?.badgeLabel || "Badge Text"}</Label>
                     <Input
                       value={form[lang].badge}
                       onChange={(e) => updateLocale(lang, "badge", e.target.value)}
-                      placeholder="Tentang Kami"
+                      placeholder={t?.placeholders?.badge || "Tentang Kami"}
                       className="rounded-md"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Years Greeting</Label>
+                    <Label>{t?.yearsLabel || "Years Greeting"}</Label>
                     <Input
                       value={form[lang].yearsCard}
                       onChange={(e) => updateLocale(lang, "yearsCard", e.target.value)}
-                      placeholder="Tahun Melayani Wisatawan"
+                      placeholder={t?.placeholders?.years || "Tahun Melayani Wisatawan"}
                       className="rounded-md"
                     />
                   </div>
@@ -125,27 +131,27 @@ export function AboutForm({ initial }: AboutFormProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>Judul Baris 1</Label>
+                    <Label>{t?.title1Label || "Judul Baris 1"}</Label>
                     <Input
                       value={form[lang].title1}
                       onChange={(e) => updateLocale(lang, "title1", e.target.value)}
-                      placeholder="CV Titan Jaya"
+                      placeholder={t?.placeholders?.title1 || "CV Titan Jaya"}
                       className="rounded-md"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Judul Baris 2</Label>
+                    <Label>{t?.title2Label || "Judul Baris 2"}</Label>
                     <Input
                       value={form[lang].title2}
                       onChange={(e) => updateLocale(lang, "title2", e.target.value)}
-                      placeholder="Travelindo"
+                      placeholder={t?.placeholders?.title2 || "Travelindo"}
                       className="rounded-md"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Deskripsi Paragraf 1</Label>
+                  <Label>{t?.desc1Label || "Deskripsi Paragraf 1"}</Label>
                   <Textarea
                     rows={3}
                     value={form[lang].desc1}
@@ -155,7 +161,7 @@ export function AboutForm({ initial }: AboutFormProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Deskripsi Paragraf 2</Label>
+                  <Label>{t?.desc2Label || "Deskripsi Paragraf 2"}</Label>
                   <Textarea
                     rows={3}
                     value={form[lang].desc2}

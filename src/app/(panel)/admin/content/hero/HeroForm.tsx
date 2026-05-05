@@ -14,6 +14,8 @@ import { translateToAll, translateText } from "@/lib/actions/translate";
 import { useCmsForm } from "@/hooks/useCmsForm";
 import { Languages, Plus, Trash2 } from "lucide-react";
 import type { Locale } from "@/lib/types/cms";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 interface StatItem {
   label: string;
@@ -44,6 +46,8 @@ const HERO_TEXT_FIELDS = ["badge", "title1", "title2", "subtitle", "cta1", "cta2
 export function HeroForm({ initial }: HeroFormProps) {
   const { form, setForm, isPending, isTranslating, startTranslating, saved, save, updateLocale } =
     useCmsForm(initial);
+  const { dObj } = useLocale();
+  const t = dObj(translations).adminPanel.content.hero;
 
   function handleSave() {
     save(async (data) => {
@@ -116,16 +120,16 @@ export function HeroForm({ initial }: HeroFormProps) {
   return (
     <>
       <PageHeader
-        title="Hero Banner"
-        description="Atur tampilan utama halaman beranda dan statistik pencapaian"
+        title={t?.title || "Hero Banner"}
+        description={t?.description || "Atur tampilan utama halaman beranda dan statistik pencapaian"}
         action={<SaveButton isPending={isPending} saved={saved} onClick={handleSave} />}
       />
 
       <div className="space-y-6">
-        <FormCard title="Media & Pengaturan Utama" icon={Languages}>
+        <FormCard title={t?.mediaSection || "Media & Pengaturan Utama"} icon={Languages}>
           <ImageUpload
-            label="Gambar Latar Belakang (Hero)"
-            helperText="Rasio 21:9 atau 16:9 direkomendasikan."
+            label={t?.imageLabel || "Gambar Latar Belakang (Hero)"}
+            helperText={t?.imageHelper || "Rasio 21:9 atau 16:9 direkomendasikan."}
             aspectRatio={21 / 9}
             value={form.imageUrl}
             onChange={(url) =>
@@ -144,67 +148,69 @@ export function HeroForm({ initial }: HeroFormProps) {
               <FormCard className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Languages className="w-4 h-4 text-primary-500" />
-                  <h3 className="font-semibold text-sm">Teks Konten ({lang.toUpperCase()})</h3>
+                  <h3 className="font-semibold text-sm">
+                    {t?.contentSection?.replace("{lang}", lang.toUpperCase()) || `Teks Konten (${lang.toUpperCase()})`}
+                  </h3>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Badge Text ({lang.toUpperCase()})</Label>
+                  <Label>{t?.badgeLabel || "Badge Text"} ({lang.toUpperCase()})</Label>
                   <Input
                     value={form[lang].badge}
                     onChange={(e) => updateLocale(lang, "badge", e.target.value)}
-                    placeholder="⭐ Layanan Wisata Terpercaya #1"
+                    placeholder={t?.placeholders?.badge || "⭐ Layanan Wisata Terpercaya #1"}
                     className="rounded-md"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>Judul Bagian 1 ({lang.toUpperCase()})</Label>
+                    <Label>{t?.title1Label || "Judul Bagian 1"} ({lang.toUpperCase()})</Label>
                     <Input
                       value={form[lang].title1}
                       onChange={(e) => updateLocale(lang, "title1", e.target.value)}
-                      placeholder="Jelajahi Dunia"
+                      placeholder={t?.placeholders?.title1 || "Jelajahi Dunia"}
                       className="rounded-md"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Judul Bagian 2 ({lang.toUpperCase()})</Label>
+                    <Label>{t?.title2Label || "Judul Bagian 2"} ({lang.toUpperCase()})</Label>
                     <Input
                       value={form[lang].title2}
                       onChange={(e) => updateLocale(lang, "title2", e.target.value)}
-                      placeholder="Bersama Titan Travel"
+                      placeholder={t?.placeholders?.title2 || "Bersama Titan Travel"}
                       className="rounded-md"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Subjudul ({lang.toUpperCase()})</Label>
+                  <Label>{t?.subtitleLabel || "Subjudul"} ({lang.toUpperCase()})</Label>
                   <Textarea
                     rows={3}
                     value={form[lang].subtitle}
                     onChange={(e) => updateLocale(lang, "subtitle", e.target.value)}
-                    placeholder="Temukan pengalaman perjalanan yang tak terlupakan..."
+                    placeholder={t?.placeholders?.subtitle || "Temukan pengalaman perjalanan yang tak terlupakan..."}
                     className="rounded-md"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
-                    <Label>Tombol CTA 1 ({lang.toUpperCase()})</Label>
+                    <Label>{t?.cta1Label || "Tombol CTA 1"} ({lang.toUpperCase()})</Label>
                     <Input
                       value={form[lang].cta1}
                       onChange={(e) => updateLocale(lang, "cta1", e.target.value)}
-                      placeholder="Lihat Paket Wisata"
+                      placeholder={t?.placeholders?.cta1 || "Lihat Paket Wisata"}
                       className="rounded-md"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Tombol CTA 2 ({lang.toUpperCase()})</Label>
+                    <Label>{t?.cta2Label || "Tombol CTA 2"} ({lang.toUpperCase()})</Label>
                     <Input
                       value={form[lang].cta2}
                       onChange={(e) => updateLocale(lang, "cta2", e.target.value)}
-                      placeholder="Hubungi Kami"
+                      placeholder={t?.placeholders?.cta2 || "Hubungi Kami"}
                       className="rounded-md"
                     />
                   </div>
@@ -215,9 +221,11 @@ export function HeroForm({ initial }: HeroFormProps) {
               <FormCard className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-semibold text-sm">Statistik Pencapaian ({lang.toUpperCase()})</h3>
+                    <h3 className="font-semibold text-sm">
+                      {t?.statsTitle?.replace("{lang}", lang.toUpperCase()) || `Statistik Pencapaian (${lang.toUpperCase()})`}
+                    </h3>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Tampil di bagian bawah hero banner. Nilai angka sama di semua bahasa, hanya label yang diterjemahkan.
+                      {t?.statsDesc || "Tampil di bagian bawah hero banner. Nilai angka sama di semua bahasa, hanya label yang diterjemahkan."}
                     </p>
                   </div>
                   <Button
@@ -226,7 +234,7 @@ export function HeroForm({ initial }: HeroFormProps) {
                     onClick={() => addStat(lang)}
                     className="gap-1.5 rounded-md h-8 text-[11px] shrink-0"
                   >
-                    <Plus className="w-3 h-3" /> Tambah
+                    <Plus className="w-3 h-3" /> {t?.statsAdd || "Tambah"}
                   </Button>
                 </div>
 
@@ -238,23 +246,23 @@ export function HeroForm({ initial }: HeroFormProps) {
                     >
                       <div className="sm:col-span-3 space-y-1.5">
                         <Label className="text-[10px] text-muted-foreground uppercase font-bold">
-                          Nilai
+                          {t?.statsValue || "Nilai"}
                         </Label>
                         <Input
                           value={stat.value}
                           onChange={(e) => updateStat(lang, i, "value", e.target.value)}
-                          placeholder="500+"
+                          placeholder={t?.placeholders?.statValue || "500+"}
                           className="h-9 rounded-md"
                         />
                       </div>
                       <div className="sm:col-span-8 space-y-1.5">
                         <Label className="text-[10px] text-muted-foreground uppercase font-bold">
-                          Label
+                          {t?.statsLabel || "Label"}
                         </Label>
                         <Input
                           value={stat.label}
                           onChange={(e) => updateStat(lang, i, "label", e.target.value)}
-                          placeholder="Pelanggan Puas"
+                          placeholder={t?.placeholders?.statLabel || "Pelanggan Puas"}
                           className="h-9 rounded-md"
                         />
                       </div>
@@ -272,7 +280,7 @@ export function HeroForm({ initial }: HeroFormProps) {
                   ))}
                   {form[lang].stats.length === 0 && (
                     <p className="text-center text-xs text-foreground-secondary py-6 italic">
-                      Belum ada statistik. Klik &quot;Tambah&quot; untuk menambahkan.
+                      {t?.statsEmpty || "Belum ada statistik. Klik \"Tambah\" untuk menambahkan."}
                     </p>
                   )}
                 </div>

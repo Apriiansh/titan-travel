@@ -12,6 +12,8 @@ import { upsertSetting } from "@/lib/actions/settings";
 import { translateToAll } from "@/lib/actions/translate";
 import { useCmsForm } from "@/hooks/useCmsForm";
 import { LayoutGrid, Plus, Trash2 } from "lucide-react";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 type Service = {
   iconName: string;
@@ -43,6 +45,8 @@ export function ServicesForm({ initial }: ServicesFormProps) {
   const [translatingIndex, setTranslatingIndex] = useState<number | null>(null);
   // Reuse only the save part of useCmsForm
   const { isPending, saved, save } = useCmsForm(initial);
+  const { dObj } = useLocale();
+  const t = dObj(translations).adminPanel.content.services;
 
   function update(index: number, key: keyof Service, val: string) {
     setServices((prev) => {
@@ -94,8 +98,8 @@ export function ServicesForm({ initial }: ServicesFormProps) {
   return (
     <>
       <PageHeader
-        title="Layanan Wisata"
-        description="Kelola daftar layanan untuk seluruh bahasa (ID, EN, MS)"
+        title={t?.title || "Layanan Wisata"}
+        description={t?.description || "Kelola daftar layanan untuk seluruh bahasa (ID, EN, MS)"}
         action={<SaveButton isPending={isPending} saved={saved} onClick={handleSave} />}
       />
 
@@ -111,7 +115,9 @@ export function ServicesForm({ initial }: ServicesFormProps) {
                 <div className="p-1.5 bg-primary-500/10 rounded-md">
                   <LayoutGrid className="w-4 h-4 text-primary-500" />
                 </div>
-                <span className="text-sm font-semibold text-foreground">Layanan #{i + 1}</span>
+                <span className="text-sm font-semibold text-foreground">
+                  {t?.cardTitle?.replace("{index}", (i + 1).toString()) || `Layanan #${i + 1}`}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <TranslateButton
@@ -133,7 +139,9 @@ export function ServicesForm({ initial }: ServicesFormProps) {
             {/* Content Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="md:col-span-1 space-y-1.5">
-                <Label className="text-[10px] uppercase font-bold text-muted-foreground">Icon Name (Lucide)</Label>
+                <Label className="text-[10px] uppercase font-bold text-muted-foreground">
+                  {t?.iconLabel || "Icon Name (Lucide)"}
+                </Label>
                 <Input
                   value={svc.iconName}
                   onChange={(e) => update(i, "iconName", e.target.value)}
@@ -146,7 +154,7 @@ export function ServicesForm({ initial }: ServicesFormProps) {
                 {/* EN Source */}
                 <div className="space-y-3 p-3 bg-blue-50/30 rounded-md border border-blue-100">
                   <Label className="text-[10px] uppercase tracking-wider font-bold text-blue-600">
-                    English (Source Content)
+                    {t?.sourceTitle || "English (Source Content)"}
                   </Label>
                   <Input
                     value={svc.titleEn}
@@ -200,7 +208,7 @@ export function ServicesForm({ initial }: ServicesFormProps) {
           onClick={() => setServices((p) => [...p, newService()])}
         >
           <Plus className="w-4 h-4" />
-          Tambah Layanan Baru
+          {t?.addBtn || "Tambah Layanan Baru"}
         </Button>
       </div>
     </>
