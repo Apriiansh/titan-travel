@@ -771,6 +771,37 @@ export const translations = {
                     year: "Tahun Ini",
                     all: "Seluruh Waktu",
                 }
+            },
+            reportCenter: {
+                title: "Pusat Laporan Manager",
+                description: "Pantau performa bisnis dan analisis rekomendasi paket",
+                transaction: {
+                    title: "Laporan Transaksi",
+                    description: "Data penjualan paket wisata per periode bulanan untuk evaluasi omzet.",
+                },
+                topsis: {
+                    title: "Laporan TOPSIS",
+                    description: "Dokumentasi hasil perankingan paket wisata berdasarkan tren pasar.",
+                }
+            },
+            topsisReport: {
+                printBtn: "Cetak Laporan Ranking",
+                companyName: "CV Titan Jaya Travelindo",
+                companyType: "Biro Perjalanan Wisata & Transportasi",
+                reportTitle: "Laporan Hasil Rekomendasi TOPSIS",
+                reportSubtitle: "Perankingan Paket Wisata Berdasarkan Kriteria Objektif",
+                criteriaConfig: "Konfigurasi Kriteria & Bobot:",
+                table: {
+                    rank: "RANK",
+                    packageName: "NAMA PAKET WISATA",
+                    score: "SKOR (Vi)",
+                },
+                signature: {
+                    location: "Palembang",
+                    role: "Manager Operasional",
+                    placeholder: "( Tanda Tangan & Nama Terang )",
+                },
+                footer: "Laporan Sistem Pendukung Keputusan Paket Wisata Titan Travel • Halaman 1 dari 1",
             }
         },
         packageDetail: {
@@ -1644,6 +1675,37 @@ export const translations = {
                     year: "This Year",
                     all: "All Time",
                 }
+            },
+            reportCenter: {
+                title: "Manager Report Center",
+                description: "Monitor business performance and package recommendation analysis",
+                transaction: {
+                    title: "Transaction Reports",
+                    description: "Tour package sales data per monthly period for revenue evaluation.",
+                },
+                topsis: {
+                    title: "TOPSIS Reports",
+                    description: "Documentation of tour package ranking results based on market trends.",
+                }
+            },
+            topsisReport: {
+                printBtn: "Print Ranking Report",
+                companyName: "CV Titan Jaya Travelindo",
+                companyType: "Travel Bureau & Transportation",
+                reportTitle: "TOPSIS Recommendation Result Report",
+                reportSubtitle: "Tour Package Ranking Based on Objective Criteria",
+                criteriaConfig: "Criteria & Weight Configuration:",
+                table: {
+                    rank: "RANK",
+                    packageName: "TOUR PACKAGE NAME",
+                    score: "SCORE (Vi)",
+                },
+                signature: {
+                    location: "Palembang",
+                    role: "Operations Manager",
+                    placeholder: "( Signature & Full Name )",
+                },
+                footer: "Titan Travel Tour Package Decision Support System Report • Page 1 of 1",
             }
         },
         packageDetail: {
@@ -2517,6 +2579,37 @@ export const translations = {
                     year: "Tahun Ini",
                     all: "Sepanjang Masa",
                 }
+            },
+            reportCenter: {
+                title: "Pusat Laporan Pengurus",
+                description: "Pantau prestasi perniagaan dan analisis cadangan pakej",
+                transaction: {
+                    title: "Laporan Transaksi",
+                    description: "Data jualan pakej pelancongan bagi setiap tempoh bulanan untuk penilaian hasil.",
+                },
+                topsis: {
+                    title: "Laporan TOPSIS",
+                    description: "Dokumentasi hasil kedudukan pakej pelancongan berdasarkan trend pasaran.",
+                }
+            },
+            topsisReport: {
+                printBtn: "Cetak Laporan Kedudukan",
+                companyName: "CV Titan Jaya Travelindo",
+                companyType: "Biro Perjalanan Pelancongan & Pengangkutan",
+                reportTitle: "Laporan Hasil Cadangan TOPSIS",
+                reportSubtitle: "Kedudukan Pakej Pelancongan Berdasarkan Kriteria Objektif",
+                criteriaConfig: "Konfigurasi Kriteria & Berat:",
+                table: {
+                    rank: "KEDUDUKAN",
+                    packageName: "NAMA PAKEJ PELANCONGAN",
+                    score: "SKOR (Vi)",
+                },
+                signature: {
+                    location: "Palembang",
+                    role: "Pengurus Operasi",
+                    placeholder: "( Tandatangan & Nama Penuh )",
+                },
+                footer: "Laporan Sistem Sokongan Keputusan Pakej Pelancongan Titan Travel • Halaman 1 dari 1",
             }
         },
         packageDetail: {

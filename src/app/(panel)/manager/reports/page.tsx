@@ -1,13 +1,20 @@
+"use client";
+
 import { PageHeader } from "@/components/panel/PageHeader";
 import { FileText, TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
 
 export default function ManagerReportsPage() {
+  const { dObj } = useLocale();
+  const t = dObj(translations).managerPanel.reportCenter;
+
   return (
     <div className="space-y-6">
       <PageHeader 
-        title="Pusat Laporan Manager" 
-        description="Pantau performa bisnis dan analisis rekomendasi paket"
+        title={t.title} 
+        description={t.description}
       />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -19,8 +26,8 @@ export default function ManagerReportsPage() {
               </div>
               <ArrowRight className="w-5 h-5 text-card-border group-hover:text-primary-500 transition-colors" />
             </div>
-            <h3 className="text-lg font-bold mt-4 text-foreground">Laporan Transaksi</h3>
-            <p className="text-sm text-foreground-secondary mt-1">Data penjualan paket wisata per periode bulanan untuk evaluasi omzet.</p>
+            <h3 className="text-lg font-bold mt-4 text-foreground">{t.transaction.title}</h3>
+            <p className="text-sm text-foreground-secondary mt-1">{t.transaction.description}</p>
           </div>
         </Link>
 
@@ -32,8 +39,8 @@ export default function ManagerReportsPage() {
               </div>
               <ArrowRight className="w-5 h-5 text-card-border group-hover:text-accent-500 transition-colors" />
             </div>
-            <h3 className="text-lg font-bold mt-4 text-foreground">Laporan TOPSIS</h3>
-            <p className="text-sm text-foreground-secondary mt-1">Dokumentasi hasil perankingan paket wisata berdasarkan tren pasar.</p>
+            <h3 className="text-lg font-bold mt-4 text-foreground">{t.topsis.title}</h3>
+            <p className="text-sm text-foreground-secondary mt-1">{t.topsis.description}</p>
           </div>
         </Link>
       </div>

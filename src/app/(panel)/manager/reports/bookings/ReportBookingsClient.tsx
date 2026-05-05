@@ -13,15 +13,25 @@ import {
 } from "lucide-react";
 import { getBookingReport } from "@/lib/actions/reports";
 import { format } from "date-fns";
-import { id } from "date-fns/locale";
+import { id, enUS, ms } from "date-fns/locale";
 import { exportBookingsToExcel } from "@/lib/utils/export";
+import { useLocale } from "@/lib/LocaleContext";
+import { translations } from "@/lib/translations";
+import { formatCurrency } from "@/lib/utils";
 
 export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
+  const { dObj, locale, rates } = useLocale();
+  const t = dObj(translations).managerPanel.reports;
+  const common = dObj(translations).managerPanel.common;
+  
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [data, setData] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+
+  // Date-fns locale mapping
+  const dateLocale = locale === "en" ? enUS : locale === "ms" ? ms : id;
 
   const handleFilter = async () => {
     setIsLoading(true);
@@ -49,8 +59,8 @@ export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Laporan Transaksi"
-        description="Pantau dan ekspor riwayat penjualan paket wisata Titan Travel"
+        title={t.title}
+        description={t.description}
         action={
           <div className="flex flex-wrap items-center gap-3">
             <Button 
@@ -60,7 +70,7 @@ export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
               className="h-10 px-6 rounded-xl border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 gap-2 font-bold shadow-sm"
             >
               {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
-              Ekspor Excel
+              {t.exportExcel}
             </Button>
           </div>
         }
@@ -69,17 +79,17 @@ export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
       {/* Stats Summary - New Section for Manager */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
         <div className="p-6 rounded-2xl border border-card-border bg-card-bg shadow-sm">
-          <p className="text-[10px] font-bold text-foreground-secondary uppercase tracking-widest mb-1">Total Pendapatan</p>
-          <p className="text-2xl font-black text-primary-600">Rp {totalRevenue.toLocaleString("id-ID")}</p>
+          <p className="text-[10px] font-bold text-foreground-secondary uppercase tracking-widest mb-1">{t.totalRevenue}</p>
+          <p className="text-2xl font-black text-primary-600">{formatCurrency(totalRevenue, locale, rates)}</p>
         </div>
         <div className="p-6 rounded-2xl border border-card-border bg-card-bg shadow-sm">
-          <p className="text-[10px] font-bold text-foreground-secondary uppercase tracking-widest mb-1">Total Booking</p>
+          <p className="text-[10px] font-bold text-foreground-secondary uppercase tracking-widest mb-1">{t.totalBookings}</p>
           <p className="text-2xl font-black text-foreground">{data.length}</p>
         </div>
         <div className="p-6 rounded-2xl border border-card-border bg-card-bg shadow-sm">
-          <p className="text-[10px] font-bold text-foreground-secondary uppercase tracking-widest mb-1">Periode Laporan</p>
+          <p className="text-[10px] font-bold text-foreground-secondary uppercase tracking-widest mb-1">{t.reportPeriod}</p>
           <p className="text-sm font-bold text-foreground mt-2">
-            {startDate ? format(new Date(startDate), "dd/MM/yy") : "Awal"} - {endDate ? format(new Date(endDate), "dd/MM/yy") : "Sekarang"}
+            {startDate ? format(new Date(startDate), "dd/MM/yy") : common.start} - {endDate ? format(new Date(endDate), "dd/MM/yy") : common.now}
           </p>
         </div>
       </div>
@@ -87,7 +97,7 @@ export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
       <div className="flex flex-col lg:flex-row lg:items-end gap-4 bg-card-bg p-6 rounded-2xl border border-card-border shadow-sm no-print">
         <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-foreground-secondary uppercase tracking-wider">Mulai Tanggal</label>
+            <label className="text-[10px] font-bold text-foreground-secondary uppercase tracking-wider">{t.startDate}</label>
             <div className="relative">
               <Input 
                 type="date" 
@@ -99,7 +109,7 @@ export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-foreground-secondary uppercase tracking-wider">Sampai Tanggal</label>
+            <label className="text-[10px] font-bold text-foreground-secondary uppercase tracking-wider">{t.endDate}</label>
             <div className="relative">
               <Input 
                 type="date" 
@@ -118,7 +128,7 @@ export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
           className="bg-primary-500 hover:bg-primary-600 h-10 px-8 rounded-xl gap-2 font-bold shadow-md shadow-primary-500/10"
         >
           {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Filter className="w-4 h-4" />}
-          Tampilkan Data
+          {t.showData}
         </Button>
       </div>
 
@@ -127,13 +137,13 @@ export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="border-b border-card-border bg-muted/30">
-                <th className="text-center px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px] w-16">No</th>
-                <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">Informasi Penjualan</th>
-                <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">Paket Wisata</th>
-                <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">Kendaraan</th>
-                <th className="text-center px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">Pax</th>
-                <th className="text-right px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">Harga/Pax</th>
-                <th className="text-right px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">Total Bayar</th>
+                <th className="text-center px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px] w-16">{t.no}</th>
+                <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">{t.customer}</th>
+                <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">{t.package}</th>
+                <th className="text-left px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">{t.vehicle}</th>
+                <th className="text-center px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">{t.pax}</th>
+                <th className="text-right px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">{t.pricePerPax}</th>
+                <th className="text-right px-6 py-4 font-bold text-foreground-secondary uppercase tracking-wider text-[10px]">{t.totalAmount}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-card-border">
@@ -141,7 +151,7 @@ export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
                 <tr>
                   <td colSpan={7} className="py-24 text-center text-foreground-secondary italic">
                     <FileSpreadsheet className="w-12 h-12 mx-auto mb-3 opacity-10" />
-                    Tidak ada data transaksi ditemukan
+                    {t.noDataFound}
                   </td>
                 </tr>
               ) : (
@@ -159,13 +169,13 @@ export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
                         <div className="space-y-0.5">
                           <p className="font-bold text-foreground">{b.name}</p>
                           <p className="text-[11px] text-foreground-secondary font-medium">
-                            {format(new Date(b.createdAt), "dd MMM yyyy", { locale: id })}
+                            {format(new Date(b.createdAt), "dd MMM yyyy", { locale: dateLocale })}
                           </p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <p className="font-bold text-foreground text-xs leading-tight">
-                          {(b.package?.title as any)?.id || "-"}
+                          {(b.package?.title as any)?.[locale] || (b.package?.title as any)?.id || "-"}
                         </p>
                       </td>
                       <td className="px-6 py-4">
@@ -181,12 +191,12 @@ export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <p className="text-xs font-medium text-foreground">
-                          Rp {pricePerPax.toLocaleString("id-ID")}
+                          {formatCurrency(pricePerPax, locale, rates)}
                         </p>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <p className="font-black text-primary-600 text-sm">
-                          Rp {amountPaid.toLocaleString("id-ID")}
+                          {formatCurrency(amountPaid, locale, rates)}
                         </p>
                       </td>
                     </tr>
@@ -198,11 +208,11 @@ export function ReportBookingsClient({ initialData }: { initialData: any[] }) {
               <tfoot className="bg-primary-500/5">
                 <tr>
                   <td colSpan={6} className="px-6 py-5 text-right font-black text-xs uppercase tracking-widest text-foreground-secondary">
-                    Total Pendapatan
+                    {t.totalIncome}
                   </td>
                   <td className="px-6 py-5 text-right">
                     <p className="font-black text-xl text-primary-600">
-                      Rp {totalRevenue.toLocaleString("id-ID")}
+                      {formatCurrency(totalRevenue, locale, rates)}
                     </p>
                   </td>
                 </tr>
