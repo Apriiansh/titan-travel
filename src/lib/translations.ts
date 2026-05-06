@@ -2,6 +2,12 @@ export type Locale = "en" | "id" | "ms";
 
 export const translations = {
     id: {
+        greetings: {
+            morning: "Selamat Pagi",
+            afternoon: "Selamat Siang",
+            evening: "Selamat Sore",
+            night: "Selamat Malam",
+        },
         navbar: {
             links: [
                 { href: "#beranda", label: "Beranda" },
@@ -906,6 +912,12 @@ export const translations = {
         }
     },
     en: {
+        greetings: {
+            morning: "Good Morning",
+            afternoon: "Good Afternoon",
+            evening: "Good Evening",
+            night: "Good Night",
+        },
         navbar: {
             links: [
                 { href: "#beranda", label: "Home" },
@@ -1810,6 +1822,12 @@ export const translations = {
         }
     },
     ms: {
+        greetings: {
+            morning: "Selamat Pagi",
+            afternoon: "Selamat Tengah Hari",
+            evening: "Selamat Petang",
+            night: "Selamat Malam",
+        },
         navbar: {
             links: [
                 { href: "#beranda", label: "Laman Utama" },

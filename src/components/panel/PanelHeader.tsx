@@ -12,6 +12,7 @@ import {
 } from "lucide-react"
 import { useTheme } from "@/components/ThemeProvider"
 import { useLocale } from "@/lib/LocaleContext"
+import { translations } from "@/lib/translations"
 import type { Locale } from "@/lib/LocaleContext"
 
 const BREADCRUMB_MAP: Record<string, { label: string; icon: typeof Home; color: string }> = {
@@ -37,18 +38,19 @@ const BREADCRUMB_MAP: Record<string, { label: string; icon: typeof Home; color: 
   "/manager/account": { label: "Akun Saya", icon: UserCircle, color: "text-primary-500" },
 }
 
-function getGreeting(): string {
+function getGreeting(g: any): string {
   const hour = new Date().getHours();
-  if (hour < 12) return "Selamat Pagi";
-  if (hour < 15) return "Selamat Siang";
-  if (hour < 18) return "Selamat Sore";
-  return "Selamat Malam";
+  if (hour < 12) return g.morning;
+  if (hour < 15) return g.afternoon;
+  if (hour < 18) return g.evening;
+  return g.night;
 }
 
 export function PanelHeader({ user }: { user: { name: string; email: string; role: string } }) {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
-  const { locale, setLocale } = useLocale();
+  const { locale, setLocale, dObj } = useLocale();
+  const t = dObj(translations);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -94,7 +96,7 @@ export function PanelHeader({ user }: { user: { name: string; email: string; rol
         <div className="flex items-center gap-2 text-sm flex-1 min-w-0">
           {isRoot ? (
             <p className="text-foreground-secondary truncate">
-              <span className="font-medium text-foreground">{getGreeting()}</span>, {user.name} 👋
+              <span className="font-medium text-foreground">{getGreeting(t.greetings)}</span>, {user.name} 👋
             </p>
           ) : (
             <nav className="flex items-center gap-1.5 text-foreground-secondary truncate">
